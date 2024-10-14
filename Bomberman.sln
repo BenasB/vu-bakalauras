@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bomberman.Desktop", "Bomberman.Desktop\Bomberman.Desktop.csproj", "{0AE9EB5B-2DAE-430D-B7D8-F63DE8A17CE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bomberman.Core", "Bomberman.Core\Bomberman.Core.csproj", "{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0AE9EB5B-2DAE-430D-B7D8-F63DE8A17CE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AE9EB5B-2DAE-430D-B7D8-F63DE8A17CE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AE9EB5B-2DAE-430D-B7D8-F63DE8A17CE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AE9EB5B-2DAE-430D-B7D8-F63DE8A17CE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
