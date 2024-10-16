@@ -8,7 +8,7 @@ public class Player(Vector2 startPosition, TileMap tileMap)
 
     private Vector2 _velocityDirection = Vector2.Zero;
 
-    private const float Speed = Constants.TileSize * 4;
+    private const float Speed = Constants.TileSize * 3;
 
     public void Update(TimeSpan deltaTime)
     {
