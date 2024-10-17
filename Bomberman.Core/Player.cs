@@ -1,14 +1,17 @@
 using System.Numerics;
+using Bomberman.Core.Tiles;
 
 namespace Bomberman.Core;
 
-public class Player(Vector2 startPosition, TileMap tileMap)
+public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, IDamageable
 {
     public Vector2 Position { get; private set; } = startPosition;
 
     private Vector2 _velocityDirection = Vector2.Zero;
 
     private const float Speed = Constants.TileSize * 3;
+
+    public bool Alive { get; private set; } = true;
 
     public void Update(TimeSpan deltaTime)
     {
@@ -20,7 +23,7 @@ public class Player(Vector2 startPosition, TileMap tileMap)
         var snapVector = GetSnapOnMovementOppositeAxis(newPosition);
         newPosition = Vector2.Add(newPosition, snapVector);
 
-        var collisionData = tileMap.IsColliding(newPosition);
+        var collisionData = tileMap.IsColliding(newPosition, this);
         if (collisionData != null)
         {
             newPosition = Vector2.Subtract(newPosition, snapVector);
@@ -41,6 +44,13 @@ public class Player(Vector2 startPosition, TileMap tileMap)
             Direction.Right => Vector2.UnitX,
             _ => throw new InvalidOperationException("Unexpected direction"),
         };
+    }
+
+    public void PlaceBomb()
+    {
+        // TODO: Check if player does not have an active bomb placed already
+        var gridPosition = Position.ToGridPosition();
+        tileMap.PlaceTile(gridPosition, new BombTile(gridPosition, tileMap, 1));
     }
 
     private Vector2 GetSnapOnMovementOppositeAxis(Vector2 newPosition)
@@ -82,5 +92,10 @@ public class Player(Vector2 startPosition, TileMap tileMap)
         }
 
         return Vector2.Zero;
+    }
+
+    public void TakeDamage()
+    {
+        Alive = false;
     }
 }

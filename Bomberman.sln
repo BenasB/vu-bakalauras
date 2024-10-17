@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bomberman.Desktop", "Bomber
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bomberman.Core", "Bomberman.Core\Bomberman.Core.csproj", "{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bomberman.Core.Tests", "Bomberman.Core.Tests\Bomberman.Core.Tests.csproj", "{9941F15F-6208-49DB-BD10-0200FE2C8CFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE833A7F-2CA6-4297-A3AC-4D845BA3C906}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9941F15F-6208-49DB-BD10-0200FE2C8CFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9941F15F-6208-49DB-BD10-0200FE2C8CFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9941F15F-6208-49DB-BD10-0200FE2C8CFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9941F15F-6208-49DB-BD10-0200FE2C8CFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

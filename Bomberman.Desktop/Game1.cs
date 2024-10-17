@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Bomberman.Core;
+using Bomberman.Core.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Bomberman.Desktop;
 
@@ -12,11 +15,22 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
-    private readonly TileMap _tileMap = new(17, 9);
+    private static readonly GridPosition StartPosition = new(Row: 3, Column: 3);
+    private readonly TileMap _tileMap = new(17, 9, StartPosition);
     private readonly Player _player;
+
+    // TODO: Move to input component
+    private bool _spacePressed = false;
+
+    // TODO: Move to texturing component
     private Texture2D _floorTexture;
     private Texture2D _wallTexture;
     private Texture2D _playerTexture;
+    private Texture2D _bombTexture;
+    private Texture2D _explosionTexture;
+    private Texture2D _boxTexture;
+
+    private Texture2D _debugGridMarkerTexture;
 
     public Game1()
     {
@@ -24,15 +38,7 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _player = new Player(
-            new System.Numerics.Vector2(x: 3 * Constants.TileSize, y: 3 * Constants.TileSize),
-            _tileMap
-        );
-    }
-
-    protected override void Initialize()
-    {
-        base.Initialize();
+        _player = new Player(StartPosition, _tileMap);
     }
 
     protected override void LoadContent()
@@ -42,6 +48,11 @@ public class Game1 : Game
         _floorTexture = Content.Load<Texture2D>("floor");
         _wallTexture = Content.Load<Texture2D>("wall");
         _playerTexture = Content.Load<Texture2D>("player");
+        _bombTexture = Content.Load<Texture2D>("bomb");
+        _explosionTexture = Content.Load<Texture2D>("explosion");
+        _boxTexture = Content.Load<Texture2D>("box");
+
+        _debugGridMarkerTexture = Content.Load<Texture2D>("debug_grid_marker");
     }
 
     protected override void Update(GameTime gameTime)
@@ -52,18 +63,32 @@ public class Game1 : Game
         )
             Exit();
 
-        if (Keyboard.GetState().IsKeyDown(Keys.W))
-            _player.SetMovingDirection(Direction.Up);
-        else if (Keyboard.GetState().IsKeyDown(Keys.S))
-            _player.SetMovingDirection(Direction.Down);
-        else if (Keyboard.GetState().IsKeyDown(Keys.A))
-            _player.SetMovingDirection(Direction.Left);
-        else if (Keyboard.GetState().IsKeyDown(Keys.D))
-            _player.SetMovingDirection(Direction.Right);
-        else
-            _player.SetMovingDirection(Direction.None);
+        if (_player.Alive)
+        {
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+                _player.SetMovingDirection(Direction.Up);
+            else if (Keyboard.GetState().IsKeyDown(Keys.S))
+                _player.SetMovingDirection(Direction.Down);
+            else if (Keyboard.GetState().IsKeyDown(Keys.A))
+                _player.SetMovingDirection(Direction.Left);
+            else if (Keyboard.GetState().IsKeyDown(Keys.D))
+                _player.SetMovingDirection(Direction.Right);
+            else
+                _player.SetMovingDirection(Direction.None);
 
-        _player.Update(gameTime.ElapsedGameTime);
+            _player.Update(gameTime.ElapsedGameTime);
+
+            if (!_spacePressed && Keyboard.GetState().IsKeyDown(Keys.Space))
+                _spacePressed = true;
+
+            if (_spacePressed && Keyboard.GetState().IsKeyUp(Keys.Space))
+            {
+                _player.PlaceBomb();
+                _spacePressed = false;
+            }
+        }
+
+        _tileMap.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
     }
@@ -74,40 +99,37 @@ public class Game1 : Game
 
         _spriteBatch.Begin();
 
-        for (int row = 0; row < _tileMap.Width; row++)
+        foreach (var tile in _tileMap.Tiles.Where(tile => tile != null).Select(tile => tile!))
         {
-            for (int column = 0; column < _tileMap.Length; column++)
-            {
-                if (!_tileMap.BackgroundTiles[row][column])
-                    continue;
-
-                _spriteBatch.Draw(
-                    _floorTexture,
-                    new Vector2(column * Constants.TileSize, row * Constants.TileSize),
-                    Color.White
-                );
-            }
+            _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        for (int row = 0; row < _tileMap.Width; row++)
+        if (_player.Alive)
         {
-            for (int column = 0; column < _tileMap.Length; column++)
-            {
-                if (!_tileMap.ForegroundTiles[row][column])
-                    continue;
+            _spriteBatch.Draw(_playerTexture, _player.Position, Color.White);
 
-                _spriteBatch.Draw(
-                    _wallTexture,
-                    new Vector2(column * Constants.TileSize, row * Constants.TileSize),
-                    Color.White
-                );
-            }
+#if DEBUG
+            _spriteBatch.Draw(
+                _debugGridMarkerTexture,
+                (Vector2)_player.Position.ToGridPosition(),
+                Color.White
+            );
+#endif
         }
-
-        _spriteBatch.Draw(_playerTexture, _player.Position, Color.White);
 
         _spriteBatch.End();
 
         base.Draw(gameTime);
     }
+
+    private Texture2D GetTileTexture(Tile tile) =>
+        tile switch
+        {
+            FloorTile => _floorTexture,
+            WallTile => _wallTexture,
+            BombTile => _bombTexture,
+            ExplosionTile => _explosionTexture,
+            BoxTile => _boxTexture,
+            _ => throw new InvalidOperationException("Could not find a texture for the tile"),
+        };
 }
