@@ -6,8 +6,8 @@ namespace Bomberman.Core;
 
 public class TileMap : IUpdatable
 {
-    private int Length { get; }
-    private int Width { get; }
+    public int Length { get; }
+    public int Width { get; }
 
     private readonly Tile[][] _backgroundTiles;
     private readonly Tile?[][] _foregroundTiles;

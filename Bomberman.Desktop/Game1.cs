@@ -11,7 +11,7 @@ namespace Bomberman.Desktop;
 
 public class Game1 : Game
 {
-    private GraphicsDeviceManager _graphics;
+    private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
@@ -39,6 +39,16 @@ public class Game1 : Game
         IsMouseVisible = true;
 
         _player = new Player(StartPosition, _tileMap);
+    }
+
+    protected override void Initialize()
+    {
+        _graphics.IsFullScreen = false;
+        _graphics.PreferredBackBufferHeight = _tileMap.Width * Constants.TileSize;
+        _graphics.PreferredBackBufferWidth = _tileMap.Length * Constants.TileSize;
+        _graphics.ApplyChanges();
+
+        base.Initialize();
     }
 
     protected override void LoadContent()
