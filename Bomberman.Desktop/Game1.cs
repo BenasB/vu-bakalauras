@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Bomberman.Core;
+using Bomberman.Core.Agents;
 using Bomberman.Core.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,6 +19,7 @@ public class Game1 : Game
     private static readonly GridPosition StartPosition = new(Row: 3, Column: 3);
     private readonly TileMap _tileMap = new(17, 9, StartPosition);
     private readonly Player _player;
+    private readonly RandomAgent _agent;
 
     // TODO: Move to input component
     private bool _spacePressed = false;
@@ -38,7 +40,10 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _player = new Player(StartPosition, _tileMap);
+        _player = new Player(new(5, 5), _tileMap);
+        // _player.TakeDamage();
+
+        _agent = new RandomAgent(StartPosition, _tileMap);
     }
 
     protected override void Initialize()
@@ -98,6 +103,8 @@ public class Game1 : Game
             }
         }
 
+        _agent.Update(gameTime.ElapsedGameTime);
+
         _tileMap.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -122,8 +129,20 @@ public class Game1 : Game
             _spriteBatch.Draw(
                 _debugGridMarkerTexture,
                 (Vector2)_player.Position.ToGridPosition(),
-                Color.White
+                Color.Red
             );
+#endif
+        }
+
+        if (_agent.Alive)
+        {
+            _spriteBatch.Draw(_playerTexture, _agent.Position, Color.GreenYellow);
+
+#if DEBUG
+            foreach (var pathPosition in _agent.CurrentPath)
+            {
+                _spriteBatch.Draw(_debugGridMarkerTexture, (Vector2)pathPosition, Color.Green);
+            }
 #endif
         }
 

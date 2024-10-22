@@ -77,11 +77,8 @@ public class TileMap : IUpdatable
         }
 
         // Clear around starting position to allow player to move
-        _foregroundTiles[start.Row][start.Column] = null;
-        _foregroundTiles[start.Row - 1][start.Column] = null;
-        _foregroundTiles[start.Row + 1][start.Column] = null;
-        _foregroundTiles[start.Row][start.Column - 1] = null;
-        _foregroundTiles[start.Row][start.Column + 1] = null;
+        foreach (var position in new[] { start }.Concat(start.Neighbours))
+            _foregroundTiles[position.Row][position.Column] = null;
     }
 
     public void Update(TimeSpan deltaTime)
@@ -145,11 +142,6 @@ public class TileMap : IUpdatable
                     ),
                     _ => IsColliding(objectPosition, tilePosition, applyOverlapThreshold: true),
                 };
-                IsColliding(
-                    objectPosition,
-                    tilePosition,
-                    applyOverlapThreshold: _foregroundTiles[row][column] is not IEnterable
-                );
 
                 if (collidingData == null)
                     continue;

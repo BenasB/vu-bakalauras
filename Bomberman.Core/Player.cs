@@ -15,6 +15,9 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
 
     public void Update(TimeSpan deltaTime)
     {
+        if (!Alive)
+            return;
+
         var newPosition = Vector2.Add(
             Position,
             _velocityDirection * Speed * (float)deltaTime.TotalSeconds
@@ -46,11 +49,14 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
         };
     }
 
-    public void PlaceBomb()
+    public BombTile PlaceBomb()
     {
         // TODO: Check if player does not have an active bomb placed already
         var gridPosition = Position.ToGridPosition();
-        tileMap.PlaceTile(gridPosition, new BombTile(gridPosition, tileMap, 1));
+        var bombTile = new BombTile(gridPosition, tileMap, 1);
+        tileMap.PlaceTile(gridPosition, bombTile);
+
+        return bombTile;
     }
 
     private Vector2 GetSnapOnMovementOppositeAxis(Vector2 newPosition)

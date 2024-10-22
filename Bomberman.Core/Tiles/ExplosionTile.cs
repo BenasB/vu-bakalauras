@@ -1,18 +1,17 @@
 namespace Bomberman.Core.Tiles;
 
-public class ExplosionTile(GridPosition position, TileMap tileMap)
+public class ExplosionTile(GridPosition position, TileMap tileMap, TimeSpan destroyAfter)
     : Tile(position),
         IUpdatable,
         IEnterable
 {
-    private static readonly TimeSpan DestroyAfter = TimeSpan.FromSeconds(0.25);
     private TimeSpan _existingTime = TimeSpan.Zero;
 
     public void Update(TimeSpan deltaTime)
     {
         _existingTime += deltaTime;
 
-        if (_existingTime >= DestroyAfter)
+        if (_existingTime >= destroyAfter)
             tileMap.RemoveTile(this);
     }
 

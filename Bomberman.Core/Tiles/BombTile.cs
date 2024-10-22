@@ -5,8 +5,11 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
         IUpdatable
 {
     private static readonly TimeSpan DetonateAfter = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan ExplosionDuration = TimeSpan.FromSeconds(0.25);
 
     private TimeSpan _existingTime = TimeSpan.Zero;
+
+    public bool Detonated { get; private set; }
 
     public void Update(TimeSpan deltaTime)
     {
@@ -32,8 +35,10 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
 
     private void Explode()
     {
+        Detonated = true;
+
         tileMap.RemoveTile(this);
-        tileMap.PlaceTile(Position, new ExplosionTile(Position, tileMap));
+        tileMap.PlaceTile(Position, new ExplosionTile(Position, tileMap, ExplosionDuration));
 
         foreach (var explosionPath in ExplosionPaths)
         {
@@ -53,7 +58,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                     tileMap.RemoveTile(boxTile);
                     tileMap.PlaceTile(
                         boxTile.Position,
-                        new ExplosionTile(boxTile.Position, tileMap)
+                        new ExplosionTile(boxTile.Position, tileMap, ExplosionDuration)
                     );
                     break;
                 }
@@ -61,7 +66,10 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                 if (tileToExplode != null)
                     break;
 
-                tileMap.PlaceTile(explosionPosition, new ExplosionTile(explosionPosition, tileMap));
+                tileMap.PlaceTile(
+                    explosionPosition,
+                    new ExplosionTile(explosionPosition, tileMap, ExplosionDuration)
+                );
             }
         }
     }
