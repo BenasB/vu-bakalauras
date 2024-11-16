@@ -11,6 +11,9 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
 
     public bool Detonated { get; private set; }
 
+    // A bomb is considered exploded only after the explosion tile is gone
+    public bool Exploded => Detonated && tileMap.GetTile(Position) == null;
+
     public void Update(TimeSpan deltaTime)
     {
         _existingTime += deltaTime;
@@ -22,7 +25,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
     /// <summary>
     /// Gets explosion paths in 4 directions based on the bomb range
     /// </summary>
-    private IEnumerable<IEnumerable<GridPosition>> ExplosionPaths =>
+    public IEnumerable<IEnumerable<GridPosition>> ExplosionPaths =>
         new Func<int, GridPosition>[]
         {
             distanceFromCenter => Position with { Row = Position.Row - distanceFromCenter },
@@ -38,7 +41,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
         Detonated = true;
 
         tileMap.RemoveTile(this);
-        tileMap.PlaceTile(Position, new ExplosionTile(Position, tileMap, ExplosionDuration));
+        tileMap.PlaceTile(new ExplosionTile(Position, tileMap, ExplosionDuration));
 
         foreach (var explosionPath in ExplosionPaths)
         {
@@ -57,19 +60,18 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                 {
                     tileMap.RemoveTile(boxTile);
                     tileMap.PlaceTile(
-                        boxTile.Position,
                         new ExplosionTile(boxTile.Position, tileMap, ExplosionDuration)
                     );
                     break;
                 }
 
+                // TODO: What if the explosion path intercepts an explosion path from another bomb?
+                // Currently this bomb's explosion path will be blocked
+
                 if (tileToExplode != null)
                     break;
 
-                tileMap.PlaceTile(
-                    explosionPosition,
-                    new ExplosionTile(explosionPosition, tileMap, ExplosionDuration)
-                );
+                tileMap.PlaceTile(new ExplosionTile(explosionPosition, tileMap, ExplosionDuration));
             }
         }
     }

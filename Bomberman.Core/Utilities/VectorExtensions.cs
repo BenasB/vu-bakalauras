@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Bomberman.Core;
+namespace Bomberman.Core.Utilities;
 
 public static class VectorExtensions
 {

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Numerics;
 using Bomberman.Core.Tiles;
+using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core;
 
@@ -92,8 +93,9 @@ public class TileMap : IUpdatable
     internal Tile? GetTile(GridPosition gridPosition) =>
         _foregroundTiles[gridPosition.Row][gridPosition.Column];
 
-    internal void PlaceTile(GridPosition gridPosition, Tile newTile)
+    internal void PlaceTile(Tile newTile)
     {
+        var gridPosition = newTile.Position;
         var existingTile = _foregroundTiles[gridPosition.Row][gridPosition.Column];
 
         if (existingTile != null)

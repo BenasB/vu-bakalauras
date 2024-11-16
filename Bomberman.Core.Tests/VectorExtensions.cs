@@ -1,4 +1,5 @@
 using System.Numerics;
+using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.Tests;
 

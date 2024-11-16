@@ -3,6 +3,7 @@ using System.Linq;
 using Bomberman.Core;
 using Bomberman.Core.Agents;
 using Bomberman.Core.Tiles;
+using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -98,7 +99,14 @@ public class Game1 : Game
 
             if (_spacePressed && Keyboard.GetState().IsKeyUp(Keys.Space))
             {
-                _player.PlaceBomb();
+                try
+                {
+                    _player.PlaceBomb();
+                }
+                catch (InvalidOperationException)
+                {
+                    // A player might try to place more bombs than they are allowed
+                }
                 _spacePressed = false;
             }
         }
@@ -139,9 +147,12 @@ public class Game1 : Game
             _spriteBatch.Draw(_playerTexture, _agent.Position, Color.GreenYellow);
 
 #if DEBUG
-            foreach (var pathPosition in _agent.CurrentPath)
+            if (_agent.CurrentPath != null)
             {
-                _spriteBatch.Draw(_debugGridMarkerTexture, (Vector2)pathPosition, Color.Green);
+                foreach (var pathPosition in _agent.CurrentPath)
+                {
+                    _spriteBatch.Draw(_debugGridMarkerTexture, (Vector2)pathPosition, Color.Green);
+                }
             }
 #endif
         }

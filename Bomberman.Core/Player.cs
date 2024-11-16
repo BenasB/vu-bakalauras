@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bomberman.Core.Tiles;
+using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core;
 
@@ -12,6 +13,8 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
     private const float Speed = Constants.TileSize * 3;
 
     public bool Alive { get; private set; } = true;
+
+    private BombTile? _placedBombTile;
 
     public void Update(TimeSpan deltaTime)
     {
@@ -51,12 +54,14 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
 
     public BombTile PlaceBomb()
     {
-        // TODO: Check if player does not have an active bomb placed already
-        var gridPosition = Position.ToGridPosition();
-        var bombTile = new BombTile(gridPosition, tileMap, 1);
-        tileMap.PlaceTile(gridPosition, bombTile);
+        if (_placedBombTile is { Detonated: false })
+            throw new InvalidOperationException("Player has already placed a bomb");
 
-        return bombTile;
+        var gridPosition = Position.ToGridPosition();
+        _placedBombTile = new BombTile(gridPosition, tileMap, 1);
+        tileMap.PlaceTile(_placedBombTile);
+
+        return _placedBombTile;
     }
 
     private Vector2 GetSnapOnMovementOppositeAxis(Vector2 newPosition)
