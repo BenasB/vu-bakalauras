@@ -4,16 +4,15 @@ using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.Agents;
 
-public class RandomAgent : IUpdatable
+public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatable
 {
     public Vector2 Position => _player.Position;
     public bool Alive => _player.Alive;
 
-    private readonly Player _player;
-    private readonly TileMap _tileMap;
+    private readonly Player _player = new(startPosition, tileMap);
 
-    public List<GridPosition>? CurrentPath { get; private set; }
-    private GridPosition? _currentlyMovingTo;
+    public List<GridPosition>? CurrentPath => _walker?.Path;
+    private Walker? _walker;
     private BombTile? _bombTile;
 
     private readonly FiniteStateMachine<State> _stateMachine =
@@ -31,18 +30,9 @@ public class RandomAgent : IUpdatable
 
     private enum State
     {
-        GoingToPlaceBomb, // Associated data: Path
-        MovingAwayFromBomb, // Associated data: Path, BombTile
-        WaitingForBomb, // Associated data: BombTile
-    }
-
-    public RandomAgent(GridPosition startPosition, TileMap tileMap)
-    {
-        _tileMap = tileMap;
-        _player = new Player(startPosition, tileMap);
-
-        // Initialize data needed for State.GoingToPlaceBomb
-        CurrentPath = FindBombPlacementPath(_player.Position.ToGridPosition());
+        GoingToPlaceBomb,
+        MovingAwayFromBomb,
+        WaitingForBomb,
     }
 
     public void Update(TimeSpan deltaTime)
@@ -62,37 +52,37 @@ public class RandomAgent : IUpdatable
         stateAction.Invoke();
     }
 
-    // Associated state: _currentlyMovingTo, CurrentPath
     private void GoToPlaceBomb()
     {
-        if (CurrentPath == null)
+        _walker ??= new Walker(FindBombPlacementPath(_player.Position.ToGridPosition()), _player);
+
+        if (!_walker.Finished)
         {
-            var newPath = FindBombPlacementPath(_player.Position.ToGridPosition());
-            if (newPath.Count == 0)
-                CurrentPath = newPath;
-        }
-
-        CurrentPath ??= FindBombPlacementPath(_player.Position.ToGridPosition());
-        var stillWalking = WalkThroughCurrentPath();
-
-        if (stillWalking)
+            _walker.UpdatePlayerMovingDirection();
             return;
+        }
+        _walker = null;
 
         _bombTile = _player.PlaceBomb();
         _stateMachine.Transition(State.MovingAwayFromBomb);
     }
 
-    // Associated state: _currentlyMovingTo, CurrentPath
     private void GoToAvoidBomb()
     {
         if (_bombTile == null)
             throw new InvalidOperationException("There is no bomb to avoid");
 
-        CurrentPath ??= FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile);
-        var stillWalking = WalkThroughCurrentPath();
+        _walker ??= new Walker(
+            FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile),
+            _player
+        );
 
-        if (stillWalking)
+        if (!_walker.Finished)
+        {
+            _walker.UpdatePlayerMovingDirection();
             return;
+        }
+        _walker = null;
 
         _stateMachine.Transition(State.WaitingForBomb);
     }
@@ -110,56 +100,6 @@ public class RandomAgent : IUpdatable
         _stateMachine.Transition(State.GoingToPlaceBomb);
     }
 
-    /// <returns><see langword="true"/> if the agent is still walking through path, otherwise <see langword="false"/></returns>
-    private bool WalkThroughCurrentPath()
-    {
-        // TODO: what if CurrentPath is []
-
-        if (CurrentPath == null)
-            throw new InvalidOperationException("Trying to walk, but there is no path given");
-
-        _currentlyMovingTo ??= CurrentPath[^1];
-
-        if (!IsOnGridPosition(_player.Position, _currentlyMovingTo))
-            return true;
-
-        var playerGridPosition = _player.Position.ToGridPosition();
-
-        // Upon reaching a tile on the path,
-        // adjust the current moving direction to point to the next tile in the path
-        CurrentPath.RemoveAt(CurrentPath.Count - 1);
-
-        if (CurrentPath.Count == 0) // End of path
-        {
-            _currentlyMovingTo = null;
-            CurrentPath = null;
-            _player.SetMovingDirection(Direction.None);
-            return false;
-        }
-
-        _currentlyMovingTo = CurrentPath[^1];
-
-        if (_currentlyMovingTo.Row > playerGridPosition.Row)
-            _player.SetMovingDirection(Direction.Down);
-        else if (_currentlyMovingTo.Row < playerGridPosition.Row)
-            _player.SetMovingDirection(Direction.Up);
-        else if (_currentlyMovingTo.Column > playerGridPosition.Column)
-            _player.SetMovingDirection(Direction.Right);
-        else if (_currentlyMovingTo.Column < playerGridPosition.Column)
-            _player.SetMovingDirection(Direction.Left);
-        else
-            _player.SetMovingDirection(Direction.None);
-
-        return true;
-    }
-
-    private static bool IsOnGridPosition(Vector2 position, GridPosition gridPosition)
-    {
-        const float threshold = 0.1f * Constants.TileSize;
-        return Math.Abs(position.Y - gridPosition.Row * Constants.TileSize) <= threshold
-            && Math.Abs(position.X - gridPosition.Column * Constants.TileSize) <= threshold;
-    }
-
     /// <summary>
     /// Finds a path to a tile where the agent should place a bomb
     /// </summary>
@@ -169,7 +109,7 @@ public class RandomAgent : IUpdatable
         var rnd = new Random();
 
         // Position is not visited yet if it does not have a parent assigned
-        var parents = new GridPosition?[_tileMap.Width, _tileMap.Length];
+        var parents = new GridPosition?[tileMap.Width, tileMap.Length];
 
         stack.Push(startingPosition);
         while (stack.Count != 0)
@@ -184,7 +124,7 @@ public class RandomAgent : IUpdatable
             foreach (var neighbour in neighbours)
             {
                 parents[neighbour.Row, neighbour.Column] = position;
-                var neighbourTile = _tileMap.GetTile(neighbour);
+                var neighbourTile = tileMap.GetTile(neighbour);
 
                 // If we encountered a neighbour box tile, then our position is our destination
                 if (neighbourTile is BoxTile && position != startingPosition)
@@ -212,7 +152,7 @@ public class RandomAgent : IUpdatable
         var rnd = new Random();
 
         // Position is not visited yet if it does not have a parent assigned
-        var parents = new GridPosition?[_tileMap.Width, _tileMap.Length];
+        var parents = new GridPosition?[tileMap.Width, tileMap.Length];
 
         // Do not end up on one of the following positions or you will explode!
         // TODO: This does not take into account bomb chain reactions
@@ -220,7 +160,7 @@ public class RandomAgent : IUpdatable
         var unsafePositions = bombTile
             .ExplosionPaths.Select(explosionPath =>
                 explosionPath.TakeWhile(explosionPosition =>
-                    _tileMap.GetTile(explosionPosition) == null
+                    tileMap.GetTile(explosionPosition) == null
                 )
             )
             .SelectMany(path => path)
@@ -231,7 +171,7 @@ public class RandomAgent : IUpdatable
         while (stack.Count != 0)
         {
             var position = stack.Pop();
-            var tile = _tileMap.GetTile(position);
+            var tile = tileMap.GetTile(position);
 
             // Maybe we found our safe haven?
             if (tile == null && !unsafePositions.Contains(position))
@@ -246,7 +186,7 @@ public class RandomAgent : IUpdatable
             foreach (var neighbour in neighbours)
             {
                 parents[neighbour.Row, neighbour.Column] = position;
-                var neighbourTile = _tileMap.GetTile(neighbour);
+                var neighbourTile = tileMap.GetTile(neighbour);
 
                 if (neighbourTile == null)
                     stack.Push(neighbour);

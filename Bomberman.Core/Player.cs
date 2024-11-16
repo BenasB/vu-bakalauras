@@ -58,10 +58,11 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
             throw new InvalidOperationException("Player has already placed a bomb");
 
         var gridPosition = Position.ToGridPosition();
-        _placedBombTile = new BombTile(gridPosition, tileMap, 1);
-        tileMap.PlaceTile(_placedBombTile);
+        var bombTile = new BombTile(gridPosition, tileMap, 1);
+        tileMap.PlaceTile(bombTile);
+        _placedBombTile = bombTile;
 
-        return _placedBombTile;
+        return bombTile;
     }
 
     private Vector2 GetSnapOnMovementOppositeAxis(Vector2 newPosition)
