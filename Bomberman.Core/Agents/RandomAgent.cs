@@ -15,6 +15,14 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
     private Walker? _walker;
     private BombTile? _bombTile;
 
+    private enum State
+    {
+        GoingToPlaceBomb,
+        MovingAwayFromBomb,
+        WaitingForBomb,
+        Standing,
+    }
+
     private readonly FiniteStateMachine<State> _stateMachine =
         new(
             State.GoingToPlaceBomb,
@@ -24,16 +32,11 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
                     (State.GoingToPlaceBomb, State.MovingAwayFromBomb) => true,
                     (State.MovingAwayFromBomb, State.WaitingForBomb) => true,
                     (State.WaitingForBomb, State.GoingToPlaceBomb) => true,
+                    (State.GoingToPlaceBomb, State.Standing) => true,
+                    (State.MovingAwayFromBomb, State.Standing) => true,
                     _ => false,
                 }
         );
-
-    private enum State
-    {
-        GoingToPlaceBomb,
-        MovingAwayFromBomb,
-        WaitingForBomb,
-    }
 
     public void Update(TimeSpan deltaTime)
     {
@@ -44,6 +47,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             State.GoingToPlaceBomb => GoToPlaceBomb,
             State.MovingAwayFromBomb => GoToAvoidBomb,
             State.WaitingForBomb => WaitForBombDetonation,
+            State.Standing => () => { },
             _ => throw new InvalidOperationException(
                 "There is not associated action with this state"
             ),
@@ -54,7 +58,18 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
 
     private void GoToPlaceBomb()
     {
-        _walker ??= new Walker(FindBombPlacementPath(_player.Position.ToGridPosition()), _player);
+        if (_walker == null)
+        {
+            var path = FindBombPlacementPath(_player.Position.ToGridPosition());
+
+            if (path.Count == 0)
+            {
+                _stateMachine.Transition(State.Standing);
+                return;
+            }
+
+            _walker = new Walker(path, _player);
+        }
 
         if (!_walker.Finished)
         {
@@ -72,10 +87,18 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
         if (_bombTile == null)
             throw new InvalidOperationException("There is no bomb to avoid");
 
-        _walker ??= new Walker(
-            FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile),
-            _player
-        );
+        if (_walker == null)
+        {
+            var path = FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile);
+
+            if (path.Count == 0)
+            {
+                _stateMachine.Transition(State.Standing);
+                return;
+            }
+
+            _walker = new Walker(path, _player);
+        }
 
         if (!_walker.Finished)
         {
