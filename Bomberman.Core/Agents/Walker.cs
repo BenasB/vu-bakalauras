@@ -5,33 +5,36 @@ namespace Bomberman.Core.Agents;
 
 internal class Walker(List<GridPosition> path, Player player)
 {
-    // TODO: What if path is [] ?
-    private GridPosition _currentlyMovingTo = path[^1];
-    public bool Finished { get; private set; }
-    public List<GridPosition> Path { get; } = path;
+    private GridPosition? _currentlyMovingTo = path[^1];
+    public bool Finished => _currentlyMovingTo == null;
+    public IReadOnlyList<GridPosition> Path { get; } = path;
 
-    public void UpdatePlayerMovingDirection()
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>Just changed moving to position.If player changed the grid position it's currently moving to</returns>
+    public GridPosition? UpdatePlayerMovingDirection()
     {
-        if (Finished)
-            return;
+        if (_currentlyMovingTo == null)
+            return null;
 
         if (!IsOnGridPosition(player.Position, _currentlyMovingTo))
-            return;
+            return null;
 
         var playerGridPosition = player.Position.ToGridPosition();
 
         // Upon reaching a tile on the path,
         // adjust the current moving direction to point to the next tile in the path
-        Path.RemoveAt(Path.Count - 1);
+        path.RemoveAt(path.Count - 1);
 
-        if (Path.Count == 0) // End of path
+        if (path.Count == 0) // End of path
         {
-            Finished = true;
+            _currentlyMovingTo = null;
             player.SetMovingDirection(Direction.None);
-            return;
+            return null;
         }
 
-        _currentlyMovingTo = Path[^1];
+        _currentlyMovingTo = path[^1];
 
         if (_currentlyMovingTo.Row > playerGridPosition.Row)
             player.SetMovingDirection(Direction.Down);
@@ -43,6 +46,8 @@ internal class Walker(List<GridPosition> path, Player player)
             player.SetMovingDirection(Direction.Left);
         else
             player.SetMovingDirection(Direction.None);
+
+        return _currentlyMovingTo;
     }
 
     private static bool IsOnGridPosition(Vector2 position, GridPosition gridPosition)

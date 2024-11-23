@@ -11,7 +11,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
 
     private readonly Player _player = new(startPosition, tileMap);
 
-    public List<GridPosition>? CurrentPath => _walker?.Path;
+    public IReadOnlyList<GridPosition>? CurrentPath => _walker?.Path;
     private Walker? _walker;
     private BombTile? _bombTile;
 
@@ -58,25 +58,8 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
 
     private void GoToPlaceBomb()
     {
-        if (_walker == null)
-        {
-            var path = FindBombPlacementPath(_player.Position.ToGridPosition());
-
-            if (path.Count == 0)
-            {
-                _stateMachine.Transition(State.Standing);
-                return;
-            }
-
-            _walker = new Walker(path, _player);
-        }
-
-        if (!_walker.Finished)
-        {
-            _walker.UpdatePlayerMovingDirection();
+        if (!WalkPath(() => FindBombPlacementPath(_player.Position.ToGridPosition())))
             return;
-        }
-        _walker = null;
 
         _bombTile = _player.PlaceBomb();
         _stateMachine.Transition(State.MovingAwayFromBomb);
@@ -87,25 +70,8 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
         if (_bombTile == null)
             throw new InvalidOperationException("There is no bomb to avoid");
 
-        if (_walker == null)
-        {
-            var path = FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile);
-
-            if (path.Count == 0)
-            {
-                _stateMachine.Transition(State.Standing);
-                return;
-            }
-
-            _walker = new Walker(path, _player);
-        }
-
-        if (!_walker.Finished)
-        {
-            _walker.UpdatePlayerMovingDirection();
+        if (!WalkPath(() => FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile)))
             return;
-        }
-        _walker = null;
 
         _stateMachine.Transition(State.WaitingForBomb);
     }
@@ -119,8 +85,47 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             return;
 
         _bombTile = null;
-
         _stateMachine.Transition(State.GoingToPlaceBomb);
+    }
+
+    /// <returns><see langword="true"/> when done walking through the generated path</returns>
+    private bool WalkPath(Func<List<GridPosition>> pathFactory)
+    {
+        if (_walker == null)
+        {
+            var path = pathFactory.Invoke();
+            if (path.Count == 0)
+            {
+                _stateMachine.Transition(State.Standing);
+                return false;
+            }
+
+            _walker = new Walker(path, _player);
+        }
+
+        if (!_walker.Finished)
+        {
+            var newGridPosition = _walker.UpdatePlayerMovingDirection();
+            if (newGridPosition == null) // Did not move to a new grid position yet, keep moving
+                return false;
+
+            var tile = tileMap.GetTile(newGridPosition);
+            if (tile == null) // Moved to a new grid position, but it's empty, keep moving
+                return false;
+
+            Logger.Warning("Came across something in my path, recalculating path");
+            var path = pathFactory.Invoke();
+            if (path.Count == 0)
+            {
+                _stateMachine.Transition(State.Standing);
+                return false;
+            }
+
+            _walker = new Walker(path, _player);
+            return false;
+        }
+        _walker = null;
+        return true;
     }
 
     /// <summary>
@@ -158,7 +163,6 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             }
         }
 
-        // TODO: If there is nowhere to go, do not place a bomb
         Logger.Warning("I can't find a way to any box tile");
         return [];
     }
@@ -179,7 +183,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
 
         // Do not end up on one of the following positions or you will explode!
         // TODO: This does not take into account bomb chain reactions
-        // TODO: This does not take into account other bombs and their exploding paths
+        // TODO: This does not take into account other bombs' exploding paths
         var unsafePositions = bombTile
             .ExplosionPaths.Select(explosionPath =>
                 explosionPath.TakeWhile(explosionPosition =>
@@ -216,7 +220,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             }
         }
 
-        // Accept your fate and don't move
+        // Accept your fate
         Logger.Warning("There is no way out of this :(");
         return [];
     }
