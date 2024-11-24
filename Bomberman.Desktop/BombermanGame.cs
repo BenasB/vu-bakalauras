@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Bomberman.Core;
-using Bomberman.Core.Agents;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
@@ -11,19 +10,14 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Bomberman.Desktop;
 
-public class Game1 : Game
+public class BombermanGame : Game
 {
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
-    private static readonly GridPosition StartPosition = new(Row: 3, Column: 3);
-    private readonly TileMap _tileMap = new(17, 9, StartPosition);
-    private readonly Player _player;
-    private readonly RandomAgent _agent;
-
-    // TODO: Move to input component
-    private bool _spacePressed = false;
+    private readonly KeyboardPlayer _keyboardPlayer;
+    private readonly GameState _gameState = new();
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -35,23 +29,20 @@ public class Game1 : Game
 
     private Texture2D _debugGridMarkerTexture;
 
-    public Game1()
+    public BombermanGame()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _player = new Player(new(5, 5), _tileMap);
-        // _player.TakeDamage();
-
-        _agent = new RandomAgent(StartPosition, _tileMap);
+        _keyboardPlayer = new KeyboardPlayer(_gameState.TileMap);
     }
 
     protected override void Initialize()
     {
         _graphics.IsFullScreen = false;
-        _graphics.PreferredBackBufferHeight = _tileMap.Width * Constants.TileSize;
-        _graphics.PreferredBackBufferWidth = _tileMap.Length * Constants.TileSize;
+        _graphics.PreferredBackBufferHeight = _gameState.TileMap.Width * Constants.TileSize;
+        _graphics.PreferredBackBufferWidth = _gameState.TileMap.Length * Constants.TileSize;
         _graphics.ApplyChanges();
 
         base.Initialize();
@@ -79,41 +70,8 @@ public class Game1 : Game
         )
             Exit();
 
-        if (_player.Alive)
-        {
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-                _player.SetMovingDirection(Direction.Up);
-            else if (Keyboard.GetState().IsKeyDown(Keys.S))
-                _player.SetMovingDirection(Direction.Down);
-            else if (Keyboard.GetState().IsKeyDown(Keys.A))
-                _player.SetMovingDirection(Direction.Left);
-            else if (Keyboard.GetState().IsKeyDown(Keys.D))
-                _player.SetMovingDirection(Direction.Right);
-            else
-                _player.SetMovingDirection(Direction.None);
-
-            _player.Update(gameTime.ElapsedGameTime);
-
-            if (!_spacePressed && Keyboard.GetState().IsKeyDown(Keys.Space))
-                _spacePressed = true;
-
-            if (_spacePressed && Keyboard.GetState().IsKeyUp(Keys.Space))
-            {
-                try
-                {
-                    _player.PlaceBomb();
-                }
-                catch (InvalidOperationException)
-                {
-                    // A player might try to place more bombs than they are allowed
-                }
-                _spacePressed = false;
-            }
-        }
-
-        _agent.Update(gameTime.ElapsedGameTime);
-
-        _tileMap.Update(gameTime.ElapsedGameTime);
+        _keyboardPlayer.Update(gameTime.ElapsedGameTime);
+        _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
     }
@@ -124,37 +82,44 @@ public class Game1 : Game
 
         _spriteBatch.Begin();
 
-        foreach (var tile in _tileMap.Tiles.Where(tile => tile != null).Select(tile => tile!))
+        foreach (
+            var tile in _gameState.TileMap.Tiles.Where(tile => tile != null).Select(tile => tile!)
+        )
         {
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        if (_player.Alive)
+        if (_keyboardPlayer.Alive)
         {
-            _spriteBatch.Draw(_playerTexture, _player.Position, Color.White);
+            _spriteBatch.Draw(_playerTexture, _keyboardPlayer.Position, Color.White);
 
 #if DEBUG
             _spriteBatch.Draw(
                 _debugGridMarkerTexture,
-                (Vector2)_player.Position.ToGridPosition(),
+                (Vector2)_keyboardPlayer.Position.ToGridPosition(),
                 Color.Red
             );
 #endif
         }
 
-        if (_agent.Alive)
+        if (_gameState.RandomAgent.Alive)
         {
-            _spriteBatch.Draw(_playerTexture, _agent.Position, Color.GreenYellow);
+            _spriteBatch.Draw(_playerTexture, _gameState.RandomAgent.Position, Color.GreenYellow);
 
 #if DEBUG
-            if (_agent.CurrentPath != null)
+            if (_gameState.RandomAgent.CurrentPath != null)
             {
-                foreach (var pathPosition in _agent.CurrentPath)
+                foreach (var pathPosition in _gameState.RandomAgent.CurrentPath)
                 {
                     _spriteBatch.Draw(_debugGridMarkerTexture, (Vector2)pathPosition, Color.Green);
                 }
             }
 #endif
+        }
+
+        if (_gameState.MctsAgent.Alive)
+        {
+            _spriteBatch.Draw(_playerTexture, _gameState.MctsAgent.Position, Color.Magenta);
         }
 
         _spriteBatch.End();

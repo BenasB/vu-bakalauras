@@ -1,2 +1,2 @@
-﻿using var game = new Bomberman.Desktop.Game1();
+﻿using var game = new Bomberman.Desktop.BombermanGame();
 game.Run();
