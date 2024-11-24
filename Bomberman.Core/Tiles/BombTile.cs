@@ -75,4 +75,11 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
             }
         }
     }
+
+    public override object Clone() =>
+        new BombTile(Position, tileMap, range)
+        {
+            _existingTime = _existingTime,
+            Detonated = Detonated,
+        };
 }

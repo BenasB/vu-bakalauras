@@ -4,9 +4,9 @@ using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core;
 
-public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, IDamageable
+public class Player : IUpdatable, IDamageable
 {
-    public Vector2 Position { get; private set; } = startPosition;
+    public Vector2 Position { get; private set; }
 
     private Vector2 _velocityDirection = Vector2.Zero;
 
@@ -15,6 +15,22 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
     public bool Alive { get; private set; } = true;
 
     private BombTile? _placedBombTile;
+    private readonly TileMap _tileMap;
+
+    public Player(GridPosition startPosition, TileMap tileMap)
+    {
+        _tileMap = tileMap;
+        Position = startPosition;
+    }
+
+    internal Player(Player original, TileMap tileMap)
+    {
+        Position = original.Position;
+        _velocityDirection = original._velocityDirection;
+        Alive = original.Alive;
+        _placedBombTile = (BombTile?)original._placedBombTile?.Clone();
+        _tileMap = tileMap;
+    }
 
     public void Update(TimeSpan deltaTime)
     {
@@ -29,7 +45,7 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
         var snapVector = GetSnapOnMovementOppositeAxis(newPosition);
         newPosition = Vector2.Add(newPosition, snapVector);
 
-        var collisionData = tileMap.IsColliding(newPosition, this);
+        var collisionData = _tileMap.IsColliding(newPosition, this);
         if (collisionData != null)
         {
             newPosition = Vector2.Subtract(newPosition, snapVector);
@@ -58,8 +74,8 @@ public class Player(GridPosition startPosition, TileMap tileMap) : IUpdatable, I
             throw new InvalidOperationException("Player has already placed a bomb");
 
         var gridPosition = Position.ToGridPosition();
-        var bombTile = new BombTile(gridPosition, tileMap, 1);
-        tileMap.PlaceTile(bombTile);
+        var bombTile = new BombTile(gridPosition, _tileMap, 1);
+        _tileMap.PlaceTile(bombTile);
         _placedBombTile = bombTile;
 
         return bombTile;

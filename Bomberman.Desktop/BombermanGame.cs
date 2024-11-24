@@ -17,7 +17,8 @@ public class BombermanGame : Game
     private SpriteFont _spriteFont;
 
     private readonly KeyboardPlayer _keyboardPlayer;
-    private readonly GameState _gameState = new();
+    private GameState _savedState = new();
+    private GameState _gameState;
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -35,6 +36,7 @@ public class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
+        _gameState = new GameState(_savedState);
         _keyboardPlayer = new KeyboardPlayer(_gameState.TileMap);
     }
 
@@ -69,6 +71,12 @@ public class BombermanGame : Game
             || Keyboard.GetState().IsKeyDown(Keys.Escape)
         )
             Exit();
+
+        if (Keyboard.GetState().IsKeyDown(Keys.R))
+            _gameState = new GameState(_savedState);
+
+        if (Keyboard.GetState().IsKeyDown(Keys.T))
+            _savedState = new GameState(_gameState);
 
         _keyboardPlayer.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);

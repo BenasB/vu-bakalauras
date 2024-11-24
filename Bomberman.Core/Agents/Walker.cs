@@ -3,49 +3,66 @@ using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.Agents;
 
-internal class Walker(List<GridPosition> path, Player player)
+internal class Walker
 {
-    private GridPosition? _currentlyMovingTo = path[^1];
-    public bool Finished => _currentlyMovingTo == null;
-    public IReadOnlyList<GridPosition> Path { get; } = path;
+    private GridPosition? _currentlyMovingTo;
+    private readonly List<GridPosition> _path;
+    private readonly Player _player;
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <returns>Just changed moving to position.If player changed the grid position it's currently moving to</returns>
+    public bool Finished => _currentlyMovingTo == null;
+    public IReadOnlyList<GridPosition> Path { get; }
+
+    public Walker(List<GridPosition> path, Player player)
+    {
+        _path = path;
+        _player = player;
+        _currentlyMovingTo = path[^1];
+        Path = path;
+    }
+
+    internal Walker(Walker original, Player player)
+    {
+        _currentlyMovingTo =
+            original._currentlyMovingTo == null ? null : original._currentlyMovingTo with { };
+        _path = original._path.Select(gp => gp with { }).ToList();
+        _player = player;
+        Path = _path;
+    }
+
+    /// <returns>"Currently moving to" position if it changed</returns>
     public GridPosition? UpdatePlayerMovingDirection()
     {
         if (_currentlyMovingTo == null)
             return null;
 
-        if (!IsOnGridPosition(player.Position, _currentlyMovingTo))
+        if (!IsOnGridPosition(_player.Position, _currentlyMovingTo))
             return null;
 
-        var playerGridPosition = player.Position.ToGridPosition();
+        var playerGridPosition = _player.Position.ToGridPosition();
 
         // Upon reaching a tile on the path,
         // adjust the current moving direction to point to the next tile in the path
-        path.RemoveAt(path.Count - 1);
+        _path.RemoveAt(_path.Count - 1);
 
-        if (path.Count == 0) // End of path
+        if (_path.Count == 0) // End of path
         {
             _currentlyMovingTo = null;
-            player.SetMovingDirection(Direction.None);
+            _player.SetMovingDirection(Direction.None);
             return null;
         }
 
-        _currentlyMovingTo = path[^1];
+        _currentlyMovingTo = _path[^1];
 
         if (_currentlyMovingTo.Row > playerGridPosition.Row)
-            player.SetMovingDirection(Direction.Down);
+            _player.SetMovingDirection(Direction.Down);
         else if (_currentlyMovingTo.Row < playerGridPosition.Row)
-            player.SetMovingDirection(Direction.Up);
+            _player.SetMovingDirection(Direction.Up);
         else if (_currentlyMovingTo.Column > playerGridPosition.Column)
-            player.SetMovingDirection(Direction.Right);
+            _player.SetMovingDirection(Direction.Right);
         else if (_currentlyMovingTo.Column < playerGridPosition.Column)
-            player.SetMovingDirection(Direction.Left);
+            _player.SetMovingDirection(Direction.Left);
         else
-            player.SetMovingDirection(Direction.None);
+            _player.SetMovingDirection(Direction.None);
 
         return _currentlyMovingTo;
     }

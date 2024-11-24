@@ -22,4 +22,7 @@ public class ExplosionTile(GridPosition position, TileMap tileMap, TimeSpan dest
 
         damageable.TakeDamage();
     }
+
+    public override object Clone() =>
+        new ExplosionTile(Position, tileMap, destroyAfter) { _existingTime = _existingTime };
 }

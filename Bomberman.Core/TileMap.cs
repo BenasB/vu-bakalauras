@@ -82,6 +82,24 @@ public class TileMap : IUpdatable
             _foregroundTiles[position.Row][position.Column] = null;
     }
 
+    internal TileMap(TileMap original)
+    {
+        Length = original.Length;
+        Width = original.Width;
+
+        _backgroundTiles = original
+            ._backgroundTiles.Select(row =>
+                row.Select(originalTile => (Tile)originalTile.Clone()).ToArray()
+            )
+            .ToArray();
+
+        _foregroundTiles = original
+            ._foregroundTiles.Select(row =>
+                row.Select(originalTile => (Tile?)originalTile?.Clone()).ToArray()
+            )
+            .ToArray();
+    }
+
     public void Update(TimeSpan deltaTime)
     {
         foreach (var updatableTile in _foregroundTiles.SelectMany(row => row).OfType<IUpdatable>())

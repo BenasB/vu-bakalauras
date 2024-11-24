@@ -4,16 +4,17 @@ using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.Agents;
 
-public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatable
+public class RandomAgent : IUpdatable
 {
     public Vector2 Position => _player.Position;
     public bool Alive => _player.Alive;
 
-    private readonly Player _player = new(startPosition, tileMap);
+    private readonly Player _player;
 
     public IReadOnlyList<GridPosition>? CurrentPath => _walker?.Path;
     private Walker? _walker;
     private BombTile? _bombTile;
+    private readonly TileMap _tileMap;
 
     private enum State
     {
@@ -37,6 +38,21 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
                     _ => false,
                 }
         );
+
+    public RandomAgent(GridPosition startPosition, TileMap tileMap)
+    {
+        _tileMap = tileMap;
+        _player = new Player(startPosition, tileMap);
+    }
+
+    public RandomAgent(RandomAgent original, TileMap tileMap)
+    {
+        _player = new Player(original._player, tileMap);
+        _walker = original._walker == null ? null : new Walker(original._walker, _player);
+        _bombTile = (BombTile?)original._bombTile?.Clone();
+        _tileMap = tileMap;
+        _stateMachine = new FiniteStateMachine<State>(original._stateMachine);
+    }
 
     public void Update(TimeSpan deltaTime)
     {
@@ -109,7 +125,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             if (newGridPosition == null) // Did not move to a new grid position yet, keep moving
                 return false;
 
-            var tile = tileMap.GetTile(newGridPosition);
+            var tile = _tileMap.GetTile(newGridPosition);
             if (tile == null) // Moved to a new grid position, but it's empty, keep moving
                 return false;
 
@@ -137,7 +153,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
         var rnd = new Random();
 
         // Position is not visited yet if it does not have a parent assigned
-        var parents = new GridPosition?[tileMap.Width, tileMap.Length];
+        var parents = new GridPosition?[_tileMap.Width, _tileMap.Length];
 
         stack.Push(startingPosition);
         while (stack.Count != 0)
@@ -152,7 +168,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             foreach (var neighbour in neighbours)
             {
                 parents[neighbour.Row, neighbour.Column] = position;
-                var neighbourTile = tileMap.GetTile(neighbour);
+                var neighbourTile = _tileMap.GetTile(neighbour);
 
                 // If we encountered a neighbour box tile, then our position is our destination
                 if (neighbourTile is BoxTile && position != startingPosition)
@@ -179,7 +195,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
         var rnd = new Random();
 
         // Position is not visited yet if it does not have a parent assigned
-        var parents = new GridPosition?[tileMap.Width, tileMap.Length];
+        var parents = new GridPosition?[_tileMap.Width, _tileMap.Length];
 
         // Do not end up on one of the following positions or you will explode!
         // TODO: This does not take into account bomb chain reactions
@@ -187,7 +203,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
         var unsafePositions = bombTile
             .ExplosionPaths.Select(explosionPath =>
                 explosionPath.TakeWhile(explosionPosition =>
-                    tileMap.GetTile(explosionPosition) == null
+                    _tileMap.GetTile(explosionPosition) == null
                 )
             )
             .SelectMany(path => path)
@@ -198,7 +214,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
         while (stack.Count != 0)
         {
             var position = stack.Pop();
-            var tile = tileMap.GetTile(position);
+            var tile = _tileMap.GetTile(position);
 
             // Maybe we found our safe haven?
             if (tile == null && !unsafePositions.Contains(position))
@@ -213,7 +229,7 @@ public class RandomAgent(GridPosition startPosition, TileMap tileMap) : IUpdatab
             foreach (var neighbour in neighbours)
             {
                 parents[neighbour.Row, neighbour.Column] = position;
-                var neighbourTile = tileMap.GetTile(neighbour);
+                var neighbourTile = _tileMap.GetTile(neighbour);
 
                 if (neighbourTile == null)
                     stack.Push(neighbour);
