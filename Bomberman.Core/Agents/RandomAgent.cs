@@ -13,7 +13,7 @@ public class RandomAgent : IUpdatable
 
     public IReadOnlyList<GridPosition>? CurrentPath => _walker?.Path;
     private Walker? _walker;
-    private BombTile? _bombTile;
+    private Tile? _bombOrExplosionTile;
     private readonly TileMap _tileMap;
 
     private enum State
@@ -49,7 +49,10 @@ public class RandomAgent : IUpdatable
     {
         _player = new Player(original._player, tileMap);
         _walker = original._walker == null ? null : new Walker(original._walker, _player);
-        _bombTile = (BombTile?)original._bombTile?.Clone();
+        _bombOrExplosionTile =
+            original._bombOrExplosionTile == null
+                ? null
+                : tileMap.GetTile(original._bombOrExplosionTile.Position);
         _tileMap = tileMap;
         _stateMachine = new FiniteStateMachine<State>(original._stateMachine);
     }
@@ -77,16 +80,24 @@ public class RandomAgent : IUpdatable
         if (!WalkPath(() => FindBombPlacementPath(_player.Position.ToGridPosition())))
             return;
 
-        _bombTile = _player.PlaceBomb();
+        _bombOrExplosionTile = _player.PlaceBomb();
         _stateMachine.Transition(State.MovingAwayFromBomb);
     }
 
     private void GoToAvoidBomb()
     {
-        if (_bombTile == null)
+        if (_bombOrExplosionTile is not BombTile)
             throw new InvalidOperationException("There is no bomb to avoid");
 
-        if (!WalkPath(() => FindBombAvoidancePath(_player.Position.ToGridPosition(), _bombTile)))
+        if (
+            !WalkPath(
+                () =>
+                    FindBombAvoidancePath(
+                        _player.Position.ToGridPosition(),
+                        (BombTile)_bombOrExplosionTile
+                    )
+            )
+        )
             return;
 
         _stateMachine.Transition(State.WaitingForBomb);
@@ -94,13 +105,16 @@ public class RandomAgent : IUpdatable
 
     private void WaitForBombDetonation()
     {
-        if (_bombTile == null)
+        if (_bombOrExplosionTile == null)
             throw new InvalidOperationException("There is no bomb to wait for");
 
-        if (!_bombTile.Exploded)
+        if (_bombOrExplosionTile is BombTile { Exploded: false })
             return;
 
-        _bombTile = null;
+        if (_bombOrExplosionTile is ExplosionTile { Destroyed: false })
+            return;
+
+        _bombOrExplosionTile = null;
         _stateMachine.Transition(State.GoingToPlaceBomb);
     }
 

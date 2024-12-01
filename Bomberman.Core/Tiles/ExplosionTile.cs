@@ -7,12 +7,17 @@ public class ExplosionTile(GridPosition position, TileMap tileMap, TimeSpan dest
 {
     private TimeSpan _existingTime = TimeSpan.Zero;
 
+    public bool Destroyed { get; private set; }
+
     public void Update(TimeSpan deltaTime)
     {
         _existingTime += deltaTime;
 
         if (_existingTime >= destroyAfter)
+        {
             tileMap.RemoveTile(this);
+            Destroyed = true;
+        }
     }
 
     public void OnEntered(object entree)
@@ -23,6 +28,6 @@ public class ExplosionTile(GridPosition position, TileMap tileMap, TimeSpan dest
         damageable.TakeDamage();
     }
 
-    public override object Clone() =>
-        new ExplosionTile(Position, tileMap, destroyAfter) { _existingTime = _existingTime };
+    public override Tile Clone(TileMap newTileMap) =>
+        new ExplosionTile(Position, newTileMap, destroyAfter) { _existingTime = _existingTime };
 }

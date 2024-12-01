@@ -89,13 +89,13 @@ public class TileMap : IUpdatable
 
         _backgroundTiles = original
             ._backgroundTiles.Select(row =>
-                row.Select(originalTile => (Tile)originalTile.Clone()).ToArray()
+                row.Select(originalTile => originalTile.Clone(this)).ToArray()
             )
             .ToArray();
 
         _foregroundTiles = original
             ._foregroundTiles.Select(row =>
-                row.Select(originalTile => (Tile?)originalTile?.Clone()).ToArray()
+                row.Select(originalTile => originalTile?.Clone(this)).ToArray()
             )
             .ToArray();
     }

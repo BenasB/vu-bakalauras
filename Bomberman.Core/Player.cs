@@ -28,7 +28,10 @@ public class Player : IUpdatable, IDamageable
         Position = original.Position;
         _velocityDirection = original._velocityDirection;
         Alive = original.Alive;
-        _placedBombTile = (BombTile?)original._placedBombTile?.Clone();
+        _placedBombTile =
+            original._placedBombTile == null
+                ? null
+                : tileMap.GetTile(original._placedBombTile.Position) as BombTile;
         _tileMap = tileMap;
     }
 

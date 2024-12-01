@@ -2,5 +2,5 @@ namespace Bomberman.Core.Tiles;
 
 public class FloorTile(GridPosition position) : Tile(position)
 {
-    public override object Clone() => new FloorTile(Position);
+    public override Tile Clone(TileMap tileMap) => new FloorTile(Position);
 }

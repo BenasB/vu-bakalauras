@@ -9,10 +9,12 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
 
     private TimeSpan _existingTime = TimeSpan.Zero;
 
+    private ExplosionTile? _explosionTile;
+
     public bool Detonated { get; private set; }
 
     // A bomb is considered exploded only after the explosion tile is gone
-    public bool Exploded => Detonated && tileMap.GetTile(Position) == null;
+    public bool Exploded => Detonated && (_explosionTile?.Destroyed ?? false);
 
     public void Update(TimeSpan deltaTime)
     {
@@ -41,7 +43,9 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
         Detonated = true;
 
         tileMap.RemoveTile(this);
-        tileMap.PlaceTile(new ExplosionTile(Position, tileMap, ExplosionDuration));
+        var centerExplosionTile = new ExplosionTile(Position, tileMap, ExplosionDuration);
+        _explosionTile = centerExplosionTile;
+        tileMap.PlaceTile(centerExplosionTile);
 
         foreach (var explosionPath in ExplosionPaths)
         {
@@ -76,8 +80,8 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
         }
     }
 
-    public override object Clone() =>
-        new BombTile(Position, tileMap, range)
+    public override Tile Clone(TileMap newTileMap) =>
+        new BombTile(Position, newTileMap, range)
         {
             _existingTime = _existingTime,
             Detonated = Detonated,

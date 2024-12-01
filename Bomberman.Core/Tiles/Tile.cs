@@ -1,6 +1,6 @@
 namespace Bomberman.Core.Tiles;
 
-public abstract class Tile : ICloneable
+public abstract class Tile
 {
     public GridPosition Position { get; }
 
@@ -9,5 +9,5 @@ public abstract class Tile : ICloneable
         Position = position;
     }
 
-    public abstract object Clone();
+    public abstract Tile Clone(TileMap tileMap);
 }
