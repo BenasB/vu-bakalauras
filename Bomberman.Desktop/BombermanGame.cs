@@ -2,7 +2,6 @@
 using System.Linq;
 using Bomberman.Core;
 using Bomberman.Core.Tiles;
-using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,7 +15,6 @@ public class BombermanGame : Game
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
-    private readonly KeyboardPlayer _keyboardPlayer;
     private GameState _savedState = new();
     private GameState _gameState;
 
@@ -36,8 +34,7 @@ public class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _gameState = new GameState(_savedState);
-        _keyboardPlayer = new KeyboardPlayer(_gameState.TileMap);
+        _gameState = new GameState(_savedState) { MctsAgent = { PerformMcts = true } };
     }
 
     protected override void Initialize()
@@ -66,6 +63,14 @@ public class BombermanGame : Game
 
     protected override void Update(GameTime gameTime)
     {
+        if (_gameState.Terminated)
+            return;
+
+        if (gameTime.IsRunningSlowly)
+            throw new InvalidOperationException(
+                "Update takes more time than a frame has allocated to it, results are unexpected"
+            );
+
         if (
             GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
             || Keyboard.GetState().IsKeyDown(Keys.Escape)
@@ -78,7 +83,6 @@ public class BombermanGame : Game
         if (Keyboard.GetState().IsKeyDown(Keys.T))
             _savedState = new GameState(_gameState);
 
-        _keyboardPlayer.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -95,19 +99,6 @@ public class BombermanGame : Game
         )
         {
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
-        }
-
-        if (_keyboardPlayer.Alive)
-        {
-            _spriteBatch.Draw(_playerTexture, _keyboardPlayer.Position, Color.White);
-
-#if DEBUG
-            _spriteBatch.Draw(
-                _debugGridMarkerTexture,
-                (Vector2)_keyboardPlayer.Position.ToGridPosition(),
-                Color.Red
-            );
-#endif
         }
 
         if (_gameState.RandomAgent.Alive)

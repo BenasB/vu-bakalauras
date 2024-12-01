@@ -85,5 +85,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
         {
             _existingTime = _existingTime,
             Detonated = Detonated,
+            _explosionTile = // TODO: double check if this is okay?
+                _explosionTile != null ? (ExplosionTile?)newTileMap.GetTile(Position) : null,
         };
 }

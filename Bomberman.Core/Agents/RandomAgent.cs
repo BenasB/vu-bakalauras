@@ -49,12 +49,17 @@ public class RandomAgent : IUpdatable
     {
         _player = new Player(original._player, tileMap);
         _walker = original._walker == null ? null : new Walker(original._walker, _player);
+        _tileMap = tileMap;
+        _stateMachine = new FiniteStateMachine<State>(original._stateMachine);
+
+        // TODO: Double check if this is correct
         _bombOrExplosionTile =
             original._bombOrExplosionTile == null
                 ? null
-                : tileMap.GetTile(original._bombOrExplosionTile.Position);
-        _tileMap = tileMap;
-        _stateMachine = new FiniteStateMachine<State>(original._stateMachine);
+                : tileMap.GetTile(original._bombOrExplosionTile.Position)
+                    ?? throw new InvalidOperationException(
+                        "Expected there to be a bomb or explosion tile"
+                    );
     }
 
     public void Update(TimeSpan deltaTime)
@@ -80,7 +85,18 @@ public class RandomAgent : IUpdatable
         if (!WalkPath(() => FindBombPlacementPath(_player.Position.ToGridPosition())))
             return;
 
-        _bombOrExplosionTile = _player.PlaceBomb();
+        try
+        {
+            _bombOrExplosionTile = _player.PlaceBomb();
+        }
+        catch
+        {
+            Logger.Warning(
+                "Came to the end of bomb placement path, but could not place bomb since the tile was occupied"
+            );
+            _ = WalkPath(() => FindBombPlacementPath(_player.Position.ToGridPosition()));
+            return;
+        }
         _stateMachine.Transition(State.MovingAwayFromBomb);
     }
 

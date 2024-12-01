@@ -1,11 +1,11 @@
 namespace Bomberman.Core.Agents.Mcts;
 
-public enum BombermanAction
+internal enum BombermanAction
 {
     MoveUp,
     MoveDown,
     MoveLeft,
     MoveRight,
     Stand,
-    PlaceBomb,
+    // TODO: PlaceBomb
 }

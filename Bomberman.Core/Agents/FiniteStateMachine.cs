@@ -1,5 +1,3 @@
-using Bomberman.Core.Utilities;
-
 namespace Bomberman.Core.Agents;
 
 internal class FiniteStateMachine<TState>(
@@ -22,7 +20,7 @@ internal class FiniteStateMachine<TState>(
                 $"Illegal transition from '{State}' to '{newState}'"
             );
 
-        Logger.Information($"State transition from '{State}' to '{newState}'");
+        //Logger.Information($"State transition from '{State}' to '{newState}'");
 
         State = newState;
     }

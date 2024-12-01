@@ -32,6 +32,7 @@ public class Player : IUpdatable, IDamageable
             original._placedBombTile == null
                 ? null
                 : tileMap.GetTile(original._placedBombTile.Position) as BombTile;
+        // TODO: why this is always triggered in a simulation ?? throw new InvalidOperationException("Expected there to be a bomb");
         _tileMap = tileMap;
     }
 
