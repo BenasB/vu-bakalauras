@@ -2,6 +2,7 @@
 using System.Linq;
 using Bomberman.Core;
 using Bomberman.Core.Tiles;
+using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,6 +18,8 @@ public class BombermanGame : Game
 
     private GameState _savedState = new();
     private GameState _gameState;
+
+    private KeyboardPlayer _keyboardPlayer;
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -34,7 +37,8 @@ public class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _gameState = new GameState(_savedState) { MctsAgent = { PerformMcts = true } };
+        _gameState = new GameState(_savedState);
+        _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
     }
 
     protected override void Initialize()
@@ -78,11 +82,15 @@ public class BombermanGame : Game
             Exit();
 
         if (Keyboard.GetState().IsKeyDown(Keys.R))
+        {
             _gameState = new GameState(_savedState);
+            _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
+        }
 
         if (Keyboard.GetState().IsKeyDown(Keys.T))
             _savedState = new GameState(_gameState);
 
+        _keyboardPlayer.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -101,24 +109,14 @@ public class BombermanGame : Game
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        if (_gameState.RandomAgent.Alive)
+        if (_gameState.Player.Alive)
         {
-            _spriteBatch.Draw(_playerTexture, _gameState.RandomAgent.Position, Color.GreenYellow);
-
-#if DEBUG
-            if (_gameState.RandomAgent.CurrentPath != null)
-            {
-                foreach (var pathPosition in _gameState.RandomAgent.CurrentPath)
-                {
-                    _spriteBatch.Draw(_debugGridMarkerTexture, (Vector2)pathPosition, Color.Green);
-                }
-            }
-#endif
-        }
-
-        if (_gameState.MctsAgent.Alive)
-        {
-            _spriteBatch.Draw(_playerTexture, _gameState.MctsAgent.Position, Color.Magenta);
+            _spriteBatch.Draw(_playerTexture, _gameState.Player.Position, Color.White);
+            _spriteBatch.Draw(
+                _debugGridMarkerTexture,
+                (Vector2)_gameState.Player.Position.ToGridPosition(),
+                Color.Navy
+            );
         }
 
         _spriteBatch.End();
