@@ -44,13 +44,14 @@ public class Player : IUpdatable, IDamageable
         if (_velocityDirection == Vector2.Zero)
             return;
 
+        var snappedPosition = Vector2.Add(Position, GetSnapOnMovementOppositeAxis(Position));
+
         var velocity = _velocityDirection * Speed * (float)deltaTime.TotalSeconds;
-        var adjustedVelocityLength = PhysicsManager.Raycast(_tileMap, Position, velocity);
+        var adjustedVelocityLength = PhysicsManager.Raycast(_tileMap, snappedPosition, velocity);
         var adjustedVelocity = _velocityDirection * adjustedVelocityLength;
 
-        var newPosition = Vector2.Add(Position, adjustedVelocity);
-
-        Position = newPosition;
+        if (adjustedVelocityLength != 0)
+            Position = Vector2.Add(snappedPosition, adjustedVelocity);
     }
 
     public void SetMovingDirection(Direction direction)
@@ -77,6 +78,47 @@ public class Player : IUpdatable, IDamageable
         _placedBombTile = bombTile;
 
         return bombTile;
+    }
+
+    private Vector2 GetSnapOnMovementOppositeAxis(Vector2 newPosition)
+    {
+        const double thresholdHorizontally = 0.25 * Constants.TileSize;
+        const double thresholdVertically = 0.3 * Constants.TileSize;
+
+        if (_velocityDirection.Y == 0 && _velocityDirection.X != 0) // Moving horizontally
+        {
+            var positionOnTile = newPosition.Y % Constants.TileSize;
+            if (positionOnTile < Constants.TileSize / 2.0f) // Snap from above
+            {
+                var diff = positionOnTile;
+                if (diff < thresholdHorizontally)
+                    return Vector2.UnitY * -diff;
+            }
+            else // Snap from below
+            {
+                var diff = Constants.TileSize - positionOnTile;
+                if (diff < thresholdHorizontally)
+                    return Vector2.UnitY * diff;
+            }
+        }
+        else if (_velocityDirection.X == 0 && _velocityDirection.Y != 0) // Moving vertically
+        {
+            var positionOnTile = newPosition.X % Constants.TileSize;
+            if (positionOnTile < Constants.TileSize / 2.0f) // Snap from right
+            {
+                var diff = positionOnTile;
+                if (diff < thresholdVertically)
+                    return Vector2.UnitX * -diff;
+            }
+            else // Snap from left
+            {
+                var diff = Constants.TileSize - positionOnTile;
+                if (diff < thresholdVertically)
+                    return Vector2.UnitX * diff;
+            }
+        }
+
+        return Vector2.Zero;
     }
 
     public void TakeDamage()
