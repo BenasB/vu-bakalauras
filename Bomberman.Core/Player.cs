@@ -41,13 +41,23 @@ public class Player : IUpdatable, IDamageable
         if (!Alive)
             return;
 
+        if (_tileMap.GetTile(Position.ToGridPosition()) is IEnterable enterableTile)
+        {
+            enterableTile.OnEntered(this);
+        }
+
         if (_velocityDirection == Vector2.Zero)
             return;
 
         var snappedPosition = Vector2.Add(Position, GetSnapOnMovementOppositeAxis(Position));
 
         var velocity = _velocityDirection * Speed * (float)deltaTime.TotalSeconds;
-        var adjustedVelocityLength = PhysicsManager.Raycast(_tileMap, snappedPosition, velocity);
+        var adjustedVelocityLength = PhysicsManager.Raycast(
+            this,
+            _tileMap,
+            snappedPosition,
+            velocity
+        );
         var adjustedVelocity = _velocityDirection * adjustedVelocityLength;
 
         if (adjustedVelocityLength != 0)

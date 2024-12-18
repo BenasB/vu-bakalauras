@@ -1,11 +1,15 @@
 using System.Numerics;
-using Bomberman.Core.Tiles;
 
 namespace Bomberman.Core;
 
 internal static class PhysicsManager
 {
-    public static float Raycast(TileMap tileMap, Vector2 subjectPosition, Vector2 subjectVelocity)
+    public static float Raycast(
+        object caller,
+        TileMap tileMap,
+        Vector2 subjectPosition,
+        Vector2 subjectVelocity
+    )
     {
         var velocityLength = subjectVelocity.Length();
         float rayLength = 0;
@@ -24,10 +28,18 @@ internal static class PhysicsManager
             {
                 var tile = tileMap.GetTile(tileGridPosition);
 
-                if (tile is null or ExplosionTile)
+                if (tile is null)
                     continue;
 
-                // TODO: crossing over explosions should make the player die?
+                // Skip enterable tiles as they are not solid
+                if (tile is IEnterable enterableTile)
+                {
+                    // If we are still not at the end of the ray make sure it is triggered
+                    if (rayLength < velocityLength)
+                        enterableTile.OnEntered(caller);
+
+                    continue;
+                }
 
                 var tilePosition = (Vector2)tileGridPosition;
                 var diff = subjectVelocity switch

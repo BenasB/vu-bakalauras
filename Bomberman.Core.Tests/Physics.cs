@@ -55,4 +55,30 @@ public class Physics
             player.Position
         );
     }
+
+    [Theory]
+    [InlineData(16)]
+    [InlineData(16 * 2)]
+    [InlineData(16 * 3)]
+    [InlineData(16 * 4)]
+    [InlineData(16 * 6)]
+    [InlineData(16 * 10)]
+    [InlineData(16 * 100)]
+    public void PlayerMovement_BigVelocityGoingThroughExplosion_PlayerDies(int deltaTimeMs)
+    {
+        var deltaTime = TimeSpan.FromMilliseconds(deltaTimeMs);
+
+        // Player is right next to an explosion and moving with any velocity towards it should kill the player
+        var startingPlayerPosition = new GridPosition(0, 0);
+        var explosionPosition = new GridPosition(0, 1);
+
+        var tileMap = new TileMap(3, 1);
+        tileMap.PlaceTile(new ExplosionTile(explosionPosition, tileMap, TimeSpan.MaxValue));
+        var player = new Player(startingPlayerPosition, tileMap);
+
+        player.SetMovingDirection(Direction.Right);
+        player.Update(deltaTime);
+
+        Assert.False(player.Alive);
+    }
 }

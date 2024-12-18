@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
-using System.Numerics;
 using Bomberman.Core.Tiles;
-using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core;
 
