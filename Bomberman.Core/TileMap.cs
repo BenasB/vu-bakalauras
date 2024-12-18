@@ -57,21 +57,29 @@ public class TileMap : IUpdatable
         _foregroundTiles[0] = Enumerable
             .Range(0, Length)
             .Select(column => new GridPosition(0, column))
-            .Select(gridPosition => new WallTile(gridPosition))
+            .Select(gridPosition => new ExplosionTile(gridPosition, this, TimeSpan.MaxValue))
             .ToArray<Tile>();
 
         // Wall on bottom row
         _foregroundTiles[Width - 1] = Enumerable
             .Range(0, Length)
             .Select(column => new GridPosition(Width - 1, column))
-            .Select(gridPosition => new WallTile(gridPosition))
+            .Select(gridPosition => new ExplosionTile(gridPosition, this, TimeSpan.MaxValue))
             .ToArray<Tile>();
 
         // Walls on left and right columns
         for (int row = 0; row < Width; row++)
         {
-            _foregroundTiles[row][0] = new WallTile(new GridPosition(row, 0));
-            _foregroundTiles[row][Length - 1] = new WallTile(new GridPosition(row, Length - 1));
+            _foregroundTiles[row][0] = new ExplosionTile(
+                new GridPosition(row, 0),
+                this,
+                TimeSpan.MaxValue
+            );
+            _foregroundTiles[row][Length - 1] = new ExplosionTile(
+                new GridPosition(row, Length - 1),
+                this,
+                TimeSpan.MaxValue
+            );
         }
 
         // Checker walls
@@ -138,5 +146,38 @@ public class TileMap : IUpdatable
             );
 
         _foregroundTiles[tile.Position.Row][tile.Position.Column] = null;
+    }
+
+    internal void Shift()
+    {
+        for (int row = 1; row < Width - 1; row++)
+        {
+            for (int column = 1; column < Length - 2; column++)
+            {
+                _foregroundTiles[row][column] = _foregroundTiles[row][column + 1];
+                var shiftedTile = _foregroundTiles[row][column];
+                _foregroundTiles[row][column + 1] = null;
+
+                if (shiftedTile != null)
+                    shiftedTile.Position = new GridPosition(Row: row, Column: column);
+            }
+        }
+
+        var rnd = new Random();
+        for (int row = 1; row < Width - 1; row++)
+        {
+            // TODO: More tiles with chances here
+            var roll = rnd.NextDouble();
+            if (roll < 0.5)
+                _foregroundTiles[row][Length - 2] = new BoxTile(
+                    new GridPosition(Row: row, Column: Length - 2)
+                );
+        }
+
+        for (int row = 2; row < Width - 1; row += 2)
+        {
+            if (GetTile(new GridPosition(row, Length - 2 - 1)) is not WallTile)
+                _foregroundTiles[row][Length - 2] = new WallTile(new GridPosition(row, Length - 2));
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace Bomberman.Core;
 
 public class Player : IUpdatable, IDamageable
 {
-    public Vector2 Position { get; private set; }
+    public Vector2 Position { get; internal set; }
 
     private Vector2 _velocityDirection = Vector2.Zero;
 

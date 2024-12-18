@@ -1,4 +1,5 @@
 using System.Numerics;
+using Bomberman.Core.Tiles;
 
 namespace Bomberman.Core;
 
@@ -26,7 +27,17 @@ internal static class PhysicsManager
 
             foreach (var tileGridPosition in relevantGridPositions)
             {
-                var tile = tileMap.GetTile(tileGridPosition);
+                Tile? tile;
+                try
+                {
+                    tile = tileMap.GetTile(tileGridPosition);
+                }
+                catch
+                {
+                    // For some reason we failed to retrieve the tile at that position, tile might be outside tilemap
+                    // which is okay, no collision, just move on
+                    continue;
+                }
 
                 if (tile is null)
                     continue;
