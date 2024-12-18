@@ -2,7 +2,6 @@ namespace Bomberman.Core;
 
 public class GameState : IUpdatable
 {
-    private static readonly TimeSpan ShiftInterval = TimeSpan.FromSeconds(3);
     public Player Player { get; }
 
     public TileMap TileMap { get; }
@@ -10,12 +9,15 @@ public class GameState : IUpdatable
     public bool Terminated => !Player.Alive;
 
     private TimeSpan _shiftElapsed = TimeSpan.Zero;
+    private int _shiftsSoFar = 0;
+    private TimeSpan _shiftInterval;
 
     public GameState()
     {
         var start = new GridPosition(Row: 5, Column: 7);
         TileMap = new TileMap(17, 9).WithDefaultTileLayout(start);
         Player = new Player(start, TileMap);
+        _shiftInterval = GetShiftInterval(_shiftsSoFar);
     }
 
     public GameState(GameState original)
@@ -23,6 +25,8 @@ public class GameState : IUpdatable
         TileMap = new TileMap(original.TileMap);
         Player = new Player(original.Player, TileMap);
         _shiftElapsed = original._shiftElapsed;
+        _shiftsSoFar = original._shiftsSoFar;
+        _shiftInterval = original._shiftInterval;
     }
 
     public void Update(TimeSpan deltaTime)
@@ -32,11 +36,16 @@ public class GameState : IUpdatable
 
         _shiftElapsed += deltaTime;
 
-        if (_shiftElapsed < ShiftInterval)
+        if (_shiftElapsed < _shiftInterval)
             return;
 
+        _shiftsSoFar++;
         _shiftElapsed = TimeSpan.Zero;
+        _shiftInterval = GetShiftInterval(_shiftsSoFar);
         TileMap.Shift();
         Player.Position = Player.Position with { X = Player.Position.X - 1 * Constants.TileSize };
     }
+
+    private static TimeSpan GetShiftInterval(int shiftsSoFar) =>
+        TimeSpan.FromSeconds(Math.Max(2, 4 * Math.Pow(0.96, shiftsSoFar)));
 }
