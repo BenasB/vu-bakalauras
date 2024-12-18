@@ -8,6 +8,16 @@ public class Player : IUpdatable, IDamageable
 {
     public Vector2 Position { get; internal set; }
 
+    public int Score
+    {
+        get => _score;
+        internal set
+        {
+            _score = value;
+            Logger.Information($"Score: {_score}");
+        }
+    }
+
     private Vector2 _velocityDirection = Vector2.Zero;
 
     private const float Speed = Constants.TileSize * 3;
@@ -16,6 +26,7 @@ public class Player : IUpdatable, IDamageable
 
     private BombTile? _placedBombTile;
     private readonly TileMap _tileMap;
+    private int _score;
 
     public Player(GridPosition startPosition, TileMap tileMap)
     {

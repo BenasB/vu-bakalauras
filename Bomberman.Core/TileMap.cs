@@ -10,6 +10,7 @@ public class TileMap : IUpdatable
 
     private readonly Tile[][] _backgroundTiles;
     private readonly Tile?[][] _foregroundTiles;
+    private static readonly Random Rnd = new Random();
 
     public ImmutableArray<Tile?> Tiles =>
         [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row)];
@@ -82,27 +83,18 @@ public class TileMap : IUpdatable
             );
         }
 
+        for (int row = 1; row < Width - 1; row++)
+        {
+            for (int column = 1; column < Length - 1; column++)
+            {
+                _foregroundTiles[row][column] = RandomTile(new GridPosition(row, column));
+            }
+        }
+
         // Checker walls
         for (int row = 2; row < Width - 1; row += 2)
         for (int column = 2; column < Length - 1; column += 2)
             _foregroundTiles[row][column] = new WallTile(new GridPosition(row, column));
-
-        // Boxes
-        var rnd = new Random(Seed: 42);
-        var freeTiles =
-            Length * Width - _foregroundTiles.SelectMany(row => row).Count(x => x != null);
-        var boxTiles = 0;
-        while (boxTiles < freeTiles / 2)
-        {
-            GridPosition boxPosition;
-            do
-            {
-                boxPosition = new GridPosition(rnd.Next(0, Width), rnd.Next(0, Length));
-            } while (_foregroundTiles[boxPosition.Row][boxPosition.Column] != null);
-
-            _foregroundTiles[boxPosition.Row][boxPosition.Column] = new BoxTile(boxPosition);
-            boxTiles++;
-        }
 
         // Clear around starting position to allow player to move
         foreach (var position in new[] { start }.Concat(start.Neighbours))
@@ -163,15 +155,11 @@ public class TileMap : IUpdatable
             }
         }
 
-        var rnd = new Random();
         for (int row = 1; row < Width - 1; row++)
         {
-            // TODO: More tiles with chances here
-            var roll = rnd.NextDouble();
-            if (roll < 0.5)
-                _foregroundTiles[row][Length - 2] = new BoxTile(
-                    new GridPosition(Row: row, Column: Length - 2)
-                );
+            _foregroundTiles[row][Length - 2] = RandomTile(
+                new GridPosition(Row: row, Column: Length - 2)
+            );
         }
 
         for (int row = 2; row < Width - 1; row += 2)
@@ -180,4 +168,12 @@ public class TileMap : IUpdatable
                 _foregroundTiles[row][Length - 2] = new WallTile(new GridPosition(row, Length - 2));
         }
     }
+
+    private Tile? RandomTile(GridPosition position) =>
+        Rnd.NextDouble() switch
+        {
+            < 0.5 => new BoxTile(position),
+            < 0.6 => new CoinTile(position, this),
+            _ => null,
+        };
 }
