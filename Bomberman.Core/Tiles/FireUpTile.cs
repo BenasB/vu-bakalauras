@@ -7,7 +7,7 @@ public class FireUpTile(GridPosition position, TileMap tileMap) : Tile(position)
         if (entree is not Player player)
             return;
 
-        player.BombRange = Math.Min(4, player.BombRange + 1);
+        player.BombRange = Math.Min(3, player.BombRange + 1);
         player.Score += 100;
         tileMap.RemoveTile(this);
     }
