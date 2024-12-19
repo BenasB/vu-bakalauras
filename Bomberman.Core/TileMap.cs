@@ -146,6 +146,14 @@ public class TileMap : IUpdatable
         {
             for (int column = 1; column < Length - 2; column++)
             {
+                var oldTile = _foregroundTiles[row][column];
+
+                if (oldTile is BombTile oldBombTile)
+                {
+                    // Force into a detonated state to unblock player bomb placement logic
+                    oldBombTile.Detonated = true;
+                }
+
                 _foregroundTiles[row][column] = _foregroundTiles[row][column + 1];
                 var shiftedTile = _foregroundTiles[row][column];
                 _foregroundTiles[row][column + 1] = null;

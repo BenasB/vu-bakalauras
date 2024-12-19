@@ -15,7 +15,7 @@ public class GameState : IUpdatable
     public GameState()
     {
         var start = new GridPosition(Row: 5, Column: 7);
-        TileMap = new TileMap(17, 9).WithDefaultTileLayout(start);
+        TileMap = new TileMap(17, 11).WithDefaultTileLayout(start);
         Player = new Player(start, TileMap);
         _shiftInterval = GetShiftInterval(_shiftsSoFar);
     }
@@ -44,6 +44,8 @@ public class GameState : IUpdatable
         _shiftInterval = GetShiftInterval(_shiftsSoFar);
         TileMap.Shift();
         Player.Position = Player.Position with { X = Player.Position.X - 1 * Constants.TileSize };
+        if (Player.Alive)
+            Player.Score += 10;
     }
 
     private static TimeSpan GetShiftInterval(int shiftsSoFar) =>

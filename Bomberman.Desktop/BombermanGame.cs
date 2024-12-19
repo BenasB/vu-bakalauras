@@ -121,6 +121,13 @@ public class BombermanGame : Game
             );
         }
 
+        _spriteBatch.DrawString(
+            _spriteFont,
+            $"Score: {_gameState.Player.Score}",
+            Microsoft.Xna.Framework.Vector2.Zero,
+            Color.Red
+        );
+
         _spriteBatch.End();
 
         base.Draw(gameTime);

@@ -11,7 +11,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
 
     private ExplosionTile? _explosionTile;
 
-    public bool Detonated { get; private set; }
+    public bool Detonated { get; internal set; }
 
     // A bomb is considered exploded only after the explosion tile is gone
     public bool Exploded => Detonated && (_explosionTile?.Destroyed ?? false);
@@ -38,7 +38,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
             Enumerable.Range(1, range).Select(explosionPositionCalculationOnSpecificDirection)
         );
 
-    private void Explode()
+    public void Explode()
     {
         Detonated = true;
 

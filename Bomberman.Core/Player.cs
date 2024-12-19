@@ -37,13 +37,14 @@ public class Player : IUpdatable, IDamageable
     internal Player(Player original, TileMap tileMap)
     {
         Position = original.Position;
+        _score = original._score;
         _velocityDirection = original._velocityDirection;
         Alive = original.Alive;
         _placedBombTile =
-            original._placedBombTile == null
+            original._placedBombTile == null || original._placedBombTile.Detonated
                 ? null
-                : tileMap.GetTile(original._placedBombTile.Position) as BombTile;
-        // TODO: why this is always triggered in a simulation ?? throw new InvalidOperationException("Expected there to be a bomb");
+                : tileMap.GetTile(original._placedBombTile.Position) as BombTile
+                    ?? throw new InvalidOperationException("Expected there to be a bomb");
         _tileMap = tileMap;
     }
 
