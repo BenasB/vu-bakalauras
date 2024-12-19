@@ -8,25 +8,20 @@ public class Player : IUpdatable, IDamageable
 {
     public Vector2 Position { get; internal set; }
 
-    public int Score
-    {
-        get => _score;
-        internal set
-        {
-            _score = value;
-            Logger.Information($"Score: {_score}");
-        }
-    }
+    public int Score { get; internal set; }
+
+    public int BombRange { get; internal set; } = 1;
+
+    public int MaxPlacedBombs { get; internal set; } = 1;
+
+    public float Speed { get; internal set; } = 2;
 
     private Vector2 _velocityDirection = Vector2.Zero;
 
-    private const float Speed = Constants.TileSize * 3;
-
     public bool Alive { get; private set; } = true;
 
-    private BombTile? _placedBombTile;
+    private readonly List<BombTile> _placedBombTiles = [];
     private readonly TileMap _tileMap;
-    private int _score;
 
     public Player(GridPosition startPosition, TileMap tileMap)
     {
@@ -37,14 +32,19 @@ public class Player : IUpdatable, IDamageable
     internal Player(Player original, TileMap tileMap)
     {
         Position = original.Position;
-        _score = original._score;
+        Score = original.Score;
+        BombRange = original.BombRange;
+        MaxPlacedBombs = original.MaxPlacedBombs;
+        Speed = original.Speed;
         _velocityDirection = original._velocityDirection;
         Alive = original.Alive;
-        _placedBombTile =
-            original._placedBombTile == null || original._placedBombTile.Detonated
-                ? null
-                : tileMap.GetTile(original._placedBombTile.Position) as BombTile
-                    ?? throw new InvalidOperationException("Expected there to be a bomb");
+        _placedBombTiles = original
+            ._placedBombTiles.Where(bomb => !bomb.Detonated)
+            .Select(activeBomb =>
+                tileMap.GetTile(activeBomb.Position) as BombTile
+                ?? throw new InvalidOperationException("Expected there to be a bomb")
+            )
+            .ToList();
         _tileMap = tileMap;
     }
 
@@ -63,7 +63,8 @@ public class Player : IUpdatable, IDamageable
 
         var snappedPosition = Vector2.Add(Position, GetSnapOnMovementOppositeAxis(Position));
 
-        var velocity = _velocityDirection * Speed * (float)deltaTime.TotalSeconds;
+        var velocity =
+            _velocityDirection * Speed * Constants.TileSize * (float)deltaTime.TotalSeconds;
         var adjustedVelocityLength = PhysicsManager.Raycast(
             this,
             _tileMap,
@@ -91,13 +92,27 @@ public class Player : IUpdatable, IDamageable
 
     public BombTile PlaceBomb()
     {
-        if (_placedBombTile is { Detonated: false })
-            throw new InvalidOperationException("Player has already placed a bomb");
+        if (
+            _placedBombTiles.Count == MaxPlacedBombs
+            && _placedBombTiles.All(bomb => !bomb.Detonated)
+        )
+            throw new InvalidOperationException(
+                "Player has already placed as much bombs as they can"
+            );
 
         var gridPosition = Position.ToGridPosition();
-        var bombTile = new BombTile(gridPosition, _tileMap, 1);
+        var bombTile = new BombTile(gridPosition, _tileMap, BombRange);
         _tileMap.PlaceTile(bombTile);
-        _placedBombTile = bombTile;
+
+        if (_placedBombTiles.Count == MaxPlacedBombs)
+            _placedBombTiles.RemoveAll(bomb => bomb.Detonated);
+
+        if (_placedBombTiles.Count == MaxPlacedBombs)
+            throw new InvalidOperationException(
+                "Expected to clean up some detonated bombs from the list, but active bomb count did not decrease"
+            );
+
+        _placedBombTiles.Add(bombTile);
 
         return bombTile;
     }

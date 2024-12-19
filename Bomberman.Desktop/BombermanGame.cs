@@ -29,6 +29,9 @@ public class BombermanGame : Game
     private Texture2D _explosionTexture;
     private Texture2D _boxTexture;
     private Texture2D _coinTexture;
+    private Texture2D _fireUpTexture;
+    private Texture2D _speedUpTexture;
+    private Texture2D _bombUpTexture;
 
     private Texture2D _debugGridMarkerTexture;
 
@@ -63,6 +66,9 @@ public class BombermanGame : Game
         _explosionTexture = Content.Load<Texture2D>("explosion");
         _boxTexture = Content.Load<Texture2D>("box");
         _coinTexture = Content.Load<Texture2D>("coin");
+        _fireUpTexture = Content.Load<Texture2D>("fireup");
+        _speedUpTexture = Content.Load<Texture2D>("speedup");
+        _bombUpTexture = Content.Load<Texture2D>("bombup");
 
         _debugGridMarkerTexture = Content.Load<Texture2D>("debug_grid_marker");
     }
@@ -142,6 +148,9 @@ public class BombermanGame : Game
             ExplosionTile => _explosionTexture,
             BoxTile => _boxTexture,
             CoinTile => _coinTexture,
+            FireUpTile => _fireUpTexture,
+            SpeedUpTile => _speedUpTexture,
+            BombUpTile => _bombUpTexture,
             _ => throw new InvalidOperationException("Could not find a texture for the tile"),
         };
 }
