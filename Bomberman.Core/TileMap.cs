@@ -58,29 +58,21 @@ public class TileMap : IUpdatable
         _foregroundTiles[0] = Enumerable
             .Range(0, Length)
             .Select(column => new GridPosition(0, column))
-            .Select(gridPosition => new ExplosionTile(gridPosition, this, TimeSpan.MaxValue))
+            .Select(gridPosition => new LavaTile(gridPosition))
             .ToArray<Tile>();
 
         // Wall on bottom row
         _foregroundTiles[Width - 1] = Enumerable
             .Range(0, Length)
             .Select(column => new GridPosition(Width - 1, column))
-            .Select(gridPosition => new ExplosionTile(gridPosition, this, TimeSpan.MaxValue))
+            .Select(gridPosition => new LavaTile(gridPosition))
             .ToArray<Tile>();
 
         // Walls on left and right columns
         for (int row = 0; row < Width; row++)
         {
-            _foregroundTiles[row][0] = new ExplosionTile(
-                new GridPosition(row, 0),
-                this,
-                TimeSpan.MaxValue
-            );
-            _foregroundTiles[row][Length - 1] = new ExplosionTile(
-                new GridPosition(row, Length - 1),
-                this,
-                TimeSpan.MaxValue
-            );
+            _foregroundTiles[row][0] = new LavaTile(new GridPosition(row, 0));
+            _foregroundTiles[row][Length - 1] = new LavaTile(new GridPosition(row, Length - 1));
         }
 
         for (int row = 1; row < Width - 1; row++)

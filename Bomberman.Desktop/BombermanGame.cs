@@ -32,6 +32,7 @@ public class BombermanGame : Game
     private Texture2D _fireUpTexture;
     private Texture2D _speedUpTexture;
     private Texture2D _bombUpTexture;
+    private Texture2D _lavaTexture;
 
     private Texture2D _debugGridMarkerTexture;
 
@@ -69,6 +70,7 @@ public class BombermanGame : Game
         _fireUpTexture = Content.Load<Texture2D>("fireup");
         _speedUpTexture = Content.Load<Texture2D>("speedup");
         _bombUpTexture = Content.Load<Texture2D>("bombup");
+        _lavaTexture = Content.Load<Texture2D>("lava");
 
         _debugGridMarkerTexture = Content.Load<Texture2D>("debug_grid_marker");
     }
@@ -131,7 +133,7 @@ public class BombermanGame : Game
             _spriteFont,
             $"Score: {_gameState.Player.Score}",
             Microsoft.Xna.Framework.Vector2.Zero,
-            Color.Red
+            Color.White
         );
 
         _spriteBatch.End();
@@ -151,6 +153,7 @@ public class BombermanGame : Game
             FireUpTile => _fireUpTexture,
             SpeedUpTile => _speedUpTexture,
             BombUpTile => _bombUpTexture,
+            LavaTile => _lavaTexture,
             _ => throw new InvalidOperationException("Could not find a texture for the tile"),
         };
 }
