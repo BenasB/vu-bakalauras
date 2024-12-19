@@ -60,7 +60,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                     break;
                 }
 
-                if (tileToExplode is BoxTile or CoinTile)
+                if (tileToExplode is BoxTile or CoinTile or BombUpTile or FireUpTile or SpeedUpTile)
                 {
                     tileMap.RemoveTile(tileToExplode);
                     tileMap.PlaceTile(
