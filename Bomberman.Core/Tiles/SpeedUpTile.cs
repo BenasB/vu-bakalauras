@@ -8,6 +8,7 @@ public class SpeedUpTile(GridPosition position, TileMap tileMap) : Tile(position
             return;
 
         player.Speed = Math.Min(4, player.Speed + 0.5f);
+        player.Score += 100;
         tileMap.RemoveTile(this);
     }
 

@@ -8,6 +8,7 @@ public class FireUpTile(GridPosition position, TileMap tileMap) : Tile(position)
             return;
 
         player.BombRange = Math.Min(4, player.BombRange + 1);
+        player.Score += 100;
         tileMap.RemoveTile(this);
     }
 
