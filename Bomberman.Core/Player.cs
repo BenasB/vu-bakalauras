@@ -20,6 +20,9 @@ public class Player : IUpdatable, IDamageable
 
     public bool Alive { get; private set; } = true;
 
+    public bool CanPlaceBomb =>
+        _placedBombTiles.Count < MaxPlacedBombs || _placedBombTiles.Any(bomb => bomb.Detonated);
+
     private readonly List<BombTile> _placedBombTiles = [];
     private readonly TileMap _tileMap;
 
@@ -92,10 +95,7 @@ public class Player : IUpdatable, IDamageable
 
     public BombTile PlaceBomb()
     {
-        if (
-            _placedBombTiles.Count == MaxPlacedBombs
-            && _placedBombTiles.All(bomb => !bomb.Detonated)
-        )
+        if (!CanPlaceBomb)
             throw new InvalidOperationException(
                 "Player has already placed as much bombs as they can"
             );

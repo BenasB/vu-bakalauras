@@ -16,10 +16,7 @@ public class BombermanGame : Game
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
-    private GameState _savedState = new();
-    private GameState _gameState;
-
-    private KeyboardPlayer _keyboardPlayer;
+    private readonly GameState _gameState;
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -42,8 +39,7 @@ public class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _gameState = new GameState(_savedState);
-        _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
+        _gameState = new GameState();
     }
 
     protected override void Initialize()
@@ -91,16 +87,6 @@ public class BombermanGame : Game
         )
             Exit();
 
-        if (Keyboard.GetState().IsKeyDown(Keys.R))
-        {
-            _gameState = new GameState(_savedState);
-            _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
-        }
-
-        if (Keyboard.GetState().IsKeyDown(Keys.T))
-            _savedState = new GameState(_gameState);
-
-        _keyboardPlayer.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -119,19 +105,19 @@ public class BombermanGame : Game
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        if (_gameState.Player.Alive)
+        if (_gameState.Agent.Player.Alive)
         {
-            _spriteBatch.Draw(_playerTexture, _gameState.Player.Position, Color.White);
+            _spriteBatch.Draw(_playerTexture, _gameState.Agent.Player.Position, Color.White);
             _spriteBatch.Draw(
                 _debugGridMarkerTexture,
-                (Vector2)_gameState.Player.Position.ToGridPosition(),
+                (Vector2)_gameState.Agent.Player.Position.ToGridPosition(),
                 Color.Navy
             );
         }
 
         _spriteBatch.DrawString(
             _spriteFont,
-            $"Score: {_gameState.Player.Score}",
+            $"Score: {_gameState.Agent.Player.Score}",
             Microsoft.Xna.Framework.Vector2.Zero,
             Color.White
         );

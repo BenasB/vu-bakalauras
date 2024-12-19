@@ -103,8 +103,16 @@ public class TileMap : IUpdatable
         }
     }
 
-    internal Tile? GetTile(GridPosition gridPosition) =>
-        _foregroundTiles[gridPosition.Row][gridPosition.Column];
+    internal Tile? GetTile(GridPosition gridPosition)
+    {
+        if (gridPosition.Row < 0 || gridPosition.Row >= Width)
+            return null;
+
+        if (gridPosition.Column < 0 || gridPosition.Column >= Length)
+            return null;
+
+        return _foregroundTiles[gridPosition.Row][gridPosition.Column];
+    }
 
     internal void PlaceTile(Tile newTile)
     {

@@ -1,5 +1,4 @@
 using System.Numerics;
-using Bomberman.Core.Tiles;
 
 namespace Bomberman.Core;
 
@@ -27,28 +26,18 @@ internal static class PhysicsManager
 
             foreach (var tileGridPosition in relevantGridPositions)
             {
-                Tile? tile;
-                try
-                {
-                    tile = tileMap.GetTile(tileGridPosition);
-                }
-                catch
-                {
-                    // For some reason we failed to retrieve the tile at that position, tile might be outside tilemap
-                    // which is okay, no collision, just move on
-                    continue;
-                }
+                var tile = tileMap.GetTile(tileGridPosition);
 
                 if (tile is null)
                     continue;
 
-                // Skip enterable tiles as they are not solid
                 if (tile is IEnterable enterableTile)
                 {
                     // If we are still not at the end of the ray make sure it is triggered
                     if (rayLength < velocityLength)
                         enterableTile.OnEntered(caller);
 
+                    // Skip enterable tiles as they are not solid
                     continue;
                 }
 
