@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.MCTS;
@@ -24,10 +25,16 @@ public class Agent : IUpdatable
 
     private void LoopMcts(GameState realState)
     {
-        var mctsInterval = TimeSpan.FromMilliseconds(200);
+        var mctsInterval = TimeSpan.FromMilliseconds(300);
+        BombermanAction? previousAction = null;
         while (!realState.Terminated)
         {
-            var root = new Node(realState);
+            // IMPORTANT: Starting state should be simulated based on previous action determined by MCTS
+            var root =
+                previousAction != null
+                    ? new Node(realState, previousAction.Value, mctsInterval)
+                    : new Node(realState);
+
             var iterations = 0;
 
             var stopWatch = Stopwatch.StartNew();
@@ -47,9 +54,10 @@ public class Agent : IUpdatable
 
             // Be aware of concurrency
             ApplyAction(bestAction);
+            previousAction = bestAction;
 
             Logger.Information(
-                $"Enqueued best action after ({iterations} iterations): {bestAction}"
+                $"Applied best action after ({iterations} iterations): {bestAction}"
             );
         }
     }
@@ -78,21 +86,8 @@ public class Agent : IUpdatable
             case BombermanAction.Stand:
                 Player.SetMovingDirection(Direction.None);
                 break;
-            case BombermanAction.PlaceBombAndMoveUp:
+            case BombermanAction.PlaceBomb:
                 Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Up);
-                break;
-            case BombermanAction.PlaceBombAndMoveDown:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Down);
-                break;
-            case BombermanAction.PlaceBombAndMoveLeft:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Left);
-                break;
-            case BombermanAction.PlaceBombAndMoveRight:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Right);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -101,29 +96,202 @@ public class Agent : IUpdatable
 
     internal IEnumerable<BombermanAction> GetPossibleActions()
     {
-        var result = new List<BombermanAction> { BombermanAction.Stand };
-
-        // TODO: determine where a player can go, e.g. don't lead to exploding bomb
+        var result = new List<BombermanAction>();
 
         var gridPosition = Player.Position.ToGridPosition();
-        if (_tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) == null)
+
+        var canStand = true;
+        for (int i = 0; i <= Player.BombRange; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - i });
+            if (tile is BombTile)
+            {
+                canStand = false;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+        for (int i = 0; i <= Player.BombRange; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + i });
+            if (tile is BombTile)
+            {
+                canStand = false;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+        for (int i = 0; i <= Player.BombRange; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 });
+            if (tile is BombTile)
+            {
+                canStand = false;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+        for (int i = 0; i <= Player.BombRange; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 });
+            if (tile is BombTile)
+            {
+                canStand = false;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+
+        if (canStand)
+            result.Add(BombermanAction.Stand);
+
+        var canMoveUp =
+            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 })
+                is null
+                    or BombUpTile
+                    or CoinTile
+                    or FireUpTile
+                    or SpeedUpTile;
+        var inBombRadiusUp = false;
+        for (int i = 1; i <= Player.BombRange + 1; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - i });
+            if (tile is BombTile)
+            {
+                inBombRadiusUp = true;
+                break;
+            }
+
+            // Assuming that any tile will break the explosion
+            if (tile != null)
+                break;
+        }
+
+        var canMoveDown =
+            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
+                is null
+                    or BombUpTile
+                    or CoinTile
+                    or FireUpTile
+                    or SpeedUpTile;
+        var inBombRadiusDown = false;
+        for (int i = 1; i <= Player.BombRange + 1; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + i });
+            if (tile is BombTile)
+            {
+                inBombRadiusDown = true;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+
+        var canMoveLeft =
+            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+                is null
+                    or BombUpTile
+                    or CoinTile
+                    or FireUpTile
+                    or SpeedUpTile;
+        var inBombRadiusLeft = false;
+        for (int i = 1; i <= Player.BombRange + 1; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - i });
+            if (tile is BombTile)
+            {
+                inBombRadiusLeft = true;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+
+        var canMoveRight =
+            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
+                is null
+                    or BombUpTile
+                    or CoinTile
+                    or FireUpTile
+                    or SpeedUpTile;
+        var inBombRadiusRight = false;
+        for (int i = 1; i <= Player.BombRange + 1; i++)
+        {
+            var tile = _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + i });
+            if (tile is BombTile)
+            {
+                inBombRadiusRight = true;
+                break;
+            }
+
+            if (tile != null)
+                break;
+        }
+
+        if (canMoveUp && !inBombRadiusUp)
             result.Add(BombermanAction.MoveUp);
-        if (_tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 }) == null)
+        if (canMoveDown && !inBombRadiusDown)
             result.Add(BombermanAction.MoveDown);
-        if (_tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 }) == null)
+        if (canMoveLeft && !inBombRadiusLeft)
             result.Add(BombermanAction.MoveLeft);
-        if (_tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 }) == null)
+        if (canMoveRight && !inBombRadiusRight)
             result.Add(BombermanAction.MoveRight);
 
         if (Player.CanPlaceBomb && _tileMap.GetTile(gridPosition) == null)
-            result.AddRange(
-                [
-                    BombermanAction.PlaceBombAndMoveUp,
-                    BombermanAction.PlaceBombAndMoveDown,
-                    BombermanAction.PlaceBombAndMoveLeft,
-                    BombermanAction.PlaceBombAndMoveRight,
-                ]
-            );
+        {
+            var willExplodeSomething = false;
+            for (int i = 1; i <= Player.BombRange; i++)
+            {
+                var tile = _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - i });
+                if (tile is BoxTile)
+                {
+                    willExplodeSomething = true;
+                    break;
+                }
+            }
+            for (int i = 0; i <= Player.BombRange; i++)
+            {
+                var tile = _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + i });
+                if (tile is BoxTile)
+                {
+                    willExplodeSomething = true;
+                    break;
+                }
+            }
+            for (int i = 0; i <= Player.BombRange; i++)
+            {
+                var tile = _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 });
+                if (tile is BoxTile)
+                {
+                    willExplodeSomething = true;
+                    break;
+                }
+            }
+            for (int i = 0; i <= Player.BombRange; i++)
+            {
+                var tile = _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 });
+                if (tile is BoxTile)
+                {
+                    willExplodeSomething = true;
+                    break;
+                }
+            }
+
+            if (willExplodeSomething)
+            {
+                result.Add(BombermanAction.PlaceBomb);
+            }
+        }
 
         return result;
     }

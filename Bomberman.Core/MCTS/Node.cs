@@ -13,13 +13,37 @@ internal class Node
     private readonly Node? _parent;
     private int _totalReward = 0;
 
-    private static readonly TimeSpan SimulationStepDeltaTime = TimeSpan.FromSeconds(1.0f / 5);
+    private static readonly TimeSpan SimulationStepDeltaTime = TimeSpan.FromSeconds(1.0f / 30);
+    private static readonly TimeSpan MaxSimulationTime = TimeSpan.FromSeconds(10);
+    private static readonly int MaxSimulationDepth = (int)(
+        MaxSimulationTime / SimulationStepDeltaTime
+    );
 
     public Node(GameState initialState)
     {
         _state = new GameState(initialState);
         _parent = null;
         Action = null;
+    }
+
+    public Node(GameState initialState, BombermanAction action, TimeSpan actionSimulationTime)
+    {
+        _parent = null;
+        Action = action;
+        _state = new GameState(initialState);
+
+        var iterations = (int)(actionSimulationTime / SimulationStepDeltaTime);
+        for (int i = 0; i < iterations; i++)
+        {
+            SimulateSingleAction(
+                _state,
+                action switch
+                {
+                    BombermanAction.PlaceBomb => BombermanAction.Stand,
+                    _ => action,
+                }
+            );
+        }
     }
 
     private Node(Node parent, BombermanAction action)
@@ -43,6 +67,9 @@ internal class Node
             Children.Add(new Node(this, action));
         }
 
+        if (Children.Count == 0)
+            Children.Add(new Node(this, BombermanAction.Stand));
+
         return Children.First();
     }
 
@@ -64,17 +91,22 @@ internal class Node
         var simulationState = new GameState(_state);
         var rnd = new Random();
 
-        var maxDepth = 100;
-        for (int depth = 0; depth < maxDepth && !simulationState.Terminated; depth++)
+        for (int depth = 0; depth < MaxSimulationDepth && !simulationState.Terminated; depth++)
         {
             var possibleActions = simulationState.Agent.GetPossibleActions().ToArray();
 
-            // Next action can be selected using heuristics, not just randomly
-            var nextAction = possibleActions[rnd.Next(0, possibleActions.Length)];
+            var nextAction =
+                possibleActions.Length == 0
+                    ? BombermanAction.Stand
+                    : possibleActions[rnd.Next(0, possibleActions.Length)];
             SimulateSingleAction(simulationState, nextAction);
         }
 
-        return simulationState.Terminated ? -100 : simulationState.Agent.Player.Score;
+        var score = simulationState.Agent.Player.Score;
+        score +=
+            1000 * (int)Math.Round(simulationState.Agent.Player.Position.X / Constants.TileSize);
+
+        return simulationState.Terminated ? -1000 : score;
     }
 
     public void Backpropagate(int reward)

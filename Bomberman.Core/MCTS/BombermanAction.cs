@@ -7,8 +7,5 @@ internal enum BombermanAction
     MoveLeft,
     MoveRight,
     Stand,
-    PlaceBombAndMoveUp,
-    PlaceBombAndMoveDown,
-    PlaceBombAndMoveLeft,
-    PlaceBombAndMoveRight,
+    PlaceBomb,
 }
