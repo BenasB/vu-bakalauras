@@ -44,9 +44,14 @@ async function loadAndRenderTree() {
   treeLayout(root);
 
   // Links
+  const linkData = root.links();
+  linkData.forEach((link) => {
+    link.target.linkToParent = link; // Add reference to the link on the target node
+  });
+
   const links = g
     .selectAll(".link-group")
-    .data(root.links())
+    .data(linkData)
     .enter()
     .append("g")
     .attr("class", "link-group");
@@ -60,7 +65,11 @@ async function loadAndRenderTree() {
         .linkHorizontal()
         .x((d) => d.y)
         .y((d) => d.x)
-    );
+    )
+    .each(function (d) {
+      // Store a reference to the circle DOM element in the node data
+      d.domElement = this;
+    });
 
   // Add text to the midpoint of the link
   links
@@ -81,12 +90,16 @@ async function loadAndRenderTree() {
   nodes
     .append("circle")
     .attr("r", 12)
-    .on("click", (e, d) => {
+    .each(function (d) {
+      // Store a reference to the circle DOM element in the node data
+      d.domElement = this;
+    })
+    .on("click", (_, d) => {
       if (selectedNode) {
         selectedNode.classed("selected", false);
       }
 
-      selectedNode = d3.select(e.target);
+      selectedNode = d3.select(d.domElement);
       selectedNode.classed("selected", true);
 
       const { Children, ...nodeDetails } = d.data;
@@ -95,6 +108,26 @@ async function loadAndRenderTree() {
         null,
         2
       );
+    })
+    .on("mouseover", (_, d) => {
+      const ancestors = d.ancestors();
+
+      for (const node of ancestors) {
+        d3.select(node.domElement).classed("hovered", true);
+
+        if (node.linkToParent)
+          d3.select(node.linkToParent.domElement).classed("hovered", true);
+      }
+    })
+    .on("mouseout", (_, d) => {
+      const ancestors = d.ancestors();
+
+      for (const node of ancestors) {
+        d3.select(node.domElement).classed("hovered", false);
+
+        if (node.linkToParent)
+          d3.select(node.linkToParent.domElement).classed("hovered", false);
+      }
     });
 }
 
