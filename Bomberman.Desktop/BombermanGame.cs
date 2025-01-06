@@ -45,8 +45,8 @@ public class BombermanGame : Game
     protected override void Initialize()
     {
         _graphics.IsFullScreen = false;
-        _graphics.PreferredBackBufferHeight = _gameState.TileMap.Width * Constants.TileSize;
-        _graphics.PreferredBackBufferWidth = _gameState.TileMap.Length * Constants.TileSize;
+        _graphics.PreferredBackBufferHeight = _gameState.TileMap.Height * Constants.TileSize;
+        _graphics.PreferredBackBufferWidth = _gameState.TileMap.Width * Constants.TileSize;
         _graphics.ApplyChanges();
 
         base.Initialize();

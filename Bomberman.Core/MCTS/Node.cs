@@ -137,11 +137,15 @@ internal class Node
         var sb = new StringBuilder();
         sb.Append('{');
 
-        sb.Append("\"Action\": \"");
+        sb.Append('"');
+        sb.Append(nameof(Action));
+        sb.Append("\": \"");
         sb.Append(Action);
         sb.Append("\",");
 
-        sb.Append("\"Visits\": ");
+        sb.Append('"');
+        sb.Append(nameof(Visits));
+        sb.Append("\": ");
         sb.Append(Visits);
         sb.Append(',');
 
@@ -149,13 +153,17 @@ internal class Node
         sb.Append(_totalReward);
         sb.Append(',');
 
-        sb.Append("\"AverageReward\": ");
+        sb.Append('"');
+        sb.Append(nameof(AverageReward));
+        sb.Append("\": ");
         sb.Append(AverageReward.ToString(CultureInfo.InvariantCulture));
         sb.Append(',');
 
         if (_parent != null)
         {
-            sb.Append("\"UCT\": ");
+            sb.Append('"');
+            sb.Append(nameof(UCT));
+            sb.Append("\": ");
             sb.Append(UCT().ToString(CultureInfo.InvariantCulture));
             sb.Append(',');
         }
@@ -164,7 +172,9 @@ internal class Node
         sb.Append(_state);
         sb.Append(',');
 
-        sb.Append("\"Children\": [");
+        sb.Append('"');
+        sb.Append(nameof(Children));
+        sb.Append("\": [");
         for (int i = 0; i < Children.Count; i++)
         {
             sb.Append(Children[i]);

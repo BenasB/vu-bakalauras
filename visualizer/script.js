@@ -1,3 +1,6 @@
+const canvas = document.getElementById("tileMap");
+const ctx = canvas.getContext("2d");
+
 const svg = d3
   .select("#tree")
   .append("svg")
@@ -102,7 +105,17 @@ async function loadAndRenderTree() {
       selectedNode = d3.select(d.domElement);
       selectedNode.classed("selected", true);
 
-      const { Children, ...nodeDetails } = d.data;
+      const { Children, State, ...nodeDetails } = d.data;
+
+      var tileMap = {
+        width: State.TileMap.Width,
+        height: State.TileMap.Height,
+        playerPosition: State.Player.Position,
+        tiles: State.TileMap.Tiles,
+      };
+
+      drawTileMap(tileMap);
+
       document.getElementById("node-details").textContent = JSON.stringify(
         nodeDetails,
         null,
@@ -131,4 +144,76 @@ async function loadAndRenderTree() {
     });
 }
 
+const textures = {};
+
+function preloadTextures() {
+  const textureFiles = [
+    { name: "bomb", url: "textures/bomb.png" },
+    { name: "bombup", url: "textures/bombup.png" },
+    { name: "box", url: "textures/box.png" },
+    { name: "coin", url: "textures/coin.png" },
+    { name: "explosion", url: "textures/explosion.png" },
+    { name: "fireup", url: "textures/fireup.png" },
+    { name: "floor", url: "textures/floor.png" },
+    { name: "lava", url: "textures/lava.png" },
+    { name: "player", url: "textures/player.png" },
+    { name: "speedup", url: "textures/speedup.png" },
+    { name: "wall", url: "textures/wall.png" },
+  ];
+
+  return Promise.all(
+    textureFiles.map((file) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = file.url;
+        img.onload = () => {
+          textures[file.name] = img;
+          resolve();
+        };
+      });
+    })
+  );
+}
+
+function drawTileMap({ width, height, tiles, playerPosition }) {
+  const tileSize = 32;
+  canvas.width = width * tileSize;
+  canvas.height = height * tileSize;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let row = 0; row < height; row++) {
+    for (let column = 0; column < width; column++) {
+      // Draw the background tile
+      ctx.drawImage(
+        textures["floor"],
+        column * tileSize,
+        row * tileSize,
+        tileSize,
+        tileSize
+      );
+
+      // Draw the foreground tile, if it exists
+      const tile = tiles[row][column];
+      if (tile) {
+        ctx.drawImage(
+          textures[tile],
+          column * tileSize,
+          row * tileSize,
+          tileSize,
+          tileSize
+        );
+      }
+    }
+  }
+
+  ctx.drawImage(
+    textures["player"],
+    playerPosition.X,
+    playerPosition.Y,
+    tileSize,
+    tileSize
+  );
+}
+
+preloadTextures();
 loadAndRenderTree();

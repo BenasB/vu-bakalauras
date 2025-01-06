@@ -25,8 +25,11 @@
         }
 
         #details {
-            flex: 1;
+            width: 544px;
             padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .node circle {
@@ -64,8 +67,13 @@
     <div id="tree-container">
         <div id="tree"></div>
         <div id="details">
-            <h2>Node Details</h2>
-            <pre id="node-details">Click a node to see details.</pre>
+            <div>
+                <h2>Node Details</h2>
+                <pre id="node-details">Click a node to see details.</pre>
+            </div>
+            <div>
+                <canvas id="tileMap"></canvas>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>

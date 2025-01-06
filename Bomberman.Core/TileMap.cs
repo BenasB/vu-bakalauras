@@ -1,12 +1,13 @@
 ﻿using System.Collections.Immutable;
+using System.Text;
 using Bomberman.Core.Tiles;
 
 namespace Bomberman.Core;
 
 public class TileMap : IUpdatable
 {
-    public int Length { get; }
     public int Width { get; }
+    public int Height { get; }
 
     private readonly Tile[][] _backgroundTiles;
     private readonly Tile?[][] _foregroundTiles;
@@ -15,29 +16,29 @@ public class TileMap : IUpdatable
     public ImmutableArray<Tile?> Tiles =>
         [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row)];
 
-    public TileMap(int length, int width)
+    public TileMap(int width, int height)
     {
-        Length = length;
         Width = width;
+        Height = height;
 
         _backgroundTiles = Enumerable
-            .Range(0, width)
+            .Range(0, height)
             .Select(row =>
                 Enumerable
-                    .Range(0, length)
+                    .Range(0, width)
                     .Select(column => new GridPosition(row, column))
                     .Select(gridPosition => new FloorTile(gridPosition))
                     .ToArray()
             )
             .ToArray<Tile[]>();
 
-        _foregroundTiles = Enumerable.Range(0, width).Select(_ => new Tile?[length]).ToArray();
+        _foregroundTiles = Enumerable.Range(0, height).Select(_ => new Tile?[width]).ToArray();
     }
 
     internal TileMap(TileMap original)
     {
-        Length = original.Length;
         Width = original.Width;
+        Height = original.Height;
 
         _backgroundTiles = original
             ._backgroundTiles.Select(row =>
@@ -56,36 +57,36 @@ public class TileMap : IUpdatable
     {
         // Wall on top row
         _foregroundTiles[0] = Enumerable
-            .Range(0, Length)
+            .Range(0, Width)
             .Select(column => new GridPosition(0, column))
             .Select(gridPosition => new LavaTile(gridPosition))
             .ToArray<Tile>();
 
         // Wall on bottom row
-        _foregroundTiles[Width - 1] = Enumerable
-            .Range(0, Length)
-            .Select(column => new GridPosition(Width - 1, column))
+        _foregroundTiles[Height - 1] = Enumerable
+            .Range(0, Width)
+            .Select(column => new GridPosition(Height - 1, column))
             .Select(gridPosition => new LavaTile(gridPosition))
             .ToArray<Tile>();
 
         // Walls on left and right columns
-        for (int row = 0; row < Width; row++)
+        for (int row = 0; row < Height; row++)
         {
             _foregroundTiles[row][0] = new LavaTile(new GridPosition(row, 0));
-            _foregroundTiles[row][Length - 1] = new LavaTile(new GridPosition(row, Length - 1));
+            _foregroundTiles[row][Width - 1] = new LavaTile(new GridPosition(row, Width - 1));
         }
 
-        for (int row = 1; row < Width - 1; row++)
+        for (int row = 1; row < Height - 1; row++)
         {
-            for (int column = 1; column < Length - 1; column++)
+            for (int column = 1; column < Width - 1; column++)
             {
                 _foregroundTiles[row][column] = RandomTile(new GridPosition(row, column));
             }
         }
 
         // Checker walls
-        for (int row = 2; row < Width - 1; row += 2)
-        for (int column = 2; column < Length - 1; column += 2)
+        for (int row = 2; row < Height - 1; row += 2)
+        for (int column = 2; column < Width - 1; column += 2)
             _foregroundTiles[row][column] = new WallTile(new GridPosition(row, column));
 
         // Clear around starting position to allow player to move
@@ -105,10 +106,10 @@ public class TileMap : IUpdatable
 
     internal Tile? GetTile(GridPosition gridPosition)
     {
-        if (gridPosition.Row < 0 || gridPosition.Row >= Width)
+        if (gridPosition.Row < 0 || gridPosition.Row >= Height)
             return null;
 
-        if (gridPosition.Column < 0 || gridPosition.Column >= Length)
+        if (gridPosition.Column < 0 || gridPosition.Column >= Width)
             return null;
 
         return _foregroundTiles[gridPosition.Row][gridPosition.Column];
@@ -142,9 +143,9 @@ public class TileMap : IUpdatable
 
     internal void Shift()
     {
-        for (int row = 1; row < Width - 1; row++)
+        for (int row = 1; row < Height - 1; row++)
         {
-            for (int column = 1; column < Length - 2; column++)
+            for (int column = 1; column < Width - 2; column++)
             {
                 var oldTile = _foregroundTiles[row][column];
 
@@ -163,17 +164,17 @@ public class TileMap : IUpdatable
             }
         }
 
-        for (int row = 1; row < Width - 1; row++)
+        for (int row = 1; row < Height - 1; row++)
         {
-            _foregroundTiles[row][Length - 2] = RandomTile(
-                new GridPosition(Row: row, Column: Length - 2)
+            _foregroundTiles[row][Width - 2] = RandomTile(
+                new GridPosition(Row: row, Column: Width - 2)
             );
         }
 
-        for (int row = 2; row < Width - 1; row += 2)
+        for (int row = 2; row < Height - 1; row += 2)
         {
-            if (GetTile(new GridPosition(row, Length - 2 - 1)) is not WallTile)
-                _foregroundTiles[row][Length - 2] = new WallTile(new GridPosition(row, Length - 2));
+            if (GetTile(new GridPosition(row, Width - 2 - 1)) is not WallTile)
+                _foregroundTiles[row][Width - 2] = new WallTile(new GridPosition(row, Width - 2));
         }
     }
 
@@ -187,4 +188,72 @@ public class TileMap : IUpdatable
             < 0.6 => new CoinTile(position, this),
             _ => null,
         };
+
+    // TODO: Rework to proper JSON serialization instead of manually doing it
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+
+        sb.Append('{');
+
+        sb.Append('"');
+        sb.Append(nameof(Width));
+        sb.Append("\": ");
+        sb.Append(Width);
+        sb.Append(',');
+
+        sb.Append('"');
+        sb.Append(nameof(Height));
+        sb.Append("\": ");
+        sb.Append(Height);
+        sb.Append(',');
+
+        sb.Append("\"Tiles\": [");
+        for (int row = 0; row < Height; row++)
+        {
+            sb.Append('[');
+            for (int column = 0; column < Width; column++)
+            {
+                var tileType = _foregroundTiles[row][column] switch
+                {
+                    BombTile => "bomb",
+                    BombUpTile => "bombup",
+                    BoxTile => "box",
+                    CoinTile => "coin",
+                    ExplosionTile => "explosion",
+                    FireUpTile => "fireup",
+                    LavaTile => "lava",
+                    SpeedUpTile => "speedup",
+                    WallTile => "wall",
+                    null => null,
+                    _ => throw new InvalidOperationException(
+                        "Could not map tile to a tile type for serialization"
+                    ),
+                };
+
+                if (tileType == null)
+                {
+                    sb.Append("null");
+                }
+                else
+                {
+                    sb.Append('"');
+                    sb.Append(tileType);
+                    sb.Append('"');
+                }
+
+                if (column != Width - 1)
+                    sb.Append(',');
+            }
+            sb.Append(']');
+
+            if (row != Height - 1)
+                sb.Append(',');
+        }
+        sb.Append(']');
+
+        sb.Append('}');
+
+        return sb.ToString();
+    }
 }
