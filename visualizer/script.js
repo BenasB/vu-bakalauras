@@ -34,6 +34,8 @@ svg.call(
 );
 
 async function loadAndRenderTree(treeData) {
+  g.selectAll("*").remove();
+
   const root = d3.hierarchy(treeData, (d) => d.Children);
   const treeLayout = d3.tree().nodeSize([60, 350]);
   treeLayout(root);
