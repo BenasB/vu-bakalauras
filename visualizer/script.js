@@ -33,15 +33,7 @@ svg.call(
   d3.zoomIdentity.translate(currentTransform.x, currentTransform.y)
 );
 
-async function loadAndRenderTree() {
-  let treeData;
-  try {
-    const response = await fetch("data.json");
-    treeData = await response.json();
-  } catch (error) {
-    console.error("Error loading JSON:", error);
-  }
-
+async function loadAndRenderTree(treeData) {
   const root = d3.hierarchy(treeData, (d) => d.Children);
   const treeLayout = d3.tree().nodeSize([60, 350]);
   treeLayout(root);
@@ -90,9 +82,16 @@ async function loadAndRenderTree() {
     .attr("class", "node")
     .attr("transform", (d) => `translate(${d.y},${d.x})`);
 
+  const maxVisits = d3.max(root.descendants(), (d) => d.data.Visits);
+  const minVisits = d3.min(root.descendants(), (d) => d.data.Visits);
+  const circleSizeScale = d3
+    .scaleLinear()
+    .domain([minVisits, maxVisits])
+    .range([10, 20]);
+
   nodes
     .append("circle")
-    .attr("r", 12)
+    .attr("r", (d) => circleSizeScale(d.data.Visits))
     .each(function (d) {
       // Store a reference to the circle DOM element in the node data
       d.domElement = this;
@@ -215,5 +214,24 @@ function drawTileMap({ width, height, tiles, playerPosition }) {
   );
 }
 
+document.getElementById("json-upload").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+
+  if (file) {
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        await loadAndRenderTree(json);
+      } catch (error) {
+        alert("Error parsing JSON file. Please upload a valid JSON file.");
+        console.error(error);
+      }
+    };
+
+    reader.readAsText(file);
+  }
+});
+
 preloadTextures();
-loadAndRenderTree();
