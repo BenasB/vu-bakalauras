@@ -3,6 +3,8 @@ name: Deploy visualizer to Pages
 on:
   push:
     branches: ["main"]
+    paths:
+      - visualizer/**
 
   workflow_dispatch:
 
