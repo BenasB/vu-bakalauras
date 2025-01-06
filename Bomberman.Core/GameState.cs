@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bomberman.Core.MCTS;
 
 namespace Bomberman.Core;
@@ -62,5 +63,5 @@ public class GameState : IUpdatable
         TimeSpan.FromSeconds(Math.Max(2, 4 * Math.Pow(0.96, shiftsSoFar)));
 
     public override string ToString() =>
-        $"{{ \"{nameof(Agent.Player)}\": {{ \"{nameof(Agent.Player.Position)}\": {{ \"{nameof(Agent.Player.Position.X)}\": {Agent.Player.Position.X}, \"{nameof(Agent.Player.Position.Y)}\": {Agent.Player.Position.Y} }} }}, \"{nameof(TileMap)}\": {TileMap} }}";
+        $"{{ \"{nameof(Agent.Player)}\": {{ \"{nameof(Agent.Player.Position)}\": {{ \"{nameof(Agent.Player.Position.X)}\": {Agent.Player.Position.X.ToString(CultureInfo.InvariantCulture)}, \"{nameof(Agent.Player.Position.Y)}\": {Agent.Player.Position.Y.ToString(CultureInfo.InvariantCulture)} }} }}, \"{nameof(TileMap)}\": {TileMap} }}";
 }
