@@ -1,0 +1,1272 @@
+{
+  "Action": "",
+  "Visits": 42810,
+  "TotalReward": 29959990,
+  "AverageReward": 699.8362531955189,
+  "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+  "Children": [
+    {
+      "Action": "Stand",
+      "Visits": 3,
+      "TotalReward": 1450,
+      "AverageReward": 483.3331722222759,
+      "UCT": 671.8760646783305,
+      "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 1,
+          "TotalReward": 610,
+          "AverageReward": 609.9993900006101,
+          "UCT": 714.8140948956296,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": []
+        },
+        {
+          "Action": "MoveUp",
+          "Visits": 1,
+          "TotalReward": 460,
+          "AverageReward": 459.99954000046006,
+          "UCT": 564.8142448954795,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 460,
+              "AverageReward": 459.99954000046006,
+              "UCT": 459.99954000046006,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        },
+        {
+          "Action": "PlaceBombAndMoveUp",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+          "Children": []
+        },
+        {
+          "Action": "MoveDown",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+          "Children": []
+        },
+        {
+          "Action": "PlaceBombAndMoveDown",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+          "Children": []
+        },
+        {
+          "Action": "MoveLeft",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+          "Children": []
+        },
+        {
+          "Action": "PlaceBombAndMoveLeft",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+          "Children": []
+        },
+        {
+          "Action": "MoveRight",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+          "Children": []
+        },
+        {
+          "Action": "PlaceBombAndMoveRight",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+          "Children": []
+        }
+      ]
+    },
+    {
+      "Action": "MoveUp",
+      "Visits": 2,
+      "TotalReward": 740,
+      "AverageReward": 369.9998150000925,
+      "UCT": 600.9167614112253,
+      "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 2,
+          "TotalReward": 740,
+          "AverageReward": 369.9998150000925,
+          "UCT": 428.87031365731906,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 280,
+              "AverageReward": 279.99972000028004,
+              "UCT": 363.2551826467644,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        },
+        {
+          "Action": "MoveUp",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+          "Children": []
+        },
+        {
+          "Action": "PlaceBombAndMoveUp",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+          "Children": []
+        },
+        {
+          "Action": "MoveDown",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": []
+        },
+        {
+          "Action": "PlaceBombAndMoveDown",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "Infinity",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": []
+        }
+      ]
+    },
+    {
+      "Action": "PlaceBombAndMoveUp",
+      "Visits": 4,
+      "TotalReward": 2090,
+      "AverageReward": 522.4998693750326,
+      "UCT": 685.7827978418295,
+      "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 2,
+          "TotalReward": 1160,
+          "AverageReward": 579.999710000145,
+          "UCT": 663.2551726466294,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 700,
+              "AverageReward": 699.9993000007,
+              "UCT": 783.2547626471844,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+              "Children": []
+            }
+          ]
+        },
+        {
+          "Action": "MoveUp",
+          "Visits": 2,
+          "TotalReward": 930,
+          "AverageReward": 464.9997675001162,
+          "UCT": 548.2552301466005,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 2,
+              "TotalReward": 930,
+              "AverageReward": 464.9997675001162,
+              "UCT": 523.8702661573427,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+              "Children": [
+                {
+                  "Action": "Stand",
+                  "Visits": 1,
+                  "TotalReward": 190,
+                  "AverageReward": 189.99981000019002,
+                  "UCT": 273.25527264667437,
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 96 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveDown",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveLeft",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 192, "Y": 96 } } },
+                  "Children": []
+                }
+              ]
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 192, "Y": 96 } } },
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Action": "MoveDown",
+      "Visits": 1,
+      "TotalReward": 370,
+      "AverageReward": 369.99963000037,
+      "UCT": 696.5654869339637,
+      "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 1,
+          "TotalReward": 370,
+          "AverageReward": 369.99963000037,
+          "UCT": 369.99963000037,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+          "Children": []
+        },
+        {
+          "Action": "MoveUp",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "NaN",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": []
+        },
+        {
+          "Action": "PlaceBombAndMoveUp",
+          "Visits": 0,
+          "TotalReward": 0,
+          "AverageReward": 0,
+          "UCT": "NaN",
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": []
+        }
+      ]
+    },
+    {
+      "Action": "PlaceBombAndMoveDown",
+      "Visits": 1,
+      "TotalReward": 330,
+      "AverageReward": 329.99967000033,
+      "UCT": 656.5655269339238,
+      "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 1,
+          "TotalReward": 330,
+          "AverageReward": 329.99967000033,
+          "UCT": 329.99967000033,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+          "Children": []
+        }
+      ]
+    },
+    {
+      "Action": "MoveLeft",
+      "Visits": 12,
+      "TotalReward": 6940,
+      "AverageReward": 578.333285138893,
+      "UCT": 672.6047313669203,
+      "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 10,
+          "TotalReward": 6060,
+          "AverageReward": 605.9999394000062,
+          "UCT": 655.8487743914612,
+          "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 520,
+              "AverageReward": 519.9994800005201,
+              "UCT": 671.7421862993482,
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveRight",
+              "Visits": 1,
+              "TotalReward": 140,
+              "AverageReward": 139.99986000014002,
+              "UCT": 291.74256629896814,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": [
+                {
+                  "Action": "Stand",
+                  "Visits": 1,
+                  "TotalReward": 140,
+                  "AverageReward": 139.99986000014002,
+                  "UCT": 139.99986000014002,
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveUp",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveUp",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveDown",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveDown",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveLeft",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveLeft",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveRight",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveRight",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "NaN",
+                  "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+                  "Children": []
+                }
+              ]
+            },
+            {
+              "Action": "PlaceBombAndMoveRight",
+              "Visits": 7,
+              "TotalReward": 3850,
+              "AverageReward": 549.9999214285826,
+              "UCT": 607.3532768362975,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": [
+                {
+                  "Action": "Stand",
+                  "Visits": 4,
+                  "TotalReward": 2220,
+                  "AverageReward": 554.9998612500347,
+                  "UCT": 624.7478013135112,
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+                  "Children": [
+                    {
+                      "Action": "Stand",
+                      "Visits": 1,
+                      "TotalReward": 420,
+                      "AverageReward": 419.99958000042005,
+                      "UCT": 537.7405773148732,
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 160 } }
+                      },
+                      "Children": []
+                    },
+                    {
+                      "Action": "MoveUp",
+                      "Visits": 1,
+                      "TotalReward": 330,
+                      "AverageReward": 329.99967000033,
+                      "UCT": 447.74066731478314,
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 128 } }
+                      },
+                      "Children": [
+                        {
+                          "Action": "Stand",
+                          "Visits": 1,
+                          "TotalReward": 330,
+                          "AverageReward": 329.99967000033,
+                          "UCT": 329.99967000033,
+                          "State": {
+                            "Agent": { "Position": { "X": 224, "Y": 128 } }
+                          },
+                          "Children": []
+                        },
+                        {
+                          "Action": "MoveUp",
+                          "Visits": 0,
+                          "TotalReward": 0,
+                          "AverageReward": 0,
+                          "UCT": "NaN",
+                          "State": {
+                            "Agent": { "Position": { "X": 224, "Y": 96 } }
+                          },
+                          "Children": []
+                        },
+                        {
+                          "Action": "MoveDown",
+                          "Visits": 0,
+                          "TotalReward": 0,
+                          "AverageReward": 0,
+                          "UCT": "NaN",
+                          "State": {
+                            "Agent": { "Position": { "X": 224, "Y": 160 } }
+                          },
+                          "Children": []
+                        }
+                      ]
+                    },
+                    {
+                      "Action": "MoveDown",
+                      "Visits": 1,
+                      "TotalReward": 180,
+                      "AverageReward": 179.99982000018002,
+                      "UCT": 297.74081731463315,
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 192 } }
+                      },
+                      "Children": [
+                        {
+                          "Action": "Stand",
+                          "Visits": 1,
+                          "TotalReward": 180,
+                          "AverageReward": 179.99982000018002,
+                          "UCT": 179.99982000018002,
+                          "State": {
+                            "Agent": { "Position": { "X": 224, "Y": 192 } }
+                          },
+                          "Children": []
+                        },
+                        {
+                          "Action": "MoveUp",
+                          "Visits": 0,
+                          "TotalReward": 0,
+                          "AverageReward": 0,
+                          "UCT": "NaN",
+                          "State": {
+                            "Agent": { "Position": { "X": 224, "Y": 160 } }
+                          },
+                          "Children": []
+                        }
+                      ]
+                    },
+                    {
+                      "Action": "MoveRight",
+                      "Visits": 0,
+                      "TotalReward": 0,
+                      "AverageReward": 0,
+                      "UCT": "Infinity",
+                      "State": {
+                        "Agent": { "Position": { "X": 256, "Y": 160 } }
+                      },
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Action": "MoveUp",
+                  "Visits": 1,
+                  "TotalReward": 550,
+                  "AverageReward": 549.99945000055,
+                  "UCT": 689.4953301275032,
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+                  "Children": [
+                    {
+                      "Action": "Stand",
+                      "Visits": 1,
+                      "TotalReward": 550,
+                      "AverageReward": 549.99945000055,
+                      "UCT": 549.99945000055,
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 128 } }
+                      },
+                      "Children": []
+                    },
+                    {
+                      "Action": "MoveUp",
+                      "Visits": 0,
+                      "TotalReward": 0,
+                      "AverageReward": 0,
+                      "UCT": "NaN",
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 96 } }
+                      },
+                      "Children": []
+                    },
+                    {
+                      "Action": "MoveDown",
+                      "Visits": 0,
+                      "TotalReward": 0,
+                      "AverageReward": 0,
+                      "UCT": "NaN",
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 160 } }
+                      },
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Action": "MoveDown",
+                  "Visits": 1,
+                  "TotalReward": 520,
+                  "AverageReward": 519.9994800005201,
+                  "UCT": 659.4953601274732,
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+                  "Children": [
+                    {
+                      "Action": "Stand",
+                      "Visits": 1,
+                      "TotalReward": 520,
+                      "AverageReward": 519.9994800005201,
+                      "UCT": 519.9994800005201,
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 192 } }
+                      },
+                      "Children": []
+                    },
+                    {
+                      "Action": "MoveUp",
+                      "Visits": 0,
+                      "TotalReward": 0,
+                      "AverageReward": 0,
+                      "UCT": "NaN",
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 160 } }
+                      },
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Action": "MoveRight",
+                  "Visits": 1,
+                  "TotalReward": 560,
+                  "AverageReward": 559.9994400005601,
+                  "UCT": 699.4953201275132,
+                  "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+                  "Children": [
+                    {
+                      "Action": "Stand",
+                      "Visits": 1,
+                      "TotalReward": 560,
+                      "AverageReward": 559.9994400005601,
+                      "UCT": 559.9994400005601,
+                      "State": {
+                        "Agent": { "Position": { "X": 256, "Y": 160 } }
+                      },
+                      "Children": []
+                    },
+                    {
+                      "Action": "MoveLeft",
+                      "Visits": 0,
+                      "TotalReward": 0,
+                      "AverageReward": 0,
+                      "UCT": "NaN",
+                      "State": {
+                        "Agent": { "Position": { "X": 224, "Y": 160 } }
+                      },
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Action": "MoveRight",
+          "Visits": 1,
+          "TotalReward": 430,
+          "AverageReward": 429.99957000043,
+          "UCT": 587.6354342582425,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 430,
+              "AverageReward": 429.99957000043,
+              "UCT": 429.99957000043,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveRight",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveRight",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        },
+        {
+          "Action": "PlaceBombAndMoveRight",
+          "Visits": 1,
+          "TotalReward": 450,
+          "AverageReward": 449.99955000045003,
+          "UCT": 607.6354142582625,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 450,
+              "AverageReward": 449.99955000045003,
+              "UCT": 449.99955000045003,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveRight",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Action": "PlaceBombAndMoveLeft",
+      "Visits": 42780,
+      "TotalReward": 29944700,
+      "AverageReward": 699.9696119518474,
+      "UCT": 701.5484965534404,
+      "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 42780,
+          "TotalReward": 29944700,
+          "AverageReward": 699.9696119518474,
+          "UCT": 701.5484446973994,
+          "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 42779,
+              "TotalReward": 29944100,
+              "AverageReward": 699.9719488370469,
+              "UCT": 701.5508000600388,
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": [
+                {
+                  "Action": "Stand",
+                  "Visits": 42778,
+                  "TotalReward": 29943400,
+                  "AverageReward": 699.9719481813088,
+                  "UCT": 701.5508162128106,
+                  "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+                  "Children": [
+                    {
+                      "Action": "Stand",
+                      "Visits": 42777,
+                      "TotalReward": 29942700,
+                      "AverageReward": 699.97194752554,
+                      "UCT": 701.5508322463423,
+                      "State": {
+                        "Agent": { "Position": { "X": 192, "Y": 160 } }
+                      },
+                      "Children": [
+                        {
+                          "Action": "Stand",
+                          "Visits": 42776,
+                          "TotalReward": 29942100,
+                          "AverageReward": 699.974284629232,
+                          "UCT": 701.5531859201255,
+                          "State": {
+                            "Agent": { "Position": { "X": 192, "Y": 160 } }
+                          },
+                          "Children": [
+                            {
+                              "Action": "Stand",
+                              "Visits": 11,
+                              "TotalReward": 6600,
+                              "AverageReward": 599.9999454545505,
+                              "UCT": 698.4595935868747,
+                              "State": {
+                                "Agent": { "Position": { "X": 192, "Y": 160 } }
+                              },
+                              "Children": []
+                            },
+                            {
+                              "Action": "MoveRight",
+                              "Visits": 42764,
+                              "TotalReward": 29934800,
+                              "AverageReward": 699.9999999836311,
+                              "UCT": 701.5791210964546,
+                              "State": {
+                                "Agent": { "Position": { "X": 224, "Y": 160 } }
+                              },
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Action": "MoveRight",
+      "Visits": 5,
+      "TotalReward": 2440,
+      "AverageReward": 487.9999024000195,
+      "UCT": 634.0446106519726,
+      "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 2,
+          "TotalReward": 1140,
+          "AverageReward": 569.9997150001425,
+          "UCT": 659.7058459815878,
+          "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 710,
+              "AverageReward": 709.9992900007101,
+              "UCT": 793.2547526471944,
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        },
+        {
+          "Action": "MoveLeft",
+          "Visits": 2,
+          "TotalReward": 740,
+          "AverageReward": 369.9998150000925,
+          "UCT": 459.7059459815378,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 2,
+              "TotalReward": 740,
+              "AverageReward": 369.9998150000925,
+              "UCT": 428.87031365731906,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": [
+                {
+                  "Action": "Stand",
+                  "Visits": 1,
+                  "TotalReward": 130,
+                  "AverageReward": 129.99987000013002,
+                  "UCT": 213.2553326466144,
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveUp",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveUp",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveDown",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveDown",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveLeft",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveLeft",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "MoveRight",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+                  "Children": []
+                },
+                {
+                  "Action": "PlaceBombAndMoveRight",
+                  "Visits": 0,
+                  "TotalReward": 0,
+                  "AverageReward": 0,
+                  "UCT": "Infinity",
+                  "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+                  "Children": []
+                }
+              ]
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveRight",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "PlaceBombAndMoveRight",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "Infinity",
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        },
+        {
+          "Action": "PlaceBombAndMoveLeft",
+          "Visits": 1,
+          "TotalReward": 560,
+          "AverageReward": 559.9994400005601,
+          "UCT": 686.863064573314,
+          "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 560,
+              "AverageReward": 559.9994400005601,
+              "UCT": 559.9994400005601,
+              "State": { "Agent": { "Position": { "X": 224, "Y": 160 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveUp",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 128 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveDown",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 224, "Y": 192 } } },
+              "Children": []
+            },
+            {
+              "Action": "MoveLeft",
+              "Visits": 0,
+              "TotalReward": 0,
+              "AverageReward": 0,
+              "UCT": "NaN",
+              "State": { "Agent": { "Position": { "X": 192, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Action": "PlaceBombAndMoveRight",
+      "Visits": 2,
+      "TotalReward": 930,
+      "AverageReward": 464.9997675001162,
+      "UCT": 695.916713911249,
+      "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+      "Children": [
+        {
+          "Action": "Stand",
+          "Visits": 2,
+          "TotalReward": 930,
+          "AverageReward": 464.9997675001162,
+          "UCT": 523.8702661573427,
+          "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+          "Children": [
+            {
+              "Action": "Stand",
+              "Visits": 1,
+              "TotalReward": 420,
+              "AverageReward": 419.99958000042005,
+              "UCT": 503.2550426469044,
+              "State": { "Agent": { "Position": { "X": 256, "Y": 160 } } },
+              "Children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

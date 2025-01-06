@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCTS Tree Visualizer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #tree-container {
+            height: 100vh;
+            display: flex;
+        }
+
+        #tree {
+            flex: 2;
+            border-right: 1px solid #ccc;
+            overflow: hidden;
+        }
+
+        #details {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .node circle {
+            fill: #69b3a2;
+            cursor: pointer;
+        }
+
+        .node circle.selected {
+            fill: #e38f22;
+        }
+
+        .link-group text {
+            font-size: 10px;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="tree-container">
+        <div id="tree"></div>
+        <div id="details">
+            <h2>Node Details</h2>
+            <pre id="node-details">Click a node to see details.</pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
