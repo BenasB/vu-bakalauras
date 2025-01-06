@@ -1,3 +1,7 @@
+using System.Globalization;
+using System.Text;
+using Bomberman.Core.Utilities;
+
 namespace Bomberman.Core.MCTS;
 
 internal class Node
@@ -13,11 +17,7 @@ internal class Node
     private readonly Node? _parent;
     private int _totalReward = 0;
 
-    private static readonly TimeSpan SimulationStepDeltaTime = TimeSpan.FromSeconds(1.0f / 30);
-    private static readonly TimeSpan MaxSimulationTime = TimeSpan.FromSeconds(10);
-    private static readonly int MaxSimulationDepth = (int)(
-        MaxSimulationTime / SimulationStepDeltaTime
-    );
+    private double AverageReward => _totalReward / (Visits + 1e-6);
 
     public Node(GameState initialState)
     {
@@ -26,24 +26,12 @@ internal class Node
         Action = null;
     }
 
-    public Node(GameState initialState, BombermanAction action, TimeSpan actionSimulationTime)
+    public Node(GameState initialState, BombermanAction action)
     {
+        _state = new GameState(initialState);
         _parent = null;
         Action = action;
-        _state = new GameState(initialState);
-
-        var iterations = (int)(actionSimulationTime / SimulationStepDeltaTime);
-        for (int i = 0; i < iterations; i++)
-        {
-            SimulateSingleAction(
-                _state,
-                action switch
-                {
-                    BombermanAction.PlaceBomb => BombermanAction.Stand,
-                    _ => action,
-                }
-            );
-        }
+        AdvanceTimeOneTile(_state);
     }
 
     private Node(Node parent, BombermanAction action)
@@ -67,9 +55,6 @@ internal class Node
             Children.Add(new Node(this, action));
         }
 
-        if (Children.Count == 0)
-            Children.Add(new Node(this, BombermanAction.Stand));
-
         return Children.First();
     }
 
@@ -91,22 +76,26 @@ internal class Node
         var simulationState = new GameState(_state);
         var rnd = new Random();
 
-        for (int depth = 0; depth < MaxSimulationDepth && !simulationState.Terminated; depth++)
+        const int maxSimulationDepth = 40;
+
+        for (int depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
             var possibleActions = simulationState.Agent.GetPossibleActions().ToArray();
 
-            var nextAction =
-                possibleActions.Length == 0
-                    ? BombermanAction.Stand
-                    : possibleActions[rnd.Next(0, possibleActions.Length)];
+            // Uniform random moves
+            var nextAction = possibleActions[rnd.Next(0, possibleActions.Length)];
             SimulateSingleAction(simulationState, nextAction);
         }
 
         var score = simulationState.Agent.Player.Score;
-        score +=
-            1000 * (int)Math.Round(simulationState.Agent.Player.Position.X / Constants.TileSize);
 
-        return simulationState.Terminated ? -1000 : score;
+        // Reward the player for getting towards the right side
+        score += 100 * simulationState.Agent.Player.Position.ToGridPosition().Column;
+
+        if (!simulationState.Terminated)
+            score += 1000; // Player is alive, additional points
+
+        return score;
     }
 
     public void Backpropagate(int reward)
@@ -124,16 +113,69 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return _totalReward / (Visits + 1e-6)
-            + 1.41f * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward + 1.41f * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     private static void SimulateSingleAction(GameState simulationState, BombermanAction action)
     {
         simulationState.Agent.ApplyAction(action);
-        simulationState.Update(SimulationStepDeltaTime);
+
+        AdvanceTimeOneTile(simulationState);
     }
 
-    public override string ToString() =>
-        $"{{ \"Action\": \"{Action}\", \"Visits\": {Visits}, \"Total reward\": {_totalReward}, \"Children\": [{string.Join(',', Children)}]}}";
+    /// <summary>
+    /// Advance the game with the time it takes for the player to move one tile
+    /// </summary>
+    private static void AdvanceTimeOneTile(GameState simulationState)
+    {
+        var deltaTime = TimeSpan.FromSeconds(1 / simulationState.Agent.Player.Speed);
+        simulationState.Update(deltaTime);
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append('{');
+
+        sb.Append("\"Action\": \"");
+        sb.Append(Action);
+        sb.Append("\",");
+
+        sb.Append("\"Visits\": ");
+        sb.Append(Visits);
+        sb.Append(',');
+
+        sb.Append("\"TotalReward\": ");
+        sb.Append(_totalReward);
+        sb.Append(',');
+
+        sb.Append("\"AverageReward\": ");
+        sb.Append(AverageReward.ToString(CultureInfo.InvariantCulture));
+        sb.Append(',');
+
+        if (_parent != null)
+        {
+            sb.Append("\"UCT\": ");
+            sb.Append(UCT().ToString(CultureInfo.InvariantCulture));
+            sb.Append(',');
+        }
+
+        sb.Append("\"State\": ");
+        sb.Append(_state);
+        sb.Append(',');
+
+        sb.Append("\"Children\": [");
+        for (int i = 0; i < Children.Count; i++)
+        {
+            sb.Append(Children[i]);
+
+            if (i != Children.Count - 1)
+                sb.Append(',');
+        }
+        sb.Append(']');
+
+        sb.Append('}');
+
+        return sb.ToString();
+    }
 }

@@ -10,7 +10,7 @@ public class TileMap : IUpdatable
 
     private readonly Tile[][] _backgroundTiles;
     private readonly Tile?[][] _foregroundTiles;
-    private static readonly Random Rnd = new();
+    private static readonly Random Rnd = new(42);
 
     public ImmutableArray<Tile?> Tiles =>
         [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row)];

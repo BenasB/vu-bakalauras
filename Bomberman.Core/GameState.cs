@@ -60,4 +60,7 @@ public class GameState : IUpdatable
 
     private static TimeSpan GetShiftInterval(int shiftsSoFar) =>
         TimeSpan.FromSeconds(Math.Max(2, 4 * Math.Pow(0.96, shiftsSoFar)));
+
+    public override string ToString() =>
+        $"{{ \"Agent\": {{ \"Position\": {{ \"X\": {Agent.Player.Position.X}, \"Y\": {Agent.Player.Position.Y} }} }} }}";
 }
