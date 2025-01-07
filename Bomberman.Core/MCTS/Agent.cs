@@ -49,6 +49,11 @@ public class Agent : IUpdatable
             }
             stopWatch.Stop();
 
+            // File.WriteAllText(
+            //     $"{DateTimeOffset.Now.Ticks}.json",
+            //     root.ToString().Replace("NaN", "\"NaN\"").Replace("Infinity", "\"Infinity\"")
+            // );
+
             var bestNode = root.Children.MaxBy(child => child.Visits);
             var bestAction =
                 bestNode?.Action
