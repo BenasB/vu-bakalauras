@@ -61,8 +61,4 @@ public class GameState : IUpdatable
 
     private static TimeSpan GetShiftInterval(int shiftsSoFar) =>
         TimeSpan.FromSeconds(Math.Max(2, 4 * Math.Pow(0.96, shiftsSoFar)));
-
-    // TODO: Expose data about player's parameters (so we know if the player picked up powerups, etc.)
-    public override string ToString() =>
-        $"{{ \"{nameof(Agent.Player)}\": {{ \"{nameof(Agent.Player.Position)}\": {{ \"{nameof(Agent.Player.Position.X)}\": {Agent.Player.Position.X.ToString(CultureInfo.InvariantCulture)}, \"{nameof(Agent.Player.Position.Y)}\": {Agent.Player.Position.Y.ToString(CultureInfo.InvariantCulture)} }} }}, \"{nameof(TileMap)}\": {TileMap} }}";
 }

@@ -98,9 +98,7 @@ public class BombermanGame : Game
 
         _spriteBatch.Begin();
 
-        foreach (
-            var tile in _gameState.TileMap.Tiles.Where(tile => tile != null).Select(tile => tile!)
-        )
+        foreach (var tile in _gameState.TileMap.Tiles)
         {
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }

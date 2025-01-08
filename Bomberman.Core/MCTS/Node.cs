@@ -12,45 +12,44 @@ internal class Node
     public BombermanAction? Action { get; }
     public List<Node> Children { get; } = [];
     public int Visits { get; private set; }
+    public int TotalReward { get; private set; }
+    public double AverageReward => TotalReward / (Visits + 1e-6);
+    public GameState State { get; }
 
-    private readonly GameState _state;
     private readonly Node? _parent;
-    private int _totalReward = 0;
-
-    private double AverageReward => _totalReward / (Visits + 1e-6);
 
     public Node(GameState initialState)
     {
-        _state = new GameState(initialState);
+        State = new GameState(initialState);
         _parent = null;
         Action = null;
     }
 
     public Node(GameState initialState, BombermanAction action)
     {
-        _state = new GameState(initialState);
+        State = new GameState(initialState);
         _parent = null;
         Action = action;
-        AdvanceTimeOneTile(_state);
+        AdvanceTimeOneTile(State);
     }
 
     private Node(Node parent, BombermanAction action)
     {
         _parent = parent;
         Action = action;
-        _state = new GameState(parent._state);
-        SimulateSingleAction(_state, action);
+        State = new GameState(parent.State);
+        SimulateSingleAction(State, action);
     }
 
     public Node Expand()
     {
-        if (_state.Terminated)
+        if (State.Terminated)
             return this;
 
         if (Children.Count > 0)
             return this; // Node already expanded
 
-        foreach (var action in _state.Agent.GetPossibleActions())
+        foreach (var action in State.Agent.GetPossibleActions())
         {
             Children.Add(new Node(this, action));
         }
@@ -60,7 +59,7 @@ internal class Node
 
     public Node Select()
     {
-        if (_state.Terminated)
+        if (State.Terminated)
             return this;
 
         if (Children.Count == 0)
@@ -73,7 +72,7 @@ internal class Node
     /// <returns>Reward</returns>
     public int Simulate()
     {
-        var simulationState = new GameState(_state);
+        var simulationState = new GameState(State);
         var rnd = new Random();
 
         const int maxSimulationDepth = 40;
@@ -101,7 +100,7 @@ internal class Node
     public void Backpropagate(int reward)
     {
         Visits++;
-        _totalReward += reward;
+        TotalReward += reward;
 
         _parent?.Backpropagate(reward);
     }
@@ -130,62 +129,5 @@ internal class Node
     {
         var deltaTime = TimeSpan.FromSeconds(1 / simulationState.Agent.Player.Speed);
         simulationState.Update(deltaTime);
-    }
-
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-        sb.Append('{');
-
-        sb.Append('"');
-        sb.Append(nameof(Action));
-        sb.Append("\": \"");
-        sb.Append(Action);
-        sb.Append("\",");
-
-        sb.Append('"');
-        sb.Append(nameof(Visits));
-        sb.Append("\": ");
-        sb.Append(Visits);
-        sb.Append(',');
-
-        sb.Append("\"TotalReward\": ");
-        sb.Append(_totalReward);
-        sb.Append(',');
-
-        sb.Append('"');
-        sb.Append(nameof(AverageReward));
-        sb.Append("\": ");
-        sb.Append(AverageReward.ToString(CultureInfo.InvariantCulture));
-        sb.Append(',');
-
-        if (_parent != null)
-        {
-            sb.Append('"');
-            sb.Append(nameof(UCT));
-            sb.Append("\": ");
-            sb.Append(UCT().ToString(CultureInfo.InvariantCulture));
-            sb.Append(',');
-        }
-
-        sb.Append("\"State\": ");
-        sb.Append(_state);
-        sb.Append(',');
-
-        sb.Append('"');
-        sb.Append(nameof(Children));
-        sb.Append("\": [");
-        for (int i = 0; i < Children.Count; i++)
-        {
-            sb.Append(Children[i]);
-
-            if (i != Children.Count - 1)
-                sb.Append(',');
-        }
-        sb.Append(']');
-
-        sb.Append('}');
-
-        return sb.ToString();
     }
 }

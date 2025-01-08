@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Text.Json;
+using Bomberman.Core.Serialization;
 using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.MCTS;
@@ -52,10 +54,10 @@ public class Agent : IUpdatable
             if (realState.Terminated)
                 break;
 
-            // File.WriteAllText(
-            //     $"{DateTimeOffset.Now.Ticks}.json",
-            //     root.ToString().Replace("NaN", "\"NaN\"").Replace("Infinity", "\"Infinity\"")
-            // );
+            File.WriteAllText(
+                $"{DateTimeOffset.Now.Ticks}.json",
+                JsonSerializer.Serialize(root.ToDto())
+            );
 
             var bestNode = root.Children.MaxBy(child => child.Visits);
             var bestAction =

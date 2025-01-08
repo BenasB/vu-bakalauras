@@ -94,6 +94,7 @@ async function loadAndRenderTree(treeData) {
   nodes
     .append("circle")
     .attr("r", (d) => circleSizeScale(d.data.Visits))
+    .classed("terminated", (d) => d.data.State.Terminated)
     .each(function (d) {
       // Store a reference to the circle DOM element in the node data
       d.domElement = this;
@@ -107,18 +108,12 @@ async function loadAndRenderTree(treeData) {
       selectedNode.classed("selected", true);
 
       const { Children, State, ...nodeDetails } = d.data;
+      const { TileMap, ...stateDetails } = State;
 
-      var tileMap = {
-        width: State.TileMap.Width,
-        height: State.TileMap.Height,
-        playerPosition: State.Player.Position,
-        tiles: State.TileMap.Tiles,
-      };
-
-      drawTileMap(tileMap);
+      drawTileMap(TileMap, State.Player);
 
       document.getElementById("node-details").textContent = JSON.stringify(
-        nodeDetails,
+        { ...nodeDetails, State: { ...stateDetails } },
         null,
         2
       );
@@ -176,44 +171,34 @@ function preloadTextures() {
   );
 }
 
-function drawTileMap({ width, height, tiles, playerPosition }) {
+function drawTileMap({ Width, Height, Tiles }, Player) {
   const tileSize = 32;
-  canvas.width = width * tileSize;
-  canvas.height = height * tileSize;
+  canvas.width = Width * tileSize;
+  canvas.height = Height * tileSize;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let row = 0; row < height; row++) {
-    for (let column = 0; column < width; column++) {
-      // Draw the background tile
-      ctx.drawImage(
-        textures["floor"],
-        column * tileSize,
-        row * tileSize,
-        tileSize,
-        tileSize
-      );
-
-      // Draw the foreground tile, if it exists
-      const tile = tiles[row][column];
-      if (tile) {
-        ctx.drawImage(
-          textures[tile],
-          column * tileSize,
-          row * tileSize,
-          tileSize,
-          tileSize
-        );
-      }
-    }
+  for (const {
+    Position: { Row, Column },
+    Type,
+  } of Tiles) {
+    ctx.drawImage(
+      textures[Type],
+      Column * tileSize,
+      Row * tileSize,
+      tileSize,
+      tileSize
+    );
   }
 
-  ctx.drawImage(
-    textures["player"],
-    playerPosition.X,
-    playerPosition.Y,
-    tileSize,
-    tileSize
-  );
+  if (Player.Alive) {
+    ctx.drawImage(
+      textures["player"],
+      Player.Position.X,
+      Player.Position.Y,
+      tileSize,
+      tileSize
+    );
+  }
 }
 
 document.getElementById("json-upload").addEventListener("change", (event) => {

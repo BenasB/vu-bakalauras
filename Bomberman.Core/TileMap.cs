@@ -13,8 +13,8 @@ public class TileMap : IUpdatable
     private readonly Tile?[][] _foregroundTiles;
     private static readonly Random Rnd = new(42);
 
-    public ImmutableArray<Tile?> Tiles =>
-        [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row)];
+    public ImmutableArray<Tile> Tiles =>
+        [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row).OfType<Tile>()];
 
     public TileMap(int width, int height)
     {
@@ -188,72 +188,4 @@ public class TileMap : IUpdatable
             < 0.6 => new CoinTile(position, this),
             _ => null,
         };
-
-    // TODO: Rework to proper JSON serialization instead of manually doing it
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-
-        sb.Append('{');
-
-        sb.Append('"');
-        sb.Append(nameof(Width));
-        sb.Append("\": ");
-        sb.Append(Width);
-        sb.Append(',');
-
-        sb.Append('"');
-        sb.Append(nameof(Height));
-        sb.Append("\": ");
-        sb.Append(Height);
-        sb.Append(',');
-
-        sb.Append("\"Tiles\": [");
-        for (int row = 0; row < Height; row++)
-        {
-            sb.Append('[');
-            for (int column = 0; column < Width; column++)
-            {
-                var tileType = _foregroundTiles[row][column] switch
-                {
-                    BombTile => "bomb",
-                    BombUpTile => "bombup",
-                    BoxTile => "box",
-                    CoinTile => "coin",
-                    ExplosionTile => "explosion",
-                    FireUpTile => "fireup",
-                    LavaTile => "lava",
-                    SpeedUpTile => "speedup",
-                    WallTile => "wall",
-                    null => null,
-                    _ => throw new InvalidOperationException(
-                        "Could not map tile to a tile type for serialization"
-                    ),
-                };
-
-                if (tileType == null)
-                {
-                    sb.Append("null");
-                }
-                else
-                {
-                    sb.Append('"');
-                    sb.Append(tileType);
-                    sb.Append('"');
-                }
-
-                if (column != Width - 1)
-                    sb.Append(',');
-            }
-            sb.Append(']');
-
-            if (row != Height - 1)
-                sb.Append(',');
-        }
-        sb.Append(']');
-
-        sb.Append('}');
-
-        return sb.ToString();
-    }
 }
