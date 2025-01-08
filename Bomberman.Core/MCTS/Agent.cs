@@ -39,7 +39,7 @@ public class Agent : IUpdatable
             // TODO: Do we need alignment to coordinates after a single action is performed?
 
             var stopWatch = Stopwatch.StartNew();
-            while (stopWatch.Elapsed < mctsInterval)
+            while (stopWatch.Elapsed < mctsInterval && !realState.Terminated)
             {
                 iterations++;
                 var selectedNode = root.Select();
@@ -48,6 +48,9 @@ public class Agent : IUpdatable
                 expandedNode.Backpropagate(reward);
             }
             stopWatch.Stop();
+
+            if (realState.Terminated)
+                break;
 
             // File.WriteAllText(
             //     $"{DateTimeOffset.Now.Ticks}.json",

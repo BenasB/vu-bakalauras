@@ -90,10 +90,10 @@ internal class Node
         var score = simulationState.Agent.Player.Score;
 
         // Reward the player for getting towards the right side
-        score += 10 * simulationState.Agent.Player.Position.ToGridPosition().Column;
+        score += 100 * simulationState.Agent.Player.Position.ToGridPosition().Column;
 
         if (!simulationState.Terminated)
-            score += 100; // Player is alive, additional points
+            score += 1000; // Player is alive, additional points
 
         return score;
     }
@@ -113,7 +113,7 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward + 1.41f * 1000 * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward + 1.41f * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     private static void SimulateSingleAction(GameState simulationState, BombermanAction action)
