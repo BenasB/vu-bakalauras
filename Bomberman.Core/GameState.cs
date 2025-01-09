@@ -1,4 +1,3 @@
-using System.Globalization;
 using Bomberman.Core.MCTS;
 
 namespace Bomberman.Core;
@@ -34,6 +33,9 @@ public class GameState : IUpdatable
 
     public void Update(TimeSpan deltaTime)
     {
+        if (Terminated)
+            return;
+
         Agent.Update(deltaTime);
         TileMap.Update(deltaTime);
 

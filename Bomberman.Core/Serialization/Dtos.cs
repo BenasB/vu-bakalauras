@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Bomberman.Core.Serialization;
 
 internal record NodeDto(

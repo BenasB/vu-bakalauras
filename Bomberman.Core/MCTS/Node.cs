@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text;
 using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.MCTS;
@@ -127,7 +125,19 @@ internal class Node
     /// </summary>
     private static void AdvanceTimeOneTile(GameState simulationState)
     {
-        var deltaTime = TimeSpan.FromSeconds(1 / simulationState.Agent.Player.Speed);
-        simulationState.Update(deltaTime);
+        const double secondsPerFrame = 1.0 / 60;
+        var frameDeltaTime = TimeSpan.FromSeconds(secondsPerFrame);
+
+        var oneTileDeltaTimeInSeconds = 1.0 / simulationState.Agent.Player.Speed;
+
+        // Splitting the time it takes to move one tile into constant fps to match the real game
+        var frameCount = (int)(oneTileDeltaTimeInSeconds / secondsPerFrame);
+        for (int i = 0; i < frameCount; i++)
+        {
+            simulationState.Update(frameDeltaTime);
+        }
+
+        var remainingDeltaTime = TimeSpan.FromSeconds(oneTileDeltaTimeInSeconds % secondsPerFrame);
+        simulationState.Update(remainingDeltaTime);
     }
 }

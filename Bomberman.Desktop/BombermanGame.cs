@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Bomberman.Core;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
