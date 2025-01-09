@@ -54,10 +54,10 @@ public class Agent : IUpdatable
             if (realState.Terminated)
                 break;
 
-            File.WriteAllText(
-                $"{DateTimeOffset.Now.Ticks}.json",
-                JsonSerializer.Serialize(root.ToDto())
-            );
+            // File.WriteAllText(
+            //     $"{DateTimeOffset.Now.Ticks}.json",
+            //     JsonSerializer.Serialize(root.ToDto())
+            // );
 
             var bestNode = root.Children.MaxBy(child => child.Visits);
             var bestAction =

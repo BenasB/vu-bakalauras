@@ -10,7 +10,7 @@ internal class Node
     public BombermanAction? Action { get; }
     public List<Node> Children { get; } = [];
     public int Visits { get; private set; }
-    public int TotalReward { get; private set; }
+    public double TotalReward { get; private set; }
     public double AverageReward => TotalReward / (Visits + 1e-6);
     public GameState State { get; }
 
@@ -68,14 +68,17 @@ internal class Node
     }
 
     /// <returns>Reward</returns>
-    public int Simulate()
+    public double Simulate()
     {
         var simulationState = new GameState(State);
         var rnd = new Random();
 
+        var startingScore = simulationState.Agent.Player.Score;
+
         const int maxSimulationDepth = 40;
 
-        for (int depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
+        var depth = 0;
+        for (; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
             var possibleActions = simulationState.Agent.GetPossibleActions().ToArray();
 
@@ -84,18 +87,20 @@ internal class Node
             SimulateSingleAction(simulationState, nextAction);
         }
 
-        var score = simulationState.Agent.Player.Score;
+        var scoreGainedDuringSimulation = simulationState.Agent.Player.Score - startingScore;
+
+        // Punish for dying early in the simulation
+        // Range [0; 1]
+        // If the player died, the simulation depth did not reach maxSimulationDepth
+        var survivalCoefficient = (double)depth / maxSimulationDepth;
 
         // Reward the player for getting towards the right side
-        score += 100 * simulationState.Agent.Player.Position.ToGridPosition().Column;
+        var columnReward = 10 * simulationState.Agent.Player.Position.ToGridPosition().Column;
 
-        if (!simulationState.Terminated)
-            score += 1000; // Player is alive, additional points
-
-        return score;
+        return survivalCoefficient * (scoreGainedDuringSimulation + columnReward);
     }
 
-    public void Backpropagate(int reward)
+    public void Backpropagate(double reward)
     {
         Visits++;
         TotalReward += reward;

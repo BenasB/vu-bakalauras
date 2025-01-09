@@ -3,7 +3,7 @@ namespace Bomberman.Core.Serialization;
 internal record NodeDto(
     string? Action,
     int Visits,
-    int TotalReward,
+    double TotalReward,
     double AverageReward,
     GameStateDto State,
     NodeDto[] Children
