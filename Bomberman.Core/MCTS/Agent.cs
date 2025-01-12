@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Bomberman.Core.Serialization;
+using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.MCTS;
@@ -168,6 +169,71 @@ public class Agent : IUpdatable
             result.Add(BombermanAction.MoveRight);
 
             if (canPlaceBomb)
+                result.Add(BombermanAction.PlaceBombAndMoveRight);
+        }
+
+        return result;
+    }
+
+    internal IEnumerable<BombermanAction> GetPossibleSimulationActions()
+    {
+        var result = new List<BombermanAction> { BombermanAction.Stand };
+
+        var gridPosition = Player.Position.ToGridPosition();
+
+        var shouldPlaceBomb =
+            Player.CanPlaceBomb
+            && _tileMap.GetTile(gridPosition) is null
+            && (
+                _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is BoxTile
+                || _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 }) is BoxTile
+                || _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+                    is BoxTile
+                || _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
+                    is BoxTile
+            );
+
+        if (
+            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is null or IEnterable
+        )
+        {
+            result.Add(BombermanAction.MoveUp);
+
+            if (shouldPlaceBomb)
+                result.Add(BombermanAction.PlaceBombAndMoveUp);
+        }
+
+        if (
+            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 }) is null or IEnterable
+        )
+        {
+            result.Add(BombermanAction.MoveDown);
+
+            if (shouldPlaceBomb)
+                result.Add(BombermanAction.PlaceBombAndMoveDown);
+        }
+
+        if (
+            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+            is null
+                or IEnterable
+        )
+        {
+            result.Add(BombermanAction.MoveLeft);
+
+            if (shouldPlaceBomb)
+                result.Add(BombermanAction.PlaceBombAndMoveLeft);
+        }
+
+        if (
+            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
+            is null
+                or IEnterable
+        )
+        {
+            result.Add(BombermanAction.MoveRight);
+
+            if (shouldPlaceBomb)
                 result.Add(BombermanAction.PlaceBombAndMoveRight);
         }
 

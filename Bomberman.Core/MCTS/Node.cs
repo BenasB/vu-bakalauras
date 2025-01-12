@@ -16,6 +16,10 @@ internal class Node
 
     private readonly Node? _parent;
 
+    // For UCT adjustment
+    private static double _minReward = 0;
+    private static double _maxReward = 10;
+
     public Node(GameState initialState)
     {
         State = new GameState(initialState);
@@ -80,7 +84,7 @@ internal class Node
         var depth = 0;
         for (; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
-            var possibleActions = simulationState.Agent.GetPossibleActions().ToArray();
+            var possibleActions = simulationState.Agent.GetPossibleSimulationActions().ToArray();
 
             // Uniform random moves
             var nextAction = possibleActions[rnd.Next(0, possibleActions.Length)];
@@ -97,7 +101,14 @@ internal class Node
         // Reward the player for getting towards the right side
         var columnReward = 10 * simulationState.Agent.Player.Position.ToGridPosition().Column;
 
-        return survivalCoefficient * (scoreGainedDuringSimulation + columnReward);
+        var finalReward = survivalCoefficient * (scoreGainedDuringSimulation + columnReward);
+
+        if (finalReward < _minReward)
+            _minReward = finalReward;
+        if (finalReward > _maxReward)
+            _maxReward = finalReward;
+
+        return finalReward;
     }
 
     public void Backpropagate(double reward)
@@ -115,7 +126,8 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward + 1.41f * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward
+            + 1.41f * (_maxReward - _minReward) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     private static void SimulateSingleAction(GameState simulationState, BombermanAction action)
