@@ -39,7 +39,7 @@ internal static class ToDtoExtensions
         new(tileMap.Width, tileMap.Height, tileMap.Tiles.Select(t => t.ToDto()).ToArray());
 
     private static GameStateDto ToDto(this GameState state) =>
-        new(state.Agent.Player.ToDto(), state.TileMap.ToDto(), state.Terminated);
+        new(state.Player.ToDto(), state.TileMap.ToDto(), state.Terminated);
 
     public static NodeDto ToDto(this Node node) =>
         new(

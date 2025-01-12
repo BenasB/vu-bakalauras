@@ -1,14 +1,12 @@
-using Bomberman.Core.MCTS;
-
 namespace Bomberman.Core;
 
 public class GameState : IUpdatable
 {
-    public Agent Agent { get; }
+    public Player Player { get; }
 
     public TileMap TileMap { get; }
 
-    public bool Terminated => !Agent.Player.Alive;
+    public bool Terminated => !Player.Alive;
 
     private TimeSpan _shiftElapsed = TimeSpan.Zero;
     private int _shiftsSoFar = 0;
@@ -18,14 +16,14 @@ public class GameState : IUpdatable
     {
         var start = new GridPosition(Row: 5, Column: 7);
         TileMap = new TileMap(17, 11).WithDefaultTileLayout(start);
-        Agent = new Agent(start, TileMap, this);
+        Player = new Player(start, TileMap);
         _shiftInterval = GetShiftInterval(_shiftsSoFar);
     }
 
     public GameState(GameState original)
     {
         TileMap = new TileMap(original.TileMap);
-        Agent = new Agent(original.Agent, TileMap);
+        Player = new Player(original.Player, TileMap);
         _shiftElapsed = original._shiftElapsed;
         _shiftsSoFar = original._shiftsSoFar;
         _shiftInterval = original._shiftInterval;
@@ -36,7 +34,7 @@ public class GameState : IUpdatable
         if (Terminated)
             return;
 
-        Agent.Update(deltaTime);
+        Player.Update(deltaTime);
         TileMap.Update(deltaTime);
 
         _shiftElapsed += deltaTime;
@@ -48,17 +46,14 @@ public class GameState : IUpdatable
         _shiftElapsed = TimeSpan.Zero;
         _shiftInterval = GetShiftInterval(_shiftsSoFar);
         TileMap.Shift();
-        Agent.Player.Position = Agent.Player.Position with
-        {
-            X = Agent.Player.Position.X - 1 * Constants.TileSize,
-        };
+        Player.Position = Player.Position with { X = Player.Position.X - 1 * Constants.TileSize };
 
         // Safety precaution to make sure the player dies
-        if (Agent.Player.Position.X < 0)
-            Agent.Player.TakeDamage();
+        if (Player.Position.X < 0)
+            Player.TakeDamage();
 
-        if (Agent.Player.Alive)
-            Agent.Player.Score += 10;
+        if (Player.Alive)
+            Player.Score += 10;
     }
 
     private static TimeSpan GetShiftInterval(int shiftsSoFar) =>

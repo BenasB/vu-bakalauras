@@ -51,7 +51,7 @@ internal class Node
         if (Children.Count > 0)
             return this; // Node already expanded
 
-        foreach (var action in State.Agent.GetPossibleActions())
+        foreach (var action in Agent.GetPossibleActions(State))
         {
             Children.Add(new Node(this, action));
         }
@@ -77,21 +77,21 @@ internal class Node
         var simulationState = new GameState(State);
         var rnd = new Random();
 
-        var startingScore = simulationState.Agent.Player.Score;
+        var startingScore = simulationState.Player.Score;
 
         const int maxSimulationDepth = 40;
 
         var depth = 0;
         for (; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
-            var possibleActions = simulationState.Agent.GetPossibleSimulationActions().ToArray();
+            var possibleActions = Agent.GetPossibleSimulationActions(simulationState).ToArray();
 
             // Uniform random moves
             var nextAction = possibleActions[rnd.Next(0, possibleActions.Length)];
             SimulateSingleAction(simulationState, nextAction);
         }
 
-        var scoreGainedDuringSimulation = simulationState.Agent.Player.Score - startingScore;
+        var scoreGainedDuringSimulation = simulationState.Player.Score - startingScore;
 
         // Punish for dying early in the simulation
         // Range [0; 1]
@@ -99,7 +99,7 @@ internal class Node
         var survivalCoefficient = (double)depth / maxSimulationDepth;
 
         // Reward the player for getting towards the right side
-        var columnReward = 10 * simulationState.Agent.Player.Position.ToGridPosition().Column;
+        var columnReward = 10 * simulationState.Player.Position.ToGridPosition().Column;
 
         var finalReward = survivalCoefficient * (scoreGainedDuringSimulation + columnReward);
 
@@ -132,7 +132,7 @@ internal class Node
 
     private static void SimulateSingleAction(GameState simulationState, BombermanAction action)
     {
-        simulationState.Agent.ApplyAction(action);
+        Agent.ApplyAction(simulationState.Player, action);
 
         AdvanceTimeOneTile(simulationState);
     }
@@ -145,7 +145,7 @@ internal class Node
         const double secondsPerFrame = 1.0 / 60;
         var frameDeltaTime = TimeSpan.FromSeconds(secondsPerFrame);
 
-        var oneTileDeltaTimeInSeconds = 1.0 / simulationState.Agent.Player.Speed;
+        var oneTileDeltaTimeInSeconds = 1.0 / simulationState.Player.Speed;
 
         // Splitting the time it takes to move one tile into constant fps to match the real game
         var frameCount = (int)(oneTileDeltaTimeInSeconds / secondsPerFrame);

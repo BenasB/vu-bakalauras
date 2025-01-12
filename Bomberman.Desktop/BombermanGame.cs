@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Bomberman.Core;
+using Bomberman.Core.MCTS;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
@@ -9,13 +11,15 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Bomberman.Desktop;
 
-public class BombermanGame : Game
+internal class BombermanGame : Game
 {
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
     private readonly GameState _gameState;
+
+    private readonly KeyboardPlayer? _keyboardPlayer;
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -29,16 +33,21 @@ public class BombermanGame : Game
     private Texture2D _speedUpTexture;
     private Texture2D _bombUpTexture;
     private Texture2D _lavaTexture;
-
+    private Texture2D _blankTexture;
     private Texture2D _debugGridMarkerTexture;
 
-    public BombermanGame()
+    public BombermanGame(BombermanGameOptions options)
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
         _gameState = new GameState();
+
+        if (options.Player == GamePlayer.Agent)
+            _ = Task.Run(() => Agent.LoopMcts(_gameState));
+        else if (options.Player == GamePlayer.Keyboard)
+            _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
     }
 
     protected override void Initialize()
@@ -67,6 +76,9 @@ public class BombermanGame : Game
         _bombUpTexture = Content.Load<Texture2D>("bombup");
         _lavaTexture = Content.Load<Texture2D>("lava");
 
+        _blankTexture = new Texture2D(_graphics.GraphicsDevice, 1, 1);
+        _blankTexture.SetData([Color.White]);
+
         _debugGridMarkerTexture = Content.Load<Texture2D>("debug_grid_marker");
     }
 
@@ -86,6 +98,7 @@ public class BombermanGame : Game
         )
             Exit();
 
+        _keyboardPlayer?.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -102,22 +115,30 @@ public class BombermanGame : Game
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        if (_gameState.Agent.Player.Alive)
+        if (_gameState.Player.Alive)
         {
-            _spriteBatch.Draw(_playerTexture, _gameState.Agent.Player.Position, Color.White);
+            _spriteBatch.Draw(_playerTexture, _gameState.Player.Position, Color.White);
             _spriteBatch.Draw(
                 _debugGridMarkerTexture,
-                (Vector2)_gameState.Agent.Player.Position.ToGridPosition(),
+                (Vector2)_gameState.Player.Position.ToGridPosition(),
                 Color.Navy
             );
         }
 
-        _spriteBatch.DrawString(
-            _spriteFont,
-            $"Score: {_gameState.Agent.Player.Score}",
+        var scoreText = $"Score: {_gameState.Player.Score}";
+        var scoreTextPosition = Microsoft.Xna.Framework.Vector2.Zero;
+        _spriteBatch.Draw(
+            _blankTexture,
+            scoreTextPosition,
+            default,
+            Color.White * 0.85f,
+            default,
             Microsoft.Xna.Framework.Vector2.Zero,
-            Color.White
+            _spriteFont.MeasureString(scoreText),
+            default,
+            default
         );
+        _spriteBatch.DrawString(_spriteFont, scoreText, scoreTextPosition, Color.Black);
 
         _spriteBatch.End();
 

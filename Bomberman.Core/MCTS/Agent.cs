@@ -1,31 +1,12 @@
 using System.Diagnostics;
-using System.Text.Json;
-using Bomberman.Core.Serialization;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.MCTS;
 
-public class Agent : IUpdatable
+public class Agent
 {
-    private readonly TileMap _tileMap;
-    public Player Player { get; }
-
-    public Agent(GridPosition startPosition, TileMap tileMap, GameState realState)
-    {
-        _tileMap = tileMap;
-        Player = new Player(startPosition, tileMap);
-
-        _ = Task.Run(() => LoopMcts(realState));
-    }
-
-    public Agent(Agent original, TileMap tileMap)
-    {
-        _tileMap = tileMap;
-        Player = new Player(original.Player, tileMap);
-    }
-
-    private void LoopMcts(GameState realState)
+    public static void LoopMcts(GameState realState)
     {
         BombermanAction? previousAction = null;
         while (!realState.Terminated)
@@ -38,7 +19,8 @@ public class Agent : IUpdatable
             var iterations = 0;
 
             // TODO: What about 'Stand' action, should we wait full time?
-            var mctsInterval = TimeSpan.FromSeconds(1 / Player.Speed);
+            // TODO: Make this dependent on real game state instead of time to support non constant fps
+            var mctsInterval = TimeSpan.FromSeconds(1 / realState.Player.Speed);
             // TODO: Do we need alignment to coordinates after a single action is performed?
 
             var stopWatch = Stopwatch.StartNew();
@@ -66,7 +48,7 @@ public class Agent : IUpdatable
                 ?? throw new InvalidOperationException("Could not find the best action");
 
             // Be aware of concurrency
-            ApplyAction(bestAction);
+            ApplyAction(realState.Player, bestAction);
             previousAction = bestAction;
 
             Logger.Information(
@@ -75,61 +57,58 @@ public class Agent : IUpdatable
         }
     }
 
-    public void Update(TimeSpan deltaTime)
-    {
-        Player.Update(deltaTime);
-    }
-
-    internal void ApplyAction(BombermanAction action)
+    internal static void ApplyAction(Player player, BombermanAction action)
     {
         switch (action)
         {
             case BombermanAction.MoveUp:
-                Player.SetMovingDirection(Direction.Up);
+                player.SetMovingDirection(Direction.Up);
                 break;
             case BombermanAction.MoveDown:
-                Player.SetMovingDirection(Direction.Down);
+                player.SetMovingDirection(Direction.Down);
                 break;
             case BombermanAction.MoveLeft:
-                Player.SetMovingDirection(Direction.Left);
+                player.SetMovingDirection(Direction.Left);
                 break;
             case BombermanAction.MoveRight:
-                Player.SetMovingDirection(Direction.Right);
+                player.SetMovingDirection(Direction.Right);
                 break;
             case BombermanAction.Stand:
-                Player.SetMovingDirection(Direction.None);
+                player.SetMovingDirection(Direction.None);
                 break;
             case BombermanAction.PlaceBombAndMoveUp:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Up);
+                player.PlaceBomb();
+                player.SetMovingDirection(Direction.Up);
                 break;
             case BombermanAction.PlaceBombAndMoveDown:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Down);
+                player.PlaceBomb();
+                player.SetMovingDirection(Direction.Down);
                 break;
             case BombermanAction.PlaceBombAndMoveLeft:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Left);
+                player.PlaceBomb();
+                player.SetMovingDirection(Direction.Left);
                 break;
             case BombermanAction.PlaceBombAndMoveRight:
-                Player.PlaceBomb();
-                Player.SetMovingDirection(Direction.Right);
+                player.PlaceBomb();
+                player.SetMovingDirection(Direction.Right);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
         }
     }
 
-    internal IEnumerable<BombermanAction> GetPossibleActions()
+    internal static IEnumerable<BombermanAction> GetPossibleActions(GameState state)
     {
         var result = new List<BombermanAction> { BombermanAction.Stand };
 
-        var gridPosition = Player.Position.ToGridPosition();
+        var gridPosition = state.Player.Position.ToGridPosition();
 
-        var canPlaceBomb = Player.CanPlaceBomb && _tileMap.GetTile(gridPosition) is null;
+        var canPlaceBomb = state.Player.CanPlaceBomb && state.TileMap.GetTile(gridPosition) is null;
 
         if (
-            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is null or IEnterable
+            state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 })
+            is null
+                or IEnterable
         )
         {
             result.Add(BombermanAction.MoveUp);
@@ -139,7 +118,9 @@ public class Agent : IUpdatable
         }
 
         if (
-            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 }) is null or IEnterable
+            state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
+            is null
+                or IEnterable
         )
         {
             result.Add(BombermanAction.MoveDown);
@@ -149,7 +130,7 @@ public class Agent : IUpdatable
         }
 
         if (
-            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+            state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
             is null
                 or IEnterable
         )
@@ -161,7 +142,7 @@ public class Agent : IUpdatable
         }
 
         if (
-            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
+            state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
             is null
                 or IEnterable
         )
@@ -175,26 +156,29 @@ public class Agent : IUpdatable
         return result;
     }
 
-    internal IEnumerable<BombermanAction> GetPossibleSimulationActions()
+    internal static IEnumerable<BombermanAction> GetPossibleSimulationActions(GameState state)
     {
         var result = new List<BombermanAction> { BombermanAction.Stand };
 
-        var gridPosition = Player.Position.ToGridPosition();
+        var gridPosition = state.Player.Position.ToGridPosition();
 
         var shouldPlaceBomb =
-            Player.CanPlaceBomb
-            && _tileMap.GetTile(gridPosition) is null
+            state.Player.CanPlaceBomb
+            && state.TileMap.GetTile(gridPosition) is null
             && (
-                _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is BoxTile
-                || _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 }) is BoxTile
-                || _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+                state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is BoxTile
+                || state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
                     is BoxTile
-                || _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
+                || state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+                    is BoxTile
+                || state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
                     is BoxTile
             );
 
         if (
-            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is null or IEnterable
+            state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 })
+            is null
+                or IEnterable
         )
         {
             result.Add(BombermanAction.MoveUp);
@@ -204,7 +188,9 @@ public class Agent : IUpdatable
         }
 
         if (
-            _tileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 }) is null or IEnterable
+            state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
+            is null
+                or IEnterable
         )
         {
             result.Add(BombermanAction.MoveDown);
@@ -214,7 +200,7 @@ public class Agent : IUpdatable
         }
 
         if (
-            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
+            state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
             is null
                 or IEnterable
         )
@@ -226,7 +212,7 @@ public class Agent : IUpdatable
         }
 
         if (
-            _tileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
+            state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
             is null
                 or IEnterable
         )
