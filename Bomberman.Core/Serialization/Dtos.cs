@@ -13,6 +13,7 @@ internal record GameStateDto(PlayerDto Player, TileMapDto TileMap, bool Terminat
 
 internal record PlayerDto(
     Vector2Dto Position,
+    int Score,
     float Speed,
     int BombRange,
     int MaxPlacedBombs,
