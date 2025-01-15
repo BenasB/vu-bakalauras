@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Bomberman.Core.Tiles;
+using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core;
 
@@ -10,7 +11,7 @@ public class TileMap : IUpdatable
 
     private readonly Tile[][] _backgroundTiles;
     private readonly Tile?[][] _foregroundTiles;
-    private static readonly Random Rnd = new(42);
+    private readonly StatefulRandom _rnd = new(44);
 
     public ImmutableArray<Tile> Tiles =>
         [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row).OfType<Tile>()];
@@ -38,6 +39,7 @@ public class TileMap : IUpdatable
     {
         Width = original.Width;
         Height = original.Height;
+        _rnd = new StatefulRandom(original._rnd);
 
         _backgroundTiles = original
             ._backgroundTiles.Select(row =>
@@ -180,7 +182,7 @@ public class TileMap : IUpdatable
     }
 
     private Tile? RandomTile(GridPosition position) =>
-        Rnd.NextDouble() switch
+        _rnd.NextDouble() switch
         {
             < 0.491 => new BoxTile(position),
             < 0.494 => new FireUpTile(position, this),

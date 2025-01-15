@@ -42,8 +42,8 @@ public class GameState : IUpdatable
         if (_shiftElapsed < _shiftInterval)
             return;
 
+        _shiftElapsed = _shiftElapsed - _shiftInterval;
         _shiftsSoFar++;
-        _shiftElapsed = TimeSpan.Zero;
         _shiftInterval = GetShiftInterval(_shiftsSoFar);
         TileMap.Shift();
         Player.Position = Player.Position with { X = Player.Position.X - 1 * Constants.TileSize };
