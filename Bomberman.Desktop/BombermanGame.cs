@@ -38,6 +38,9 @@ internal class BombermanGame : Game
 
     public BombermanGame(BombermanGameOptions options)
     {
+        // Disable throttling when the window is inactive
+        InactiveSleepTime = TimeSpan.Zero;
+
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
