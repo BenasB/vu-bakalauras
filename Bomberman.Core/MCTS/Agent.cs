@@ -4,7 +4,7 @@ using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.MCTS;
 
-public class Agent
+public static class Agent
 {
     public static void LoopMcts(GameState realState)
     {
@@ -175,11 +175,7 @@ public class Agent
                     is BoxTile
             );
 
-        if (
-            state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 })
-            is null
-                or IEnterable
-        )
+        if (IsTileSafeToWalk(gridPosition with { Row = gridPosition.Row - 1 }))
         {
             result.Add(BombermanAction.MoveUp);
 
@@ -187,11 +183,7 @@ public class Agent
                 result.Add(BombermanAction.PlaceBombAndMoveUp);
         }
 
-        if (
-            state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
-            is null
-                or IEnterable
-        )
+        if (IsTileSafeToWalk(gridPosition with { Row = gridPosition.Row + 1 }))
         {
             result.Add(BombermanAction.MoveDown);
 
@@ -199,11 +191,7 @@ public class Agent
                 result.Add(BombermanAction.PlaceBombAndMoveDown);
         }
 
-        if (
-            state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
-            is null
-                or IEnterable
-        )
+        if (IsTileSafeToWalk(gridPosition with { Column = gridPosition.Column - 1 }))
         {
             result.Add(BombermanAction.MoveLeft);
 
@@ -211,11 +199,7 @@ public class Agent
                 result.Add(BombermanAction.PlaceBombAndMoveLeft);
         }
 
-        if (
-            state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
-            is null
-                or IEnterable
-        )
+        if (IsTileSafeToWalk(gridPosition with { Column = gridPosition.Column + 1 }))
         {
             result.Add(BombermanAction.MoveRight);
 
@@ -224,5 +208,8 @@ public class Agent
         }
 
         return result;
+
+        bool IsTileSafeToWalk(GridPosition position) =>
+            state.TileMap.GetTile(position) is (null or IEnterable) and not LavaTile;
     }
 }
