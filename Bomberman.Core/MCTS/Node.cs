@@ -104,7 +104,7 @@ internal class Node
         var survivalCoefficient = (double)depth / maxSimulationDepth;
 
         // Reward the player for getting towards the right side
-        var columnReward = 10 * simulationState.Player.Position.ToGridPosition().Column;
+        var columnReward = 20 * simulationState.Player.Position.ToGridPosition().Column;
 
         var finalReward = survivalCoefficient * (scoreGainedDuringSimulation + columnReward);
 
