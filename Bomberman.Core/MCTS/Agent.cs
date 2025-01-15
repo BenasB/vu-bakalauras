@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.Text.Json;
+using System.Threading.Channels;
+using Bomberman.Core.Serialization;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 
@@ -6,8 +9,15 @@ namespace Bomberman.Core.MCTS;
 
 public static class Agent
 {
-    public static void LoopMcts(GameState realState)
+    public static void LoopMcts(GameState realState, bool writeJson)
     {
+        var serializationChannel = Channel.CreateUnbounded<Node>(
+            new UnboundedChannelOptions { SingleReader = true, SingleWriter = true }
+        );
+
+        if (writeJson)
+            _ = Task.Run(async () => await SerializationLoop(serializationChannel.Reader));
+
         BombermanAction? previousAction = null;
         while (!realState.Terminated)
         {
@@ -37,11 +47,6 @@ public static class Agent
             if (realState.Terminated)
                 break;
 
-            // File.WriteAllText(
-            //     $"{DateTimeOffset.Now.Ticks}.json",
-            //     JsonSerializer.Serialize(root.ToDto())
-            // );
-
             var bestNode = root.Children.MaxBy(child => child.Visits);
             var bestAction =
                 bestNode?.Action
@@ -51,9 +56,31 @@ public static class Agent
             ApplyAction(realState.Player, bestAction);
             previousAction = bestAction;
 
+            if (writeJson)
+                serializationChannel.Writer.TryWrite(root);
+
             Logger.Information(
                 $"Applied best action after ({iterations} iterations): {bestAction}"
             );
+        }
+    }
+
+    private static async ValueTask SerializationLoop(ChannelReader<Node> reader)
+    {
+        var outputDirectory = $"{DateTimeOffset.Now.Ticks}";
+        Directory.CreateDirectory(outputDirectory);
+
+        while (await reader.WaitToReadAsync())
+        {
+            while (reader.TryRead(out var root))
+            {
+                var dto = root.ToDto();
+
+                await File.WriteAllTextAsync(
+                    Path.Combine(outputDirectory, $"{DateTimeOffset.Now.Ticks}.json"),
+                    JsonSerializer.Serialize(dto)
+                );
+            }
         }
     }
 

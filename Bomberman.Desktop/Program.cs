@@ -21,6 +21,15 @@ for (int i = 0; i < args.Length; i++)
         else
             throw new InvalidOperationException($"Unsupported '{flag}' value '{value}'");
     }
+    else if (flag == "export")
+    {
+        if (options.Player != GamePlayer.Agent)
+            throw new InvalidOperationException(
+                "Flag 'export' may only be used after setting the flag 'player' to 'agent'"
+            );
+
+        options.Export = true;
+    }
 }
 
 using var game = new BombermanGame(options);

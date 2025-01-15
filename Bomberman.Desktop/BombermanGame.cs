@@ -45,7 +45,7 @@ internal class BombermanGame : Game
         _gameState = new GameState();
 
         if (options.Player == GamePlayer.Agent)
-            _ = Task.Run(() => Agent.LoopMcts(_gameState));
+            _ = Task.Run(() => Agent.LoopMcts(_gameState, options.Export));
         else if (options.Player == GamePlayer.Keyboard)
             _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
     }
