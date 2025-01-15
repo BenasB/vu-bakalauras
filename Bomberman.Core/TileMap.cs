@@ -146,9 +146,9 @@ public class TileMap : IUpdatable
         {
             for (int column = 1; column < Width - 2; column++)
             {
-                var oldTile = _foregroundTiles[row][column];
-
-                if (oldTile is BombTile oldBombTile)
+                // _foregroundTiles[row][column] is not null only for the left most column of the play zone
+                var removedTile = _foregroundTiles[row][column];
+                if (removedTile is BombTile oldBombTile)
                 {
                     // Force into a detonated state to unblock player bomb placement logic
                     oldBombTile.Detonated = true;
@@ -156,6 +156,8 @@ public class TileMap : IUpdatable
 
                 _foregroundTiles[row][column] = _foregroundTiles[row][column + 1];
                 var shiftedTile = _foregroundTiles[row][column];
+
+                // The next column iteration will have _foregroundTiles[row][column] set to null
                 _foregroundTiles[row][column + 1] = null;
 
                 if (shiftedTile != null)

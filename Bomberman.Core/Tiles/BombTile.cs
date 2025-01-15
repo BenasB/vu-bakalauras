@@ -9,25 +9,20 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
 
     private TimeSpan _existingTime = TimeSpan.Zero;
 
-    private ExplosionTile? _explosionTile;
-
     public bool Detonated { get; internal set; }
-
-    // A bomb is considered exploded only after the explosion tile is gone
-    public bool Exploded => Detonated && (_explosionTile?.Destroyed ?? false);
 
     public void Update(TimeSpan deltaTime)
     {
         _existingTime += deltaTime;
 
         if (_existingTime >= DetonateAfter)
-            Explode();
+            Detonate(_existingTime - DetonateAfter);
     }
 
     /// <summary>
     /// Gets explosion paths in 4 directions based on the bomb range
     /// </summary>
-    public IEnumerable<IEnumerable<GridPosition>> ExplosionPaths =>
+    private IEnumerable<IEnumerable<GridPosition>> ExplosionPaths =>
         new Func<int, GridPosition>[]
         {
             distanceFromCenter => Position with { Row = Position.Row - distanceFromCenter },
@@ -38,14 +33,14 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
             Enumerable.Range(1, range).Select(explosionPositionCalculationOnSpecificDirection)
         );
 
-    public void Explode()
+    private void Detonate(TimeSpan elapsedExplosionTime)
     {
         Detonated = true;
 
         tileMap.RemoveTile(this);
         var centerExplosionTile = new ExplosionTile(Position, tileMap, ExplosionDuration);
-        _explosionTile = centerExplosionTile;
         tileMap.PlaceTile(centerExplosionTile);
+        centerExplosionTile.Update(elapsedExplosionTime);
 
         foreach (var explosionPath in ExplosionPaths)
         {
@@ -56,7 +51,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                 if (tileToExplode is BombTile bombTile)
                 {
                     // Chain reaction
-                    bombTile.Explode();
+                    bombTile.Detonate(elapsedExplosionTime);
                     break;
                 }
 
@@ -64,9 +59,13 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                 if (tileToExplode is BoxTile or CoinTile or BombUpTile or FireUpTile or SpeedUpTile)
                 {
                     tileMap.RemoveTile(tileToExplode);
-                    tileMap.PlaceTile(
-                        new ExplosionTile(tileToExplode.Position, tileMap, ExplosionDuration)
+                    var replacementExplosionTile = new ExplosionTile(
+                        tileToExplode.Position,
+                        tileMap,
+                        ExplosionDuration
                     );
+                    tileMap.PlaceTile(replacementExplosionTile);
+                    replacementExplosionTile.Update(elapsedExplosionTime);
                     break;
                 }
 
@@ -76,7 +75,13 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                 if (tileToExplode != null)
                     break;
 
-                tileMap.PlaceTile(new ExplosionTile(explosionPosition, tileMap, ExplosionDuration));
+                var newExplosionTile = new ExplosionTile(
+                    explosionPosition,
+                    tileMap,
+                    ExplosionDuration
+                );
+                tileMap.PlaceTile(newExplosionTile);
+                newExplosionTile.Update(elapsedExplosionTime);
             }
         }
     }
@@ -86,7 +91,5 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
         {
             _existingTime = _existingTime,
             Detonated = Detonated,
-            _explosionTile = // TODO: double check if this is okay?
-                _explosionTile != null ? (ExplosionTile?)newTileMap.GetTile(Position) : null,
         };
 }
