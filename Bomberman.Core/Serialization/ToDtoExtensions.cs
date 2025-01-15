@@ -45,6 +45,7 @@ internal static class ToDtoExtensions
     public static NodeDto ToDto(this Node node) =>
         new(
             node.Action.ToString(),
+            node.UnexploredActions.Select(a => a.ToString()).ToArray(),
             node.Visits,
             node.TotalReward,
             node.AverageReward,

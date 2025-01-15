@@ -2,6 +2,7 @@ namespace Bomberman.Core.Serialization;
 
 internal record NodeDto(
     string? Action,
+    string[] UnexploredActions,
     int Visits,
     double TotalReward,
     double AverageReward,

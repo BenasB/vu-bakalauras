@@ -8,6 +8,7 @@ internal class Node
     /// The action that was taken from the parent to reach this node
     /// </summary>
     public BombermanAction? Action { get; }
+    public List<BombermanAction> UnexploredActions { get; }
     public List<Node> Children { get; } = [];
     public int Visits { get; private set; }
     public double TotalReward { get; private set; }
@@ -15,6 +16,7 @@ internal class Node
     public GameState State { get; }
 
     private readonly Node? _parent;
+    private readonly Random _rnd = new();
 
     // For UCT adjustment
     private static double _minReward = 0;
@@ -25,6 +27,7 @@ internal class Node
         State = new GameState(initialState);
         _parent = null;
         Action = null;
+        UnexploredActions = Agent.GetPossibleActions(State).ToList();
     }
 
     public Node(GameState initialState, BombermanAction action)
@@ -33,6 +36,7 @@ internal class Node
         _parent = null;
         Action = action;
         AdvanceTimeOneTile(State);
+        UnexploredActions = Agent.GetPossibleActions(State).ToList();
     }
 
     private Node(Node parent, BombermanAction action)
@@ -41,6 +45,7 @@ internal class Node
         Action = action;
         State = new GameState(parent.State);
         SimulateSingleAction(State, action);
+        UnexploredActions = Agent.GetPossibleActions(State).ToList();
     }
 
     public Node Expand()
@@ -48,23 +53,25 @@ internal class Node
         if (State.Terminated)
             return this;
 
-        if (Children.Count > 0)
-            return this; // Node already expanded
+        if (UnexploredActions.Count == 0)
+            throw new InvalidOperationException(
+                "Trying to expand a node that is already fully expanded"
+            );
 
-        foreach (var action in Agent.GetPossibleActions(State))
-        {
-            Children.Add(new Node(this, action));
-        }
+        var actionToExplore = UnexploredActions[_rnd.Next(0, UnexploredActions.Count)];
+        UnexploredActions.Remove(actionToExplore);
+        var newChild = new Node(this, actionToExplore);
+        Children.Add(newChild);
 
-        return Children.First();
+        return newChild;
     }
 
     public Node Select()
     {
-        if (State.Terminated)
+        if (UnexploredActions.Count != 0)
             return this;
 
-        if (Children.Count == 0)
+        if (State.Terminated)
             return this;
 
         var bestNode = Children.OrderByDescending(node => node.UCT()).First();
@@ -75,8 +82,6 @@ internal class Node
     public double Simulate()
     {
         var simulationState = new GameState(State);
-        var rnd = new Random();
-
         var startingScore = simulationState.Player.Score;
 
         const int maxSimulationDepth = 40;
@@ -87,7 +92,7 @@ internal class Node
             var possibleActions = Agent.GetPossibleSimulationActions(simulationState).ToArray();
 
             // Uniform random moves
-            var nextAction = possibleActions[rnd.Next(0, possibleActions.Length)];
+            var nextAction = possibleActions[_rnd.Next(0, possibleActions.Length)];
             SimulateSingleAction(simulationState, nextAction);
         }
 
@@ -155,6 +160,8 @@ internal class Node
         }
 
         var remainingDeltaTime = TimeSpan.FromSeconds(oneTileDeltaTimeInSeconds % secondsPerFrame);
-        simulationState.Update(remainingDeltaTime);
+
+        if (remainingDeltaTime > TimeSpan.Zero)
+            simulationState.Update(remainingDeltaTime);
     }
 }

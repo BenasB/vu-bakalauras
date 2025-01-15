@@ -37,6 +37,7 @@ async function loadAndRenderTree(treeData) {
   g.selectAll("*").remove();
 
   const root = d3.hierarchy(treeData, (d) => d.Children);
+  root.sort((a, b) => a.data.Action.localeCompare(b.data.Action));
   const treeLayout = d3.tree().nodeSize([60, 350]);
   treeLayout(root);
 
