@@ -18,10 +18,6 @@ internal class Node
     private readonly Node? _parent;
     private readonly Random _rnd = new();
 
-    // For UCT adjustment
-    private static double _minReward = 0;
-    private static double _maxReward = 10;
-
     public Node(GameState initialState)
     {
         State = new GameState(initialState);
@@ -108,11 +104,6 @@ internal class Node
 
         var finalReward = survivalCoefficient * (scoreGainedDuringSimulation + columnReward);
 
-        if (finalReward < _minReward)
-            _minReward = finalReward;
-        if (finalReward > _maxReward)
-            _maxReward = finalReward;
-
         return finalReward;
     }
 
@@ -131,8 +122,7 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward
-            + 1.41f * (_maxReward - _minReward) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward + 1.41f * 200 * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     private static void SimulateSingleAction(GameState simulationState, BombermanAction action)
