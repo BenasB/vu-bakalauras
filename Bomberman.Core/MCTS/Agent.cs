@@ -68,6 +68,8 @@ public static class Agent
         var outputDirectory = $"{DateTimeOffset.Now.Ticks}";
         Directory.CreateDirectory(outputDirectory);
 
+        var jsonOptions = new JsonSerializerOptions { MaxDepth = 1024 };
+
         while (true)
         {
             var root = collection.Take();
@@ -75,7 +77,7 @@ public static class Agent
 
             File.WriteAllText(
                 Path.Combine(outputDirectory, $"{DateTimeOffset.Now.Ticks}.json"),
-                JsonSerializer.Serialize(dto)
+                JsonSerializer.Serialize(dto, jsonOptions)
             );
         }
     }
