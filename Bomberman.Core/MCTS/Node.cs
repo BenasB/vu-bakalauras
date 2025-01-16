@@ -122,7 +122,7 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward + 1.41f * 200 * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward + 1.41f * 10 * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     private static void SimulateSingleAction(GameState simulationState, BombermanAction action)
@@ -137,7 +137,7 @@ internal class Node
     /// </summary>
     private static void AdvanceTimeOneTile(GameState simulationState)
     {
-        const double secondsPerFrame = 1.0 / 60;
+        const double secondsPerFrame = 1.0 / 20;
         var frameDeltaTime = TimeSpan.FromSeconds(secondsPerFrame);
 
         var oneTileDeltaTimeInSeconds = 1.0 / simulationState.Player.Speed;
