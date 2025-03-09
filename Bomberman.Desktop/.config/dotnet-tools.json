@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "isRoot": true,
+  "isRoot": false,
   "tools": {
     "dotnet-mgcb": {
       "version": "3.8.2.1105",
