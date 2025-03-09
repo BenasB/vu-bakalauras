@@ -6,9 +6,7 @@ namespace Bomberman.Core;
 
 public class Player : IUpdatable, IDamageable
 {
-    public Vector2 Position { get; internal set; }
-
-    public int Score { get; internal set; }
+    public Vector2 Position { get; private set; }
 
     public int BombRange { get; internal set; } = 1;
 
@@ -35,7 +33,6 @@ public class Player : IUpdatable, IDamageable
     internal Player(Player original, TileMap tileMap)
     {
         Position = original.Position;
-        Score = original.Score;
         BombRange = original.BombRange;
         MaxPlacedBombs = original.MaxPlacedBombs;
         Speed = original.Speed;

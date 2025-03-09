@@ -235,8 +235,6 @@ public static class Agent
         return result;
 
         bool IsTileSafeToWalk(GridPosition position) =>
-            state.TileMap.GetTile(position)
-                is null
-                    or (IEnterable and not ExplosionTile);
+            state.TileMap.GetTile(position) is null or (IEnterable and not ExplosionTile);
     }
 }

@@ -54,7 +54,7 @@ public class TileMap : IUpdatable
             .ToArray();
     }
 
-    internal TileMap WithDefaultTileLayout(GridPosition start)
+    internal TileMap WithDefaultTileLayout(params GridPosition[] startingTiles)
     {
         // Wall on top row
         _foregroundTiles[0] = Enumerable
@@ -78,21 +78,24 @@ public class TileMap : IUpdatable
         }
 
         for (int row = 1; row < Height - 1; row++)
-        {
-            for (int column = 1; column < Width - 1; column++)
-            {
-                _foregroundTiles[row][column] = RandomTile(new GridPosition(row, column));
-            }
-        }
+        for (int column = 1; column < Width - 1; column++)
+            _foregroundTiles[row][column] = RandomTile(new GridPosition(row, column));
 
         // Checker walls
         for (int row = 2; row < Height - 1; row += 2)
         for (int column = 2; column < Width - 1; column += 2)
             _foregroundTiles[row][column] = new WallTile(new GridPosition(row, column));
 
-        // Clear around starting position to allow player to move
+        // Clear around starting positions to allow players to move
+        foreach (var start in startingTiles)
         foreach (var position in new[] { start }.Concat(start.Neighbours))
+        {
+            var tile = _foregroundTiles[position.Row][position.Column];
+            if (tile is WallTile)
+                continue;
+
             _foregroundTiles[position.Row][position.Column] = null;
+        }
 
         return this;
     }

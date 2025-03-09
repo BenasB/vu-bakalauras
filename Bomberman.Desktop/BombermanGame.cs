@@ -126,21 +126,6 @@ internal class BombermanGame : Game
             );
         }
 
-        var scoreText = $"Score: {_gameState.Player.Score}";
-        var scoreTextPosition = Microsoft.Xna.Framework.Vector2.Zero;
-        _spriteBatch.Draw(
-            _blankTexture,
-            scoreTextPosition,
-            default,
-            Color.White * 0.85f,
-            default,
-            Microsoft.Xna.Framework.Vector2.Zero,
-            _spriteFont.MeasureString(scoreText),
-            default,
-            default
-        );
-        _spriteBatch.DrawString(_spriteFont, scoreText, scoreTextPosition, Color.Black);
-
         _spriteBatch.End();
 
         base.Draw(gameTime);

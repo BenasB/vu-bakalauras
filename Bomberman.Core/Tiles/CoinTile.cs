@@ -7,7 +7,6 @@ public class CoinTile(GridPosition position, TileMap tileMap) : Tile(position), 
         if (entree is not Player player)
             return;
 
-        player.Score += 40;
         tileMap.RemoveTile(this);
     }
 

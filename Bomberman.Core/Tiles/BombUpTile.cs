@@ -8,7 +8,6 @@ public class BombUpTile(GridPosition position, TileMap tileMap) : Tile(position)
             return;
 
         player.MaxPlacedBombs = Math.Min(3, player.MaxPlacedBombs + 1);
-        player.Score += 100;
         tileMap.RemoveTile(this);
     }
 

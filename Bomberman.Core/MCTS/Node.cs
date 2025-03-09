@@ -78,7 +78,6 @@ internal class Node
     public double Simulate()
     {
         var simulationState = new GameState(State);
-        var startingScore = simulationState.Player.Score;
 
         const int maxSimulationDepth = 40;
 
@@ -92,7 +91,7 @@ internal class Node
             SimulateSingleAction(simulationState, nextAction);
         }
 
-        var scoreGainedDuringSimulation = simulationState.Player.Score - startingScore;
+        var scoreGainedDuringSimulation = 0;
 
         // Punish for dying early in the simulation
         // Range [0; 1]

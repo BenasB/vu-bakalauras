@@ -28,7 +28,6 @@ internal static class ToDtoExtensions
     private static PlayerDto ToDto(this Player player) =>
         new(
             new Vector2Dto(player.Position.X, player.Position.Y),
-            player.Score,
             player.Speed,
             player.BombRange,
             player.MaxPlacedBombs,
