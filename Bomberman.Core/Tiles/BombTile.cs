@@ -55,8 +55,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
                     break;
                 }
 
-                // TODO: Maybe powerups and coins shouldn't break the explosion?
-                if (tileToExplode is BoxTile or CoinTile or BombUpTile or FireUpTile or SpeedUpTile)
+                if (tileToExplode is BoxTile)
                 {
                     tileMap.RemoveTile(tileToExplode);
                     var replacementExplosionTile = new ExplosionTile(

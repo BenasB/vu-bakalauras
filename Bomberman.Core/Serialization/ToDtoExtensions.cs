@@ -11,12 +11,8 @@ internal static class ToDtoExtensions
             tile switch
             {
                 BombTile => "bomb",
-                BombUpTile => "bombup",
                 BoxTile => "box",
-                CoinTile => "coin",
                 ExplosionTile => "explosion",
-                FireUpTile => "fireup",
-                SpeedUpTile => "speedup",
                 WallTile => "wall",
                 FloorTile => "floor",
                 _ => throw new InvalidOperationException(

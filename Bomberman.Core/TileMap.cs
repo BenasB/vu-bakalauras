@@ -148,11 +148,7 @@ public class TileMap : IUpdatable
     private Tile? RandomTile(GridPosition position) =>
         _rnd.NextDouble() switch
         {
-            < 0.491 => new BoxTile(position),
-            < 0.494 => new FireUpTile(position, this),
-            < 0.497 => new SpeedUpTile(position, this),
-            < 0.5 => new BombUpTile(position, this),
-            < 0.6 => new CoinTile(position, this),
+            < 0.4 => new BoxTile(position),
             _ => null,
         };
 }
