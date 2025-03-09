@@ -60,21 +60,21 @@ public class TileMap : IUpdatable
         _foregroundTiles[0] = Enumerable
             .Range(0, Width)
             .Select(column => new GridPosition(0, column))
-            .Select(gridPosition => new LavaTile(gridPosition))
+            .Select(gridPosition => new WallTile(gridPosition))
             .ToArray<Tile>();
 
         // Wall on bottom row
         _foregroundTiles[Height - 1] = Enumerable
             .Range(0, Width)
             .Select(column => new GridPosition(Height - 1, column))
-            .Select(gridPosition => new LavaTile(gridPosition))
+            .Select(gridPosition => new WallTile(gridPosition))
             .ToArray<Tile>();
 
         // Walls on left and right columns
         for (int row = 0; row < Height; row++)
         {
-            _foregroundTiles[row][0] = new LavaTile(new GridPosition(row, 0));
-            _foregroundTiles[row][Width - 1] = new LavaTile(new GridPosition(row, Width - 1));
+            _foregroundTiles[row][0] = new WallTile(new GridPosition(row, 0));
+            _foregroundTiles[row][Width - 1] = new WallTile(new GridPosition(row, Width - 1));
         }
 
         for (int row = 1; row < Height - 1; row++)
@@ -140,45 +140,6 @@ public class TileMap : IUpdatable
             );
 
         _foregroundTiles[tile.Position.Row][tile.Position.Column] = null;
-    }
-
-    internal void Shift()
-    {
-        for (int row = 1; row < Height - 1; row++)
-        {
-            for (int column = 1; column < Width - 2; column++)
-            {
-                // _foregroundTiles[row][column] is not null only for the left most column of the play zone
-                var removedTile = _foregroundTiles[row][column];
-                if (removedTile is BombTile oldBombTile)
-                {
-                    // Force into a detonated state to unblock player bomb placement logic
-                    oldBombTile.Detonated = true;
-                }
-
-                _foregroundTiles[row][column] = _foregroundTiles[row][column + 1];
-                var shiftedTile = _foregroundTiles[row][column];
-
-                // The next column iteration will have _foregroundTiles[row][column] set to null
-                _foregroundTiles[row][column + 1] = null;
-
-                if (shiftedTile != null)
-                    shiftedTile.Position = new GridPosition(Row: row, Column: column);
-            }
-        }
-
-        for (int row = 1; row < Height - 1; row++)
-        {
-            _foregroundTiles[row][Width - 2] = RandomTile(
-                new GridPosition(Row: row, Column: Width - 2)
-            );
-        }
-
-        for (int row = 2; row < Height - 1; row += 2)
-        {
-            if (GetTile(new GridPosition(row, Width - 2 - 1)) is not WallTile)
-                _foregroundTiles[row][Width - 2] = new WallTile(new GridPosition(row, Width - 2));
-        }
     }
 
     private Tile? RandomTile(GridPosition position) =>

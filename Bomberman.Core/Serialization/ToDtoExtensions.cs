@@ -16,7 +16,6 @@ internal static class ToDtoExtensions
                 CoinTile => "coin",
                 ExplosionTile => "explosion",
                 FireUpTile => "fireup",
-                LavaTile => "lava",
                 SpeedUpTile => "speedup",
                 WallTile => "wall",
                 FloorTile => "floor",

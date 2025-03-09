@@ -32,7 +32,6 @@ internal class BombermanGame : Game
     private Texture2D _fireUpTexture;
     private Texture2D _speedUpTexture;
     private Texture2D _bombUpTexture;
-    private Texture2D _lavaTexture;
     private Texture2D _blankTexture;
     private Texture2D _debugGridMarkerTexture;
 
@@ -77,7 +76,6 @@ internal class BombermanGame : Game
         _fireUpTexture = Content.Load<Texture2D>("fireup");
         _speedUpTexture = Content.Load<Texture2D>("speedup");
         _bombUpTexture = Content.Load<Texture2D>("bombup");
-        _lavaTexture = Content.Load<Texture2D>("lava");
 
         _blankTexture = new Texture2D(_graphics.GraphicsDevice, 1, 1);
         _blankTexture.SetData([Color.White]);
@@ -90,10 +88,10 @@ internal class BombermanGame : Game
         if (_gameState.Terminated)
             return;
 
-        if (gameTime.IsRunningSlowly)
-            throw new InvalidOperationException(
-                "Update takes more time than a frame has allocated to it, results are unexpected"
-            );
+        // if (gameTime.IsRunningSlowly)
+        //     throw new InvalidOperationException(
+        //         "Update takes more time than a frame has allocated to it, results are unexpected"
+        //     );
 
         if (
             GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
@@ -160,7 +158,6 @@ internal class BombermanGame : Game
             FireUpTile => _fireUpTexture,
             SpeedUpTile => _speedUpTexture,
             BombUpTile => _bombUpTexture,
-            LavaTile => _lavaTexture,
             _ => throw new InvalidOperationException("Could not find a texture for the tile"),
         };
 }
