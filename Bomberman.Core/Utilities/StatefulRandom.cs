@@ -10,6 +10,9 @@ internal class StatefulRandom
 
     private int _state;
 
+    public StatefulRandom()
+        : this(Environment.TickCount) { }
+
     public StatefulRandom(int seed)
     {
         if (seed is <= 0 or int.MaxValue)

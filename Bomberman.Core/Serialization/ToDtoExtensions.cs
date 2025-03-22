@@ -1,4 +1,4 @@
-using Bomberman.Core.MCTS;
+using Bomberman.Core.Agents.MCTS;
 using Bomberman.Core.Tiles;
 
 namespace Bomberman.Core.Serialization;
@@ -34,7 +34,12 @@ internal static class ToDtoExtensions
         new(tileMap.Width, tileMap.Height, tileMap.Tiles.Select(t => t.ToDto()).ToArray());
 
     private static GameStateDto ToDto(this GameState state) =>
-        new(state.Player.ToDto(), state.TileMap.ToDto(), state.Terminated);
+        new(
+            state.AgentOne.Player.ToDto(),
+            state.AgentTwo.Player.ToDto(),
+            state.TileMap.ToDto(),
+            state.Terminated
+        );
 
     public static NodeDto ToDto(this Node node) =>
         new(

@@ -1,4 +1,4 @@
-namespace Bomberman.Core.MCTS;
+namespace Bomberman.Core.Agents.MCTS;
 
 internal enum BombermanAction
 {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bomberman.Core;
-using Bomberman.Core.MCTS;
+using Bomberman.Core.Agents;
+using Bomberman.Core.Agents.MCTS;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
@@ -18,8 +19,6 @@ internal class BombermanGame : Game
     private SpriteFont _spriteFont;
 
     private readonly GameState _gameState;
-
-    private readonly KeyboardPlayer? _keyboardPlayer;
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -40,12 +39,11 @@ internal class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _gameState = new GameState();
-
-        if (options.Player == GamePlayer.Agent)
-            _ = Task.Run(() => Agent.LoopMcts(_gameState, options.Export));
-        else if (options.Player == GamePlayer.Keyboard)
-            _keyboardPlayer = new KeyboardPlayer(_gameState.Player);
+        // TODO: create agents based on options
+        _gameState = new GameState(
+            (state, player) => new WalkingAgent(state, player),
+            (state, player) => new WalkingAgent(state, player)
+        );
     }
 
     protected override void Initialize()
@@ -91,7 +89,6 @@ internal class BombermanGame : Game
         )
             Exit();
 
-        _keyboardPlayer?.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -108,12 +105,22 @@ internal class BombermanGame : Game
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        if (_gameState.Player.Alive)
+        if (_gameState.AgentOne.Player.Alive)
         {
-            _spriteBatch.Draw(_playerTexture, _gameState.Player.Position, Color.White);
+            _spriteBatch.Draw(_playerTexture, _gameState.AgentOne.Player.Position, Color.White);
             _spriteBatch.Draw(
                 _debugGridMarkerTexture,
-                (Vector2)_gameState.Player.Position.ToGridPosition(),
+                (Vector2)_gameState.AgentOne.Player.Position.ToGridPosition(),
+                Color.Navy
+            );
+        }
+
+        if (_gameState.AgentTwo.Player.Alive)
+        {
+            _spriteBatch.Draw(_playerTexture, _gameState.AgentTwo.Player.Position, Color.White);
+            _spriteBatch.Draw(
+                _debugGridMarkerTexture,
+                (Vector2)_gameState.AgentTwo.Player.Position.ToGridPosition(),
                 Color.Navy
             );
         }

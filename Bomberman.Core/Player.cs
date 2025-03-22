@@ -8,17 +8,17 @@ public class Player : IUpdatable, IDamageable
 {
     public Vector2 Position { get; private set; }
 
-    public int BombRange { get; internal set; } = 1;
+    public int BombRange { get; } = 1;
 
-    public int MaxPlacedBombs { get; internal set; } = 1;
+    public int MaxPlacedBombs { get; } = 1;
 
-    public float Speed { get; internal set; } = 2;
+    public float Speed { get; } = 2;
 
     private Vector2 _velocityDirection = Vector2.Zero;
 
     public bool Alive { get; private set; } = true;
 
-    public bool CanPlaceBomb =>
+    internal bool CanPlaceBomb =>
         _placedBombTiles.Count < MaxPlacedBombs || _placedBombTiles.Any(bomb => bomb.Detonated);
 
     private readonly List<BombTile> _placedBombTiles = [];
