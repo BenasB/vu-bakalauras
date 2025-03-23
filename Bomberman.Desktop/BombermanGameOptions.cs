@@ -2,13 +2,16 @@ namespace Bomberman.Desktop;
 
 internal record BombermanGameOptions
 {
-    public GamePlayer Player { get; set; } = GamePlayer.Agent;
+    public PlayerType PlayerOne { get; set; } = PlayerType.Walking;
+    public PlayerType PlayerTwo { get; set; } = PlayerType.Walking;
 
     public bool Export { get; set; } = false;
 }
 
-internal enum GamePlayer
+internal enum PlayerType
 {
-    Agent,
+    Static,
+    Walking,
+    Mcts,
     Keyboard,
 }

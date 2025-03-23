@@ -2,6 +2,8 @@
 
 public abstract class Agent : IUpdatable
 {
+    // TODO: Add player number
+
     public readonly Player Player;
 
     protected Agent(Player player)

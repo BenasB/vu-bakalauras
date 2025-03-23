@@ -4,6 +4,8 @@ namespace Bomberman.Core;
 
 public class GameState : IUpdatable
 {
+    // TODO: Store agents in an array to let agents find themselves (or opponents) from their playerNumber
+
     public Agent AgentOne { get; }
     public Agent AgentTwo { get; }
 

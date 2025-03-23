@@ -12,23 +12,41 @@ for (int i = 0; i < args.Length; i++)
     else
         throw new InvalidOperationException($"Unsupported flag '{args[i]}'");
 
-    if (flag == "player")
+    const string playerPrefix = "player";
+    if (flag.StartsWith(playerPrefix))
     {
+        var number = flag[playerPrefix.Length..];
         i++;
         var value = args[i];
-        if (Enum.TryParse<GamePlayer>(value, ignoreCase: true, out var parsedValue))
-            options.Player = parsedValue;
+        if (Enum.TryParse<PlayerType>(value, ignoreCase: true, out var parsedValue))
+        {
+            switch (number)
+            {
+                case "one":
+                    options.PlayerOne = parsedValue;
+                    break;
+                case "two":
+                    options.PlayerTwo = parsedValue;
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported player number '{number}'");
+            }
+        }
         else
             throw new InvalidOperationException($"Unsupported '{flag}' value '{value}'");
     }
     else if (flag == "export")
     {
-        if (options.Player != GamePlayer.Agent)
+        if (options.PlayerOne != PlayerType.Mcts)
             throw new InvalidOperationException(
-                "Flag 'export' may only be used after setting the flag 'player' to 'agent'"
+                $"Flag 'export' may only be used after setting the flag '{nameof(options.PlayerOne)}' to '{nameof(PlayerType.Mcts)}'"
             );
 
         options.Export = true;
+    }
+    else
+    {
+        throw new InvalidOperationException($"Unsupported flag '{args[i]}'");
     }
 }
 

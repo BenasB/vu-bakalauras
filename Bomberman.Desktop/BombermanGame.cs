@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Bomberman.Core;
 using Bomberman.Core.Agents;
-using Bomberman.Core.Agents.MCTS;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
@@ -19,6 +18,7 @@ internal class BombermanGame : Game
     private SpriteFont _spriteFont;
 
     private readonly GameState _gameState;
+    private readonly List<KeyboardPlayer> _keyboardPlayers = [];
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -30,6 +30,9 @@ internal class BombermanGame : Game
     private Texture2D _blankTexture;
     private Texture2D _debugGridMarkerTexture;
 
+    private static readonly TimeSpan RunningSlowThreshold = TimeSpan.FromMilliseconds(500);
+    private TimeSpan _runningSlowAccumulator = TimeSpan.Zero;
+
     public BombermanGame(BombermanGameOptions options)
     {
         // Disable throttling when the window is inactive
@@ -39,11 +42,36 @@ internal class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        // TODO: create agents based on options
         _gameState = new GameState(
-            (state, player) => new WalkingAgent(state, player),
-            (state, player) => new WalkingAgent(state, player)
+            GetAgentFactory(options.PlayerOne, 1),
+            GetAgentFactory(options.PlayerTwo, 2)
         );
+        return;
+
+        Func<GameState, Player, Agent> GetAgentFactory(PlayerType type, int playerNumber) =>
+            type switch
+            {
+                PlayerType.Static => (_, player) => new StaticAgent(player),
+                PlayerType.Walking => (state, player) => new WalkingAgent(state, player),
+                PlayerType.Keyboard => (_, player) =>
+                {
+                    var keyboardPlayer = new KeyboardPlayer(
+                        player,
+                        playerNumber switch
+                        {
+                            1 => KeyboardPlayer.KeyPreset.Wasd,
+                            2 => KeyboardPlayer.KeyPreset.Arrows,
+                            _ => throw new InvalidOperationException(
+                                $"There isn't any key preset assigned to player number {playerNumber}"
+                            ),
+                        }
+                    );
+
+                    _keyboardPlayers.Add(keyboardPlayer);
+                    return new StaticAgent(player);
+                },
+                _ => throw new NotSupportedException("This player type is not supported yet"),
+            };
     }
 
     protected override void Initialize()
@@ -78,10 +106,21 @@ internal class BombermanGame : Game
         if (_gameState.Terminated)
             return;
 
-        // if (gameTime.IsRunningSlowly)
-        //     throw new InvalidOperationException(
-        //         "Update takes more time than a frame has allocated to it, results are unexpected"
-        //     );
+        if (gameTime.IsRunningSlowly)
+        {
+            _runningSlowAccumulator += gameTime.ElapsedGameTime;
+
+            if (_runningSlowAccumulator >= RunningSlowThreshold)
+            {
+                throw new InvalidOperationException(
+                    "Update takes more time than a frame has allocated to it, results are unexpected"
+                );
+            }
+        }
+        else
+        {
+            _runningSlowAccumulator = TimeSpan.Zero;
+        }
 
         if (
             GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
@@ -89,6 +128,8 @@ internal class BombermanGame : Game
         )
             Exit();
 
+        foreach (var keyboardPlayer in _keyboardPlayers)
+            keyboardPlayer.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
