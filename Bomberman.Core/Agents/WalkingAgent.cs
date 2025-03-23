@@ -10,8 +10,8 @@ public class WalkingAgent : Agent
     private readonly GameState _state;
     private readonly StatefulRandom _rnd;
 
-    public WalkingAgent(GameState state, Player player)
-        : base(player)
+    public WalkingAgent(GameState state, Player player, int agentIndex)
+        : base(player, agentIndex)
     {
         _state = state;
         _target = player.Position.ToGridPosition();
@@ -19,7 +19,7 @@ public class WalkingAgent : Agent
     }
 
     private WalkingAgent(GameState state, Player player, WalkingAgent original)
-        : base(player)
+        : base(player, original.AgentIndex)
     {
         _state = state;
         _target = original._target;

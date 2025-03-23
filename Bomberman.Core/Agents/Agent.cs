@@ -2,13 +2,14 @@
 
 public abstract class Agent : IUpdatable
 {
-    // TODO: Add player number
+    protected readonly int AgentIndex;
 
     public readonly Player Player;
 
-    protected Agent(Player player)
+    protected Agent(Player player, int agentIndex)
     {
         Player = player;
+        AgentIndex = agentIndex;
     }
 
     public virtual void Update(TimeSpan deltaTime)

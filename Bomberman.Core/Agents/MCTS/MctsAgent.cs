@@ -11,15 +11,15 @@ public class MctsAgent : Agent
 {
     private readonly GameState _state;
 
-    public MctsAgent(GameState state, Player player)
-        : base(player)
+    public MctsAgent(GameState state, Player player, int agentIndex)
+        : base(player, agentIndex)
     {
         _state = state;
         _ = Task.Run(() => LoopMcts(false));
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
-        : base(player)
+        : base(player, original.AgentIndex)
     {
         _state = state;
     }

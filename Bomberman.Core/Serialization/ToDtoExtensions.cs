@@ -35,8 +35,8 @@ internal static class ToDtoExtensions
 
     private static GameStateDto ToDto(this GameState state) =>
         new(
-            state.AgentOne.Player.ToDto(),
-            state.AgentTwo.Player.ToDto(),
+            state.Agents[0].Player.ToDto(),
+            state.Agents[1].Player.ToDto(),
             state.TileMap.ToDto(),
             state.Terminated
         );

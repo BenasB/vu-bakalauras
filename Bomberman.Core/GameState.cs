@@ -4,19 +4,13 @@ namespace Bomberman.Core;
 
 public class GameState : IUpdatable
 {
-    // TODO: Store agents in an array to let agents find themselves (or opponents) from their playerNumber
-
-    public Agent AgentOne { get; }
-    public Agent AgentTwo { get; }
+    public Agent[] Agents { get; }
 
     public TileMap TileMap { get; }
 
-    public bool Terminated => !AgentOne.Player.Alive || !AgentTwo.Player.Alive;
+    public bool Terminated => Agents.Any(a => !a.Player.Alive);
 
-    public GameState(
-        Func<GameState, Player, Agent> agentOneFactory,
-        Func<GameState, Player, Agent> agentTwoFactory
-    )
+    public GameState(Func<GameState, Player, int, Agent> agentFactory)
     {
         var startOne = new GridPosition(Row: 5, Column: 7);
         var startTwo = new GridPosition(Row: 5, Column: 12);
@@ -24,19 +18,22 @@ public class GameState : IUpdatable
         var playerOne = new Player(startOne, TileMap);
         var playerTwo = new Player(startTwo, TileMap);
 
-        AgentOne = agentOneFactory(this, playerOne);
-        AgentTwo = agentTwoFactory(this, playerTwo);
+        var agentOne = agentFactory(this, playerOne, 0);
+        var agentTwo = agentFactory(this, playerTwo, 1);
+
+        Agents = [agentOne, agentTwo];
     }
 
     public GameState(GameState original)
     {
         TileMap = new TileMap(original.TileMap);
 
-        var playerOne = new Player(original.AgentOne.Player, TileMap);
-        var playerTwo = new Player(original.AgentTwo.Player, TileMap);
-
-        AgentOne = original.AgentOne.Clone(this, playerOne);
-        AgentTwo = original.AgentTwo.Clone(this, playerTwo);
+        Agents = new Agent[original.Agents.Length];
+        for (int i = 0; i < original.Agents.Length; i++)
+        {
+            var player = new Player(original.Agents[i].Player, TileMap);
+            Agents[i] = original.Agents[i].Clone(this, player);
+        }
     }
 
     public void Update(TimeSpan deltaTime)
@@ -44,8 +41,9 @@ public class GameState : IUpdatable
         if (Terminated)
             return;
 
-        AgentOne.Update(deltaTime);
-        AgentTwo.Update(deltaTime);
+        foreach (var agent in Agents)
+            agent.Update(deltaTime);
+
         TileMap.Update(deltaTime);
     }
 }

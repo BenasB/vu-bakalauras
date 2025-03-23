@@ -13,12 +13,12 @@ namespace Bomberman.Desktop;
 
 internal class BombermanGame : Game
 {
+    private readonly BombermanGameOptions _options;
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont _spriteFont;
 
     private readonly GameState _gameState;
-    private readonly List<KeyboardPlayer> _keyboardPlayers = [];
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -35,6 +35,8 @@ internal class BombermanGame : Game
 
     public BombermanGame(BombermanGameOptions options)
     {
+        _options = options;
+
         // Disable throttling when the window is inactive
         InactiveSleepTime = TimeSpan.Zero;
 
@@ -42,36 +44,36 @@ internal class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _gameState = new GameState(
-            GetAgentFactory(options.PlayerOne, 1),
-            GetAgentFactory(options.PlayerTwo, 2)
-        );
-        return;
+        _gameState = new GameState(CreateAgent);
+    }
 
-        Func<GameState, Player, Agent> GetAgentFactory(PlayerType type, int playerNumber) =>
-            type switch
-            {
-                PlayerType.Static => (_, player) => new StaticAgent(player),
-                PlayerType.Walking => (state, player) => new WalkingAgent(state, player),
-                PlayerType.Keyboard => (_, player) =>
+    private Agent CreateAgent(GameState state, Player player, int agentIndex)
+    {
+        var playerType = agentIndex switch
+        {
+            0 => _options.PlayerOne,
+            1 => _options.PlayerTwo,
+            _ => throw new InvalidOperationException("Only 2 players are supported."),
+        };
+
+        return playerType switch
+        {
+            PlayerType.Static => new StaticAgent(player, agentIndex),
+            PlayerType.Walking => new WalkingAgent(state, player, agentIndex),
+            PlayerType.Keyboard => new KeyboardAgent(
+                player,
+                agentIndex,
+                agentIndex switch
                 {
-                    var keyboardPlayer = new KeyboardPlayer(
-                        player,
-                        playerNumber switch
-                        {
-                            1 => KeyboardPlayer.KeyPreset.Wasd,
-                            2 => KeyboardPlayer.KeyPreset.Arrows,
-                            _ => throw new InvalidOperationException(
-                                $"There isn't any key preset assigned to player number {playerNumber}"
-                            ),
-                        }
-                    );
-
-                    _keyboardPlayers.Add(keyboardPlayer);
-                    return new StaticAgent(player);
-                },
-                _ => throw new NotSupportedException("This player type is not supported yet"),
-            };
+                    0 => KeyboardPresets.WasdPreset,
+                    1 => KeyboardPresets.ArrowsPreset,
+                    _ => throw new InvalidOperationException(
+                        "Only 2 keyboard presets are supported."
+                    ),
+                }
+            ),
+            _ => throw new NotSupportedException("This player type is not supported yet"),
+        };
     }
 
     protected override void Initialize()
@@ -128,8 +130,6 @@ internal class BombermanGame : Game
         )
             Exit();
 
-        foreach (var keyboardPlayer in _keyboardPlayers)
-            keyboardPlayer.Update(gameTime.ElapsedGameTime);
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
@@ -146,23 +146,23 @@ internal class BombermanGame : Game
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }
 
-        if (_gameState.AgentOne.Player.Alive)
+        for (int i = 0; i < _gameState.Agents.Length; i++)
         {
-            _spriteBatch.Draw(_playerTexture, _gameState.AgentOne.Player.Position, Color.White);
-            _spriteBatch.Draw(
-                _debugGridMarkerTexture,
-                (Vector2)_gameState.AgentOne.Player.Position.ToGridPosition(),
-                Color.Navy
-            );
-        }
+            if (!_gameState.Agents[i].Player.Alive)
+                continue;
 
-        if (_gameState.AgentTwo.Player.Alive)
-        {
-            _spriteBatch.Draw(_playerTexture, _gameState.AgentTwo.Player.Position, Color.White);
+            var tint = i switch
+            {
+                0 => Color.Green,
+                1 => Color.Red,
+                _ => Color.White,
+            };
+
+            _spriteBatch.Draw(_playerTexture, _gameState.Agents[i].Player.Position, tint);
             _spriteBatch.Draw(
                 _debugGridMarkerTexture,
-                (Vector2)_gameState.AgentTwo.Player.Position.ToGridPosition(),
-                Color.Navy
+                (Vector2)_gameState.Agents[i].Player.Position.ToGridPosition(),
+                tint
             );
         }
 
