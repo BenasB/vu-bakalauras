@@ -37,9 +37,9 @@ for (int i = 0; i < args.Length; i++)
     }
     else if (flag == "export")
     {
-        if (options.PlayerOne != PlayerType.Mcts)
+        if (options.PlayerOne != PlayerType.Mcts && options.PlayerTwo != PlayerType.Mcts)
             throw new InvalidOperationException(
-                $"Flag 'export' may only be used after setting the flag '{nameof(options.PlayerOne)}' to '{nameof(PlayerType.Mcts)}'"
+                $"Flag 'export' may only be used with at least one '{nameof(PlayerType.Mcts)}' agent"
             );
 
         options.Export = true;

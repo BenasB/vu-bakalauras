@@ -73,7 +73,7 @@ internal class BombermanGame : Game
                     ),
                 }
             ),
-            PlayerType.Mcts => new MctsAgent(state, player, agentIndex),
+            PlayerType.Mcts => new MctsAgent(state, player, agentIndex, _options.Export),
             _ => throw new NotSupportedException("This player type is not supported yet"),
         };
     }

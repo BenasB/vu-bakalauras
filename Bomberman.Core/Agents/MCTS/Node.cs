@@ -113,22 +113,21 @@ internal class Node
     /// </summary>
     private static void AdvanceTimeOneTile(GameState stateToAdvance, MctsAgent agent)
     {
-        const int simulationFps = 20;
-        const double secondsPerFrame = 1.0 / simulationFps;
+        const double secondsPerFrame = 1.0 / 20;
         var frameDeltaTime = TimeSpan.FromSeconds(secondsPerFrame);
 
         var oneTileDeltaTimeInSeconds = 1.0 / agent.Player.Speed;
 
         // Splitting the time it takes to move one tile into constant fps to more closely match the real game
         var frameCount = (int)(oneTileDeltaTimeInSeconds / secondsPerFrame);
+        var simulationTimeLeft = oneTileDeltaTimeInSeconds;
         for (int i = 0; i < frameCount; i++)
         {
             stateToAdvance.Update(frameDeltaTime);
+            simulationTimeLeft -= secondsPerFrame;
         }
 
-        var remainingDeltaTime = TimeSpan.FromSeconds(oneTileDeltaTimeInSeconds % secondsPerFrame);
-
-        if (remainingDeltaTime > TimeSpan.Zero)
-            stateToAdvance.Update(remainingDeltaTime);
+        if (simulationTimeLeft > 0)
+            stateToAdvance.Update(TimeSpan.FromSeconds(simulationTimeLeft));
     }
 }

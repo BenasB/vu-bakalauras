@@ -111,7 +111,7 @@ async function loadAndRenderTree(treeData) {
       const { Children, State, ...nodeDetails } = d.data;
       const { TileMap, ...stateDetails } = State;
 
-      drawTileMap(TileMap, State.Player);
+      drawTileMap(TileMap, State.Players);
 
       document.getElementById("node-details").textContent = JSON.stringify(
         { ...nodeDetails, State: { ...stateDetails } },
@@ -146,15 +146,10 @@ const textures = {};
 function preloadTextures() {
   const textureFiles = [
     { name: "bomb", url: "textures/bomb.png" },
-    { name: "bombup", url: "textures/bombup.png" },
     { name: "box", url: "textures/box.png" },
-    { name: "coin", url: "textures/coin.png" },
     { name: "explosion", url: "textures/explosion.png" },
-    { name: "fireup", url: "textures/fireup.png" },
     { name: "floor", url: "textures/floor.png" },
-    { name: "lava", url: "textures/lava.png" },
     { name: "player", url: "textures/player.png" },
-    { name: "speedup", url: "textures/speedup.png" },
     { name: "wall", url: "textures/wall.png" },
   ];
 
@@ -172,7 +167,7 @@ function preloadTextures() {
   );
 }
 
-function drawTileMap({ Width, Height, Tiles }, Player) {
+function drawTileMap({ Width, Height, Tiles }, Players) {
   const tileSize = 32;
   canvas.width = Width * tileSize;
   canvas.height = Height * tileSize;
@@ -191,15 +186,18 @@ function drawTileMap({ Width, Height, Tiles }, Player) {
     );
   }
 
-  if (Player.Alive) {
+  Players.forEach(player => {
+    if (!player.Alive)
+      return;
+
     ctx.drawImage(
       textures["player"],
-      Player.Position.X,
-      Player.Position.Y,
+      player.Position.X,
+      player.Position.Y,
       tileSize,
       tileSize
     );
-  }
+  });
 }
 
 document.getElementById("json-upload").addEventListener("change", (event) => {

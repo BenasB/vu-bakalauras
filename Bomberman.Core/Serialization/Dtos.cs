@@ -10,12 +10,7 @@ internal record NodeDto(
     NodeDto[] Children
 );
 
-internal record GameStateDto(
-    PlayerDto PlayerOne,
-    PlayerDto PlayerTwo,
-    TileMapDto TileMap,
-    bool Terminated
-);
+internal record GameStateDto(PlayerDto[] Players, TileMapDto TileMap, bool Terminated);
 
 internal record PlayerDto(
     Vector2Dto Position,

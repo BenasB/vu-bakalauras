@@ -10,12 +10,13 @@ namespace Bomberman.Core.Agents.MCTS;
 public class MctsAgent : Agent
 {
     private readonly GameState _state;
+    private static readonly string SerializationOutputDirectory = $"{DateTimeOffset.Now.Ticks}";
 
-    public MctsAgent(GameState state, Player player, int agentIndex)
+    public MctsAgent(GameState state, Player player, int agentIndex, bool writeJson)
         : base(player, agentIndex)
     {
         _state = state;
-        _ = Task.Run(() => LoopMcts(false));
+        _ = Task.Run(() => LoopMcts(writeJson));
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
@@ -81,20 +82,22 @@ public class MctsAgent : Agent
         }
     }
 
-    private static void SerializationLoop(BlockingCollection<Node> collection)
+    private void SerializationLoop(BlockingCollection<Node> collection)
     {
-        var outputDirectory = $"{DateTimeOffset.Now.Ticks}";
-        Directory.CreateDirectory(outputDirectory);
+        Directory.CreateDirectory(SerializationOutputDirectory);
 
         var jsonOptions = new JsonSerializerOptions { MaxDepth = 1024 };
 
-        while (true)
+        while (!collection.IsAddingCompleted)
         {
             var root = collection.Take();
             var dto = root.ToDto();
 
             File.WriteAllText(
-                Path.Combine(outputDirectory, $"{DateTimeOffset.Now.Ticks}.json"),
+                Path.Combine(
+                    SerializationOutputDirectory,
+                    $"{AgentIndex}-{DateTimeOffset.Now.Ticks}.json"
+                ),
                 JsonSerializer.Serialize(dto, jsonOptions)
             );
         }
