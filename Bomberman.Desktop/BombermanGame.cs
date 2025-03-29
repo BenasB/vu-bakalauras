@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Bomberman.Core;
 using Bomberman.Core.Agents;
+using Bomberman.Core.Agents.MCTS;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 using Microsoft.Xna.Framework;
@@ -72,6 +73,7 @@ internal class BombermanGame : Game
                     ),
                 }
             ),
+            PlayerType.Mcts => new MctsAgent(state, player, agentIndex),
             _ => throw new NotSupportedException("This player type is not supported yet"),
         };
     }

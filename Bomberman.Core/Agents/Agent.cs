@@ -2,7 +2,7 @@
 
 public abstract class Agent : IUpdatable
 {
-    protected readonly int AgentIndex;
+    internal readonly int AgentIndex;
 
     public readonly Player Player;
 

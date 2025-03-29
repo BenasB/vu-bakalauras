@@ -29,54 +29,56 @@ public class MctsAgent : Agent
 
     private void LoopMcts(bool writeJson)
     {
-        // var serializationQueue = new BlockingCollection<Node>(new ConcurrentQueue<Node>());
-        //
-        // if (writeJson)
-        //     _ = Task.Run(() => SerializationLoop(serializationQueue));
-        //
-        // var previousAction = BombermanAction.Stand;
-        // while (!_state.Terminated)
-        // {
-        //     // IMPORTANT: Starting state should be simulated based on previous action determined by MCTS
-        //     var root = new Node(_state, previousAction);
-        //
-        //     var iterations = 0;
-        //
-        //     // TODO: What about 'Stand' action, should we wait full time?
-        //     // TODO: Make this dependent on real game state instead of time to support non constant fps
-        //     var mctsInterval = TimeSpan.FromSeconds(1 / Player.Speed);
-        //     // TODO: Do we need alignment to coordinates after a single action is performed?
-        //
-        //     var stopWatch = Stopwatch.StartNew();
-        //     while (stopWatch.Elapsed < mctsInterval && !_state.Terminated)
-        //     {
-        //         iterations++;
-        //         var selectedNode = root.Select();
-        //         var expandedNode = selectedNode.Expand();
-        //         var reward = expandedNode.Simulate();
-        //         expandedNode.Backpropagate(reward);
-        //     }
-        //     stopWatch.Stop();
-        //
-        //     if (_state.Terminated)
-        //         break;
-        //
-        //     var bestNode = root.Children.MaxBy(child => child.Visits);
-        //     var bestAction =
-        //         bestNode?.Action
-        //         ?? throw new InvalidOperationException("Could not find the best action");
-        //
-        //     // Be aware of concurrency
-        //     ApplyAction(bestAction);
-        //     previousAction = bestAction;
-        //
-        //     if (writeJson)
-        //         serializationQueue.Add(root);
-        //
-        //     Logger.Information(
-        //         $"Applied best action after ({iterations} iterations): {bestAction}"
-        //     );
-        // }
+        Logger.Information($"Starting MCTS loop for agent {AgentIndex}");
+
+        var serializationQueue = new BlockingCollection<Node>(new ConcurrentQueue<Node>());
+
+        if (writeJson)
+            _ = Task.Run(() => SerializationLoop(serializationQueue));
+
+        var previousAction = BombermanAction.Stand;
+        while (!_state.Terminated)
+        {
+            // IMPORTANT: Starting state should be simulated based on previous action determined by MCTS
+            var root = new Node(_state, this, previousAction);
+
+            var iterations = 0;
+
+            // TODO: What about 'Stand' action, should we wait full time?
+            // TODO: Make this dependent on real game state instead of time to support non constant fps
+            var mctsInterval = TimeSpan.FromSeconds(1 / Player.Speed);
+            // TODO: Do we need alignment to coordinates after a single action is performed?
+
+            var stopWatch = Stopwatch.StartNew();
+            while (stopWatch.Elapsed < mctsInterval && !_state.Terminated)
+            {
+                iterations++;
+                var selectedNode = root.Select();
+                var expandedNode = selectedNode.Expand();
+                var reward = expandedNode.Simulate();
+                expandedNode.Backpropagate(reward);
+            }
+            stopWatch.Stop();
+
+            if (_state.Terminated)
+                break;
+
+            var bestNode = root.Children.MaxBy(child => child.Visits);
+            var bestAction =
+                bestNode?.Action
+                ?? throw new InvalidOperationException("Could not find the best action");
+
+            // Be aware of concurrency
+            ApplyAction(bestAction);
+            previousAction = bestAction;
+
+            if (writeJson)
+                serializationQueue.Add(root);
+
+            Logger.Information(
+                $"Applied best action after ({iterations} iterations): {bestAction}"
+            );
+        }
     }
 
     private static void SerializationLoop(BlockingCollection<Node> collection)

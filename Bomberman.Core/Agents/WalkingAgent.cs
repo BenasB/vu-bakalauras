@@ -9,6 +9,7 @@ public class WalkingAgent : Agent
 
     private readonly GameState _state;
     private readonly StatefulRandom _rnd;
+    private bool _active;
 
     public WalkingAgent(GameState state, Player player, int agentIndex)
         : base(player, agentIndex)
@@ -16,6 +17,7 @@ public class WalkingAgent : Agent
         _state = state;
         _target = player.Position.ToGridPosition();
         _rnd = new StatefulRandom();
+        _active = true;
     }
 
     private WalkingAgent(GameState state, Player player, WalkingAgent original)
@@ -24,6 +26,7 @@ public class WalkingAgent : Agent
         _state = state;
         _target = original._target;
         _rnd = new StatefulRandom(original._rnd);
+        _active = original._active;
     }
 
     internal override Agent Clone(GameState state, Player player) =>
@@ -33,6 +36,9 @@ public class WalkingAgent : Agent
     {
         base.Update(deltaTime);
 
+        if (!_active)
+            return;
+
         while (!IsPlayerOnTarget())
             return;
 
@@ -41,6 +47,13 @@ public class WalkingAgent : Agent
         var clearTiles = playerPosition
             .Neighbours.Where(tile => _state.TileMap.GetTile(tile) is null)
             .ToList();
+
+        if (clearTiles.Count == 0)
+        {
+            // TODO: Retry to find a new target (at intervals) instead of giving up completely
+            _active = false;
+            return;
+        }
 
         var randomIndex = (int)(_rnd.NextDouble() * clearTiles.Count);
         _target = clearTiles[randomIndex];
