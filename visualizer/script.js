@@ -141,9 +141,10 @@ async function loadAndRenderTree(treeData) {
     });
 }
 
+const foregroundTextures = [];
 const textures = {};
 
-function preloadTextures() {
+async function preloadTextures() {
   const textureFiles = [
     { name: "bomb", url: "textures/bomb.png" },
     { name: "box", url: "textures/box.png" },
@@ -153,7 +154,7 @@ function preloadTextures() {
     { name: "wall", url: "textures/wall.png" },
   ];
 
-  return Promise.all(
+  await Promise.all(
     textureFiles.map((file) => {
       return new Promise((resolve) => {
         const img = new Image();
@@ -165,25 +166,43 @@ function preloadTextures() {
       });
     })
   );
+
+  foregroundTextures.push(textures["bomb"]);
+  foregroundTextures.push(textures["box"]);
+  foregroundTextures.push(textures["explosion"]);
+  foregroundTextures.push(textures["wall"]);
 }
 
-function drawTileMap({ Width, Height, Tiles }, Players) {
+function drawTileMap(TileMap, Players) {
   const tileSize = 32;
-  canvas.width = Width * tileSize;
-  canvas.height = Height * tileSize;
+  const width = TileMap[0].length;
+  const height = TileMap.length;
+  canvas.width = width * tileSize;
+  canvas.height = height * tileSize;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (const {
-    Position: { Row, Column },
-    Type,
-  } of Tiles) {
-    ctx.drawImage(
-      textures[Type],
-      Column * tileSize,
-      Row * tileSize,
-      tileSize,
-      tileSize
-    );
+  for (let row = 0; row < height; row++) {
+    for (let column = 0; column < width; column++) {
+      ctx.drawImage(
+        textures["floor"],
+        column * tileSize,
+        row * tileSize,
+        tileSize,
+        tileSize
+      );
+
+      const textureIndex = TileMap[row][column]
+      if (textureIndex == -1)
+        continue;
+
+      ctx.drawImage(
+        foregroundTextures[textureIndex],
+        column * tileSize,
+        row * tileSize,
+        tileSize,
+        tileSize
+      );
+    }
   }
 
   Players.forEach(player => {

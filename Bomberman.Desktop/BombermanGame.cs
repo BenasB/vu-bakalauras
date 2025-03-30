@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using Bomberman.Core;
 using Bomberman.Core.Agents;
 using Bomberman.Core.Agents.MCTS;
@@ -143,7 +143,12 @@ internal class BombermanGame : Game
 
         _spriteBatch.Begin();
 
-        foreach (var tile in _gameState.TileMap.Tiles)
+        foreach (var tile in _gameState.TileMap.BackgroundTiles.SelectMany(r => r))
+        {
+            _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
+        }
+
+        foreach (var tile in _gameState.TileMap.ForegroundTiles.SelectMany(r => r).OfType<Tile>())
         {
             _spriteBatch.Draw(GetTileTexture(tile), (Vector2)tile.Position, Color.White);
         }

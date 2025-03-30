@@ -13,8 +13,11 @@ public class TileMap : IUpdatable
     private readonly Tile?[][] _foregroundTiles;
     private readonly StatefulRandom _rnd = new(44);
 
-    public ImmutableArray<Tile> Tiles =>
-        [.. _backgroundTiles.Concat(_foregroundTiles).SelectMany(row => row).OfType<Tile>()];
+    public ImmutableArray<ImmutableArray<Tile>> BackgroundTiles =>
+        [.. _backgroundTiles.Select(row => row.ToImmutableArray())];
+
+    public ImmutableArray<ImmutableArray<Tile?>> ForegroundTiles =>
+        [.. _foregroundTiles.Select(row => row.ToImmutableArray())];
 
     public TileMap(int width, int height)
     {
@@ -42,7 +45,7 @@ public class TileMap : IUpdatable
         _rnd = new StatefulRandom(original._rnd);
 
         _backgroundTiles = original
-            ._backgroundTiles.Select(row =>
+            .BackgroundTiles.Select(row =>
                 row.Select(originalTile => originalTile.Clone(this)).ToArray()
             )
             .ToArray();
