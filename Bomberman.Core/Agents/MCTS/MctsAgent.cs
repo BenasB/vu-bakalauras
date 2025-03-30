@@ -208,11 +208,19 @@ public class MctsAgent : Agent
 
         var gridPosition = Player.Position.ToGridPosition();
 
+        var opponent = _state.Agents.First(a => a != this).Player;
+        var opponentGridPosition = opponent.Position.ToGridPosition();
+
         var shouldPlaceBomb =
             Player.CanPlaceBomb
             && _state.TileMap.GetTile(gridPosition) is null
             && (
-                _state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 }) is BoxTile
+                gridPosition with { Row = gridPosition.Row - 1 } == opponentGridPosition
+                || gridPosition with { Row = gridPosition.Row + 1 } == opponentGridPosition
+                || gridPosition with { Column = gridPosition.Column - 1 } == opponentGridPosition
+                || gridPosition with { Column = gridPosition.Column + 1 } == opponentGridPosition
+                || _state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 })
+                    is BoxTile
                 || _state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
                     is BoxTile
                 || _state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })

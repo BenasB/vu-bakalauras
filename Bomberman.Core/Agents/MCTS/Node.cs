@@ -87,7 +87,25 @@ internal class Node
             AdvanceTimeOneTile(simulationState, simulationAgent);
         }
 
-        return 0.5; // TODO: Score
+        var opponent = simulationState.Agents.First(a => a != simulationAgent);
+
+        if (!simulationAgent.Player.Alive)
+            return 0;
+
+        if (!opponent.Player.Alive)
+            return 1;
+
+        var manhattanDistance =
+            Math.Abs(simulationAgent.Player.Position.X - opponent.Player.Position.X)
+            + Math.Abs(simulationAgent.Player.Position.Y - opponent.Player.Position.Y);
+
+        var maxManhattanDistance =
+            (simulationState.TileMap.Width - 2 + simulationState.TileMap.Height - 2)
+            * Constants.TileSize;
+
+        var distanceScore = 0.25 + ((manhattanDistance / maxManhattanDistance) / 2);
+
+        return distanceScore;
     }
 
     public void Backpropagate(double reward)
@@ -113,7 +131,7 @@ internal class Node
     /// </summary>
     private static void AdvanceTimeOneTile(GameState stateToAdvance, MctsAgent agent)
     {
-        const double secondsPerFrame = 1.0 / 20;
+        const double secondsPerFrame = 1.0 / 10;
         var frameDeltaTime = TimeSpan.FromSeconds(secondsPerFrame);
 
         var oneTileDeltaTimeInSeconds = 1.0 / agent.Player.Speed;
