@@ -1,7 +1,17 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Bomberman.Core.Agents;
+using Bomberman.Core.Agents.MCTS;
+using Bomberman.Core.Utilities;
 using Bomberman.Desktop;
 
 var options = new BombermanGameOptions();
+var jsonOptions = new JsonSerializerOptions
+{
+    PropertyNameCaseInsensitive = true,
+    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+};
 
 const string flagPrefix = "--";
 for (int i = 0; i < args.Length; i++)
@@ -15,34 +25,46 @@ for (int i = 0; i < args.Length; i++)
     const string playerPrefix = "player";
     if (flag.StartsWith(playerPrefix))
     {
-        var number = flag[playerPrefix.Length..];
+        var numberString = flag[playerPrefix.Length..];
+
+        var playerNumber = numberString switch
+        {
+            "one" => 1,
+            "two" => 2,
+            _ => throw new InvalidOperationException($"Unsupported player number '{numberString}'"),
+        };
+
         i++;
         var value = args[i];
-        if (Enum.TryParse<PlayerType>(value, ignoreCase: true, out var parsedValue))
+        if (!Enum.TryParse<AgentType>(value, ignoreCase: true, out var parsedValue))
         {
-            switch (number)
-            {
-                case "one":
-                    options.PlayerOne = parsedValue;
-                    break;
-                case "two":
-                    options.PlayerTwo = parsedValue;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unsupported player number '{number}'");
-            }
-        }
-        else
             throw new InvalidOperationException($"Unsupported '{flag}' value '{value}'");
-    }
-    else if (flag == "export")
-    {
-        if (options.PlayerOne != PlayerType.Mcts && options.PlayerTwo != PlayerType.Mcts)
-            throw new InvalidOperationException(
-                $"Flag 'export' may only be used with at least one '{nameof(PlayerType.Mcts)}' agent"
-            );
+        }
 
-        options.Export = true;
+        MctsAgentOptions? mctsOptions = null;
+        try
+        {
+            var maybeMctsOptions = args[i + 1];
+            mctsOptions = JsonSerializer.Deserialize<MctsAgentOptions>(
+                maybeMctsOptions,
+                jsonOptions
+            );
+            i++;
+        }
+        catch (Exception) { }
+
+        if (playerNumber == 1)
+        {
+            options.PlayerOne = parsedValue;
+            if (mctsOptions != null)
+                options.PlayerOneMctsOptions = mctsOptions;
+        }
+        else if (playerNumber == 2)
+        {
+            options.PlayerTwo = parsedValue;
+            if (mctsOptions != null)
+                options.PlayerTwoMctsOptions = mctsOptions;
+        }
     }
     else
     {
@@ -50,5 +72,6 @@ for (int i = 0; i < args.Length; i++)
     }
 }
 
+Logger.Information($"Starting game with the following options: {options}");
 using var game = new BombermanGame(options);
 game.Run();

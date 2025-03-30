@@ -8,7 +8,7 @@ public class GameState : IUpdatable
 
     public TileMap TileMap { get; }
 
-    public bool Terminated => Agents.Any(a => !a.Player.Alive);
+    public bool Terminated => Agents.Any(a => a is { Player.Alive: false });
 
     public GameState(Func<GameState, Player, int, Agent> agentFactory)
     {
@@ -18,10 +18,9 @@ public class GameState : IUpdatable
         var playerOne = new Player(startOne, TileMap);
         var playerTwo = new Player(startTwo, TileMap);
 
-        var agentOne = agentFactory(this, playerOne, 0);
-        var agentTwo = agentFactory(this, playerTwo, 1);
-
-        Agents = [agentOne, agentTwo];
+        Agents = new Agent[2];
+        Agents[0] = agentFactory(this, playerOne, 0);
+        Agents[1] = agentFactory(this, playerTwo, 1);
     }
 
     public GameState(GameState original)
@@ -33,6 +32,21 @@ public class GameState : IUpdatable
         {
             var player = new Player(original.Agents[i].Player, TileMap);
             Agents[i] = original.Agents[i].Clone(this, player);
+        }
+    }
+
+    public GameState(
+        GameState original,
+        Func<GameState, GameState, Player, int, Agent> agentFactory
+    )
+    {
+        TileMap = new TileMap(original.TileMap);
+
+        Agents = new Agent[original.Agents.Length];
+        for (int i = 0; i < original.Agents.Length; i++)
+        {
+            var player = new Player(original.Agents[i].Player, TileMap);
+            Agents[i] = agentFactory(original, this, player, i);
         }
     }
 

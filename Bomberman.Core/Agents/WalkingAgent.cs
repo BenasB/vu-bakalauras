@@ -4,7 +4,7 @@ namespace Bomberman.Core.Agents;
 
 public class WalkingAgent : Agent
 {
-    private GridPosition _target;
+    private GridPosition? _target;
     private const float TargetThreshold = 0.1f;
 
     private readonly GameState _state;
@@ -15,7 +15,6 @@ public class WalkingAgent : Agent
         : base(player, agentIndex)
     {
         _state = state;
-        _target = player.Position.ToGridPosition();
         _rnd = new StatefulRandom();
         _active = true;
     }
@@ -39,7 +38,7 @@ public class WalkingAgent : Agent
         if (!_active)
             return;
 
-        while (!IsPlayerOnTarget())
+        if (_target != null && !IsPlayerOnTarget())
             return;
 
         var playerPosition = Player.Position.ToGridPosition();
@@ -69,7 +68,8 @@ public class WalkingAgent : Agent
     }
 
     private bool IsPlayerOnTarget() =>
-        Player.Position.X > _target.Column * Constants.TileSize - TargetThreshold
+        _target != null
+        && Player.Position.X > _target.Column * Constants.TileSize - TargetThreshold
         && Player.Position.X < _target.Column * Constants.TileSize + TargetThreshold
         && Player.Position.Y > _target.Row * Constants.TileSize - TargetThreshold
         && Player.Position.Y < _target.Row * Constants.TileSize + TargetThreshold;

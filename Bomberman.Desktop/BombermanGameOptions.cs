@@ -1,17 +1,13 @@
+using Bomberman.Core.Agents;
+using Bomberman.Core.Agents.MCTS;
+
 namespace Bomberman.Desktop;
 
 internal record BombermanGameOptions
 {
-    public PlayerType PlayerOne { get; set; } = PlayerType.Walking;
-    public PlayerType PlayerTwo { get; set; } = PlayerType.Walking;
+    public AgentType PlayerOne { get; set; } = AgentType.Walking;
+    public AgentType PlayerTwo { get; set; } = AgentType.Walking;
 
-    public bool Export { get; set; } = false;
-}
-
-internal enum PlayerType
-{
-    Static,
-    Walking,
-    Mcts,
-    Keyboard,
+    public MctsAgentOptions PlayerOneMctsOptions { get; set; } = new();
+    public MctsAgentOptions PlayerTwoMctsOptions { get; set; } = new();
 }

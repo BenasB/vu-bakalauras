@@ -17,13 +17,13 @@ internal class Node
     private readonly Random _rnd = new();
     private readonly MctsAgent _agent;
 
-    public Node(GameState initialState, MctsAgent agent, BombermanAction action)
+    public Node(GameState mctsStartingState, int agentIndex, BombermanAction action)
     {
         // TODO: Add the possibility to switch out the opponent logic
         _parent = null;
         Action = action;
-        State = new GameState(initialState);
-        _agent = (MctsAgent)State.Agents[agent.AgentIndex];
+        State = mctsStartingState;
+        _agent = (MctsAgent)State.Agents[agentIndex];
         AdvanceTimeOneTile(State, _agent);
         UnexploredActions = _agent.GetPossibleActions().ToList();
     }

@@ -10,38 +10,42 @@ namespace Bomberman.Core.Agents.MCTS;
 public class MctsAgent : Agent
 {
     private readonly GameState _state;
+    private readonly MctsAgentOptions _options;
     private static readonly string SerializationOutputDirectory = $"{DateTimeOffset.Now.Ticks}";
 
-    public MctsAgent(GameState state, Player player, int agentIndex, bool writeJson)
+    public MctsAgent(GameState state, Player player, int agentIndex, MctsAgentOptions options)
         : base(player, agentIndex)
     {
         _state = state;
-        _ = Task.Run(() => LoopMcts(writeJson));
+        _options = options;
+        _ = Task.Run(LoopMcts);
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
         : base(player, original.AgentIndex)
     {
+        _options = original._options;
         _state = state;
     }
 
     internal override Agent Clone(GameState state, Player player) =>
         new MctsAgent(state, player, this);
 
-    private void LoopMcts(bool writeJson)
+    private void LoopMcts()
     {
         Logger.Information($"Starting MCTS loop for agent {AgentIndex}");
 
         var serializationQueue = new BlockingCollection<Node>(new ConcurrentQueue<Node>());
 
-        if (writeJson)
+        if (_options.Export)
             _ = Task.Run(() => SerializationLoop(serializationQueue));
 
         var previousAction = BombermanAction.Stand;
         while (!_state.Terminated)
         {
             // IMPORTANT: Starting state should be simulated based on previous action determined by MCTS
-            var root = new Node(_state, this, previousAction);
+            var mctsStartingState = new GameState(_state, CreateAgent);
+            var root = new Node(mctsStartingState, AgentIndex, previousAction);
 
             var iterations = 0;
 
@@ -73,7 +77,7 @@ public class MctsAgent : Agent
             ApplyAction(bestAction);
             previousAction = bestAction;
 
-            if (writeJson)
+            if (_options.Export)
                 serializationQueue.Add(root);
 
             Logger.Information(
@@ -265,5 +269,30 @@ public class MctsAgent : Agent
 
         bool IsTileSafeToWalk(GridPosition position) =>
             _state.TileMap.GetTile(position) is null or (IEnterable and not ExplosionTile);
+    }
+
+    private Agent CreateAgent(
+        GameState originalState,
+        GameState newState,
+        Player player,
+        int agentIndex
+    )
+    {
+        if (agentIndex == AgentIndex)
+            return originalState.Agents[agentIndex].Clone(newState, player);
+
+        return (_options.OpponentType, originalState.Agents[agentIndex]) switch
+        {
+            (null, StaticAgent) => originalState.Agents[agentIndex].Clone(newState, player),
+            (null, WalkingAgent) => originalState.Agents[agentIndex].Clone(newState, player),
+            (null, _) => throw new NotSupportedException(
+                "This opponent type is not supported in MCTS, you must replace it"
+            ),
+            (AgentType.Static, _) => new StaticAgent(player, agentIndex),
+            (AgentType.Walking, _) => new WalkingAgent(newState, player, agentIndex),
+            (_, _) => throw new NotSupportedException(
+                "This agent type is not supported for replacement in MCTS"
+            ),
+        };
     }
 }

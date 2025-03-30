@@ -59,9 +59,9 @@ internal class BombermanGame : Game
 
         return playerType switch
         {
-            PlayerType.Static => new StaticAgent(player, agentIndex),
-            PlayerType.Walking => new WalkingAgent(state, player, agentIndex),
-            PlayerType.Keyboard => new KeyboardAgent(
+            AgentType.Static => new StaticAgent(player, agentIndex),
+            AgentType.Walking => new WalkingAgent(state, player, agentIndex),
+            AgentType.Keyboard => new KeyboardAgent(
                 player,
                 agentIndex,
                 agentIndex switch
@@ -73,7 +73,17 @@ internal class BombermanGame : Game
                     ),
                 }
             ),
-            PlayerType.Mcts => new MctsAgent(state, player, agentIndex, _options.Export),
+            AgentType.Mcts => new MctsAgent(
+                state,
+                player,
+                agentIndex,
+                agentIndex switch
+                {
+                    0 => _options.PlayerOneMctsOptions,
+                    1 => _options.PlayerTwoMctsOptions,
+                    _ => throw new InvalidOperationException("Only 2 players are supported."),
+                }
+            ),
             _ => throw new NotSupportedException("This player type is not supported yet"),
         };
     }
