@@ -7,7 +7,9 @@ internal record NodeDto(
     double TotalReward,
     double AverageReward,
     GameStateDto State,
-    NodeDto[] Children
+    NodeDto[] Children,
+    // DEBUG
+    GameStateDto? SimulationEndState
 );
 
 internal record GameStateDto(PlayerDto[] Players, int[][] TileMap, bool Terminated);

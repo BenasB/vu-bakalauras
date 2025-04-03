@@ -13,6 +13,8 @@ public class MctsAgent : Agent
     private readonly MctsAgentOptions _options;
     private static readonly string SerializationOutputDirectory = $"{DateTimeOffset.Now.Ticks}";
 
+    private Random _rnd = new();
+
     public MctsAgent(GameState state, Player player, int agentIndex, MctsAgentOptions options)
         : base(player, agentIndex)
     {
@@ -206,9 +208,9 @@ public class MctsAgent : Agent
         return result;
     }
 
-    internal IEnumerable<BombermanAction> GetPossibleSimulationActions()
+    internal BombermanAction GetSimulationAction(BombermanAction previousAction, ref int actionTtl)
     {
-        var result = new List<BombermanAction> { BombermanAction.Stand };
+        var possibilities = new List<BombermanAction> { BombermanAction.Stand };
 
         var gridPosition = Player.Position.ToGridPosition();
 
@@ -235,37 +237,54 @@ public class MctsAgent : Agent
 
         if (IsTileSafeToWalk(gridPosition with { Row = gridPosition.Row - 1 }))
         {
-            result.Add(BombermanAction.MoveUp);
+            possibilities.Add(BombermanAction.MoveUp);
 
             if (shouldPlaceBomb)
-                result.Add(BombermanAction.PlaceBombAndMoveUp);
+                possibilities.Add(BombermanAction.PlaceBombAndMoveUp);
         }
 
         if (IsTileSafeToWalk(gridPosition with { Row = gridPosition.Row + 1 }))
         {
-            result.Add(BombermanAction.MoveDown);
+            possibilities.Add(BombermanAction.MoveDown);
 
             if (shouldPlaceBomb)
-                result.Add(BombermanAction.PlaceBombAndMoveDown);
+                possibilities.Add(BombermanAction.PlaceBombAndMoveDown);
         }
 
         if (IsTileSafeToWalk(gridPosition with { Column = gridPosition.Column - 1 }))
         {
-            result.Add(BombermanAction.MoveLeft);
+            possibilities.Add(BombermanAction.MoveLeft);
 
             if (shouldPlaceBomb)
-                result.Add(BombermanAction.PlaceBombAndMoveLeft);
+                possibilities.Add(BombermanAction.PlaceBombAndMoveLeft);
         }
 
         if (IsTileSafeToWalk(gridPosition with { Column = gridPosition.Column + 1 }))
         {
-            result.Add(BombermanAction.MoveRight);
+            possibilities.Add(BombermanAction.MoveRight);
 
             if (shouldPlaceBomb)
-                result.Add(BombermanAction.PlaceBombAndMoveRight);
+                possibilities.Add(BombermanAction.PlaceBombAndMoveRight);
         }
 
-        return result;
+        actionTtl--;
+
+        const double actionInertiaChance = 0.9f;
+        const int maxActionTtl = 6;
+
+        if (
+            previousAction != BombermanAction.Stand // Do not apply intertia to standing
+            && actionTtl >= 0
+            && _rnd.NextDouble() < actionInertiaChance
+        )
+        {
+            if (possibilities.Contains(previousAction))
+                return previousAction;
+        }
+
+        actionTtl = _rnd.Next(1, maxActionTtl + 1);
+
+        return possibilities[_rnd.Next(0, possibilities.Count)];
 
         bool IsTileSafeToWalk(GridPosition position) =>
             _state.TileMap.GetTile(position) is null or (IEnterable and not ExplosionTile);

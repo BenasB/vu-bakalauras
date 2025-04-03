@@ -59,26 +59,7 @@ public class TileMap : IUpdatable
 
     internal TileMap WithDefaultTileLayout(params GridPosition[] startingTiles)
     {
-        // Wall on top row
-        _foregroundTiles[0] = Enumerable
-            .Range(0, Width)
-            .Select(column => new GridPosition(0, column))
-            .Select(gridPosition => new WallTile(gridPosition))
-            .ToArray<Tile>();
-
-        // Wall on bottom row
-        _foregroundTiles[Height - 1] = Enumerable
-            .Range(0, Width)
-            .Select(column => new GridPosition(Height - 1, column))
-            .Select(gridPosition => new WallTile(gridPosition))
-            .ToArray<Tile>();
-
-        // Walls on left and right columns
-        for (int row = 0; row < Height; row++)
-        {
-            _foregroundTiles[row][0] = new WallTile(new GridPosition(row, 0));
-            _foregroundTiles[row][Width - 1] = new WallTile(new GridPosition(row, Width - 1));
-        }
+        WithBorder();
 
         for (int row = 1; row < Height - 1; row++)
         for (int column = 1; column < Width - 1; column++)
@@ -98,6 +79,32 @@ public class TileMap : IUpdatable
                 continue;
 
             _foregroundTiles[position.Row][position.Column] = null;
+        }
+
+        return this;
+    }
+
+    internal TileMap WithBorder()
+    {
+        // Wall on top row
+        _foregroundTiles[0] = Enumerable
+            .Range(0, Width)
+            .Select(column => new GridPosition(0, column))
+            .Select(gridPosition => new WallTile(gridPosition))
+            .ToArray<Tile>();
+
+        // Wall on bottom row
+        _foregroundTiles[Height - 1] = Enumerable
+            .Range(0, Width)
+            .Select(column => new GridPosition(Height - 1, column))
+            .Select(gridPosition => new WallTile(gridPosition))
+            .ToArray<Tile>();
+
+        // Walls on left and right columns
+        for (int row = 0; row < Height; row++)
+        {
+            _foregroundTiles[row][0] = new WallTile(new GridPosition(row, 0));
+            _foregroundTiles[row][Width - 1] = new WallTile(new GridPosition(row, Width - 1));
         }
 
         return this;

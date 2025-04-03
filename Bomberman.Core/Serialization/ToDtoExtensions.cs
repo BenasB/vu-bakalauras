@@ -39,6 +39,8 @@ internal static class ToDtoExtensions
             node.TotalReward,
             node.AverageReward,
             node.State.ToDto(),
-            node.Children.Select(n => n.ToDto()).ToArray()
+            node.Children.Select(n => n.ToDto()).ToArray(),
+            // DEBUG
+            node.SimulationEndState?.ToDto()
         );
 }

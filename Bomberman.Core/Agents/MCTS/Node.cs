@@ -1,3 +1,5 @@
+using Bomberman.Core.Utilities;
+
 namespace Bomberman.Core.Agents.MCTS;
 
 internal class Node
@@ -12,6 +14,9 @@ internal class Node
     public double TotalReward { get; private set; }
     public double AverageReward => TotalReward / (Visits + 1e-6);
     public GameState State { get; }
+
+    // DEBUG
+    public GameState? SimulationEndState { get; private set; }
 
     private readonly Node? _parent;
     private readonly Random _rnd = new();
@@ -74,36 +79,45 @@ internal class Node
     {
         var simulationState = new GameState(State);
         var simulationAgent = (MctsAgent)simulationState.Agents[_agent.AgentIndex];
+        var opponentAgent = simulationState.Agents.First(a => a != simulationAgent);
 
-        const int maxSimulationDepth = 40;
+        const int maxSimulationDepth = 20;
+
+        var startingDistance = simulationAgent
+            .Player.Position.ToGridPosition()
+            .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
 
         var depth = 0;
+        var actionTtl = 0;
+        var nextAction = BombermanAction.Stand;
         for (; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
-            var possibleActions = simulationAgent.GetPossibleSimulationActions().ToArray();
-            var nextAction = possibleActions[_rnd.Next(0, possibleActions.Length)];
+            nextAction = simulationAgent.GetSimulationAction(nextAction, ref actionTtl);
 
             simulationAgent.ApplyAction(nextAction);
             AdvanceTimeOneTile(simulationState, simulationAgent);
         }
 
-        var opponent = simulationState.Agents.First(a => a != simulationAgent);
+        SimulationEndState = simulationState;
 
         if (!simulationAgent.Player.Alive)
             return 0;
 
-        if (!opponent.Player.Alive)
+        if (!opponentAgent.Player.Alive)
             return 1;
 
-        var manhattanDistance =
-            Math.Abs(simulationAgent.Player.Position.X - opponent.Player.Position.X)
-            + Math.Abs(simulationAgent.Player.Position.Y - opponent.Player.Position.Y);
-
         var maxManhattanDistance =
-            (simulationState.TileMap.Width - 2 + simulationState.TileMap.Height - 2)
-            * Constants.TileSize;
+            simulationState.TileMap.Width - 2 + simulationState.TileMap.Height - 2;
 
-        var distanceScore = 0.25 + ((manhattanDistance / maxManhattanDistance) / 2);
+        var finishDistance = simulationAgent
+            .Player.Position.ToGridPosition()
+            .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
+
+        // How much distance did we reduce? How closer did we get
+        var distanceReduction = startingDistance - finishDistance;
+
+        // distanceScore [0.25; 0.75]
+        var distanceScore = (((double)distanceReduction / maxManhattanDistance) / 4) + 0.5;
 
         return distanceScore;
     }
@@ -123,7 +137,7 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward + 1.41f * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward + (1.41f / 4) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     /// <summary>

@@ -26,4 +26,7 @@ public record GridPosition(int Row, int Column)
                 Column = Column + 1,
             },
         ];
+
+    internal int ManhattanDistance(GridPosition pos) =>
+        Math.Abs(pos.Row - Row) + Math.Abs(pos.Column - Column);
 }

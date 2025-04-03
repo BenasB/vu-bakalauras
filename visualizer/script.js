@@ -108,7 +108,7 @@ async function loadAndRenderTree(treeData) {
       selectedNode = d3.select(d.domElement);
       selectedNode.classed("selected", true);
 
-      const { Children, State, ...nodeDetails } = d.data;
+      const { Children, State, SimulationEndState, ...nodeDetails } = d.data;
       const { TileMap, ...stateDetails } = State;
 
       drawTileMap(TileMap, State.Players);

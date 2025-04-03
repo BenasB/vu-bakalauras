@@ -12,9 +12,12 @@ public class GameState : IUpdatable
 
     public GameState(Func<GameState, Player, int, Agent> agentFactory)
     {
-        var startOne = new GridPosition(Row: 1, Column: 1);
-        var startTwo = new GridPosition(Row: 5, Column: 12);
-        TileMap = new TileMap(17, 11).WithDefaultTileLayout(startOne, startTwo);
+        //var startOne = new GridPosition(Row: 1, Column: 1);
+        var startOne = new GridPosition(Row: 5, Column: 6);
+        //var startOne = new GridPosition(Row: 5, Column: 4);
+        var startTwo = new GridPosition(Row: 5, Column: 15);
+        //TileMap = new TileMap(17, 11).WithDefaultTileLayout(startOne, startTwo);
+        TileMap = new TileMap(17, 11).WithBorder();
         var playerOne = new Player(startOne, TileMap);
         var playerTwo = new Player(startTwo, TileMap);
 
