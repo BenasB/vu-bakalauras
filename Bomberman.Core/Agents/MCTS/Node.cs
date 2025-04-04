@@ -87,12 +87,9 @@ internal class Node
             .Player.Position.ToGridPosition()
             .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
 
-        var depth = 0;
-        var actionTtl = 0;
-        var nextAction = BombermanAction.Stand;
-        for (; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
+        for (var depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
-            nextAction = simulationAgent.GetSimulationAction(nextAction, ref actionTtl);
+            var nextAction = simulationAgent.GetSimulationAction();
 
             simulationAgent.ApplyAction(nextAction);
             AdvanceTimeOneTile(simulationState, simulationAgent);
@@ -137,7 +134,7 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward + (1.41f / 4) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        return AverageReward + (1.41f / 1) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
     }
 
     /// <summary>

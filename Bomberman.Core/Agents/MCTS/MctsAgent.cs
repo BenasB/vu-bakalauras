@@ -208,7 +208,7 @@ public class MctsAgent : Agent
         return result;
     }
 
-    internal BombermanAction GetSimulationAction(BombermanAction previousAction, ref int actionTtl)
+    internal BombermanAction GetSimulationAction()
     {
         var possibilities = new List<BombermanAction> { BombermanAction.Stand };
 
@@ -217,9 +217,9 @@ public class MctsAgent : Agent
         var opponent = _state.Agents.First(a => a != this).Player;
         var opponentGridPosition = opponent.Position.ToGridPosition();
 
+        // TODO: Take into account the bomb's range
         var shouldPlaceBomb =
-            Player.CanPlaceBomb
-            && _state.TileMap.GetTile(gridPosition) is null
+            _state.TileMap.GetTile(gridPosition) is null
             && (
                 gridPosition with { Row = gridPosition.Row - 1 } == opponentGridPosition
                 || gridPosition with { Row = gridPosition.Row + 1 } == opponentGridPosition
@@ -235,60 +235,83 @@ public class MctsAgent : Agent
                     is BoxTile
             );
 
-        if (IsTileSafeToWalk(gridPosition with { Row = gridPosition.Row - 1 }))
+        var actionsPerDirection = new[]
         {
-            possibilities.Add(BombermanAction.MoveUp);
+            (BombermanAction.MoveUp, BombermanAction.PlaceBombAndMoveUp),
+            (BombermanAction.MoveDown, BombermanAction.PlaceBombAndMoveDown),
+            (BombermanAction.MoveLeft, BombermanAction.PlaceBombAndMoveLeft),
+            (BombermanAction.MoveRight, BombermanAction.PlaceBombAndMoveRight),
+        };
+        foreach (var (action, equivalentMovementAction) in actionsPerDirection)
+        {
+            if (!IsTileSafeToWalk(GetGridPositionAfterAction(gridPosition, action)))
+                continue;
 
-            if (shouldPlaceBomb)
-                possibilities.Add(BombermanAction.PlaceBombAndMoveUp);
+            possibilities.Add(action);
+
+            if (Player.CanPlaceBomb && shouldPlaceBomb)
+                possibilities.Add(equivalentMovementAction);
         }
 
-        if (IsTileSafeToWalk(gridPosition with { Row = gridPosition.Row + 1 }))
+        const double heuristicMoveProbability = 0.6;
+        if (_rnd.NextDouble() < heuristicMoveProbability)
         {
-            possibilities.Add(BombermanAction.MoveDown);
-
-            if (shouldPlaceBomb)
-                possibilities.Add(BombermanAction.PlaceBombAndMoveDown);
+            return possibilities
+                .Select(action => new
+                {
+                    Action = action,
+                    Heuristic = SimulationHeuristic(action, gridPosition, opponentGridPosition),
+                })
+                .OrderBy(x => x.Heuristic)
+                .Select(x => x.Action)
+                .First();
         }
-
-        if (IsTileSafeToWalk(gridPosition with { Column = gridPosition.Column - 1 }))
-        {
-            possibilities.Add(BombermanAction.MoveLeft);
-
-            if (shouldPlaceBomb)
-                possibilities.Add(BombermanAction.PlaceBombAndMoveLeft);
-        }
-
-        if (IsTileSafeToWalk(gridPosition with { Column = gridPosition.Column + 1 }))
-        {
-            possibilities.Add(BombermanAction.MoveRight);
-
-            if (shouldPlaceBomb)
-                possibilities.Add(BombermanAction.PlaceBombAndMoveRight);
-        }
-
-        actionTtl--;
-
-        const double actionInertiaChance = 0.9f;
-        const int maxActionTtl = 6;
-
-        if (
-            previousAction != BombermanAction.Stand // Do not apply intertia to standing
-            && actionTtl >= 0
-            && _rnd.NextDouble() < actionInertiaChance
-        )
-        {
-            if (possibilities.Contains(previousAction))
-                return previousAction;
-        }
-
-        actionTtl = _rnd.Next(1, maxActionTtl + 1);
 
         return possibilities[_rnd.Next(0, possibilities.Count)];
 
         bool IsTileSafeToWalk(GridPosition position) =>
             _state.TileMap.GetTile(position) is null or (IEnterable and not ExplosionTile);
     }
+
+    private static int SimulationHeuristic(
+        BombermanAction action,
+        GridPosition playerPosition,
+        GridPosition opponentPosition
+    )
+    {
+        return opponentPosition.ManhattanDistance(
+            GetGridPositionAfterAction(playerPosition, action)
+        );
+    }
+
+    /// <summary>
+    /// Does not take into account physics, just calculates the grid position
+    /// </summary>
+    private static GridPosition GetGridPositionAfterAction(
+        GridPosition position,
+        BombermanAction action
+    ) =>
+        action switch
+        {
+            BombermanAction.MoveUp or BombermanAction.PlaceBombAndMoveUp => position with
+            {
+                Row = position.Row - 1,
+            },
+            BombermanAction.MoveDown or BombermanAction.PlaceBombAndMoveDown => position with
+            {
+                Row = position.Row + 1,
+            },
+            BombermanAction.MoveLeft or BombermanAction.PlaceBombAndMoveLeft => position with
+            {
+                Column = position.Column - 1,
+            },
+            BombermanAction.MoveRight or BombermanAction.PlaceBombAndMoveRight => position with
+            {
+                Column = position.Column + 1,
+            },
+            BombermanAction.Stand => position with { },
+            _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
+        };
 
     private Agent CreateAgent(
         GameState originalState,
