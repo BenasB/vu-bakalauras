@@ -87,9 +87,12 @@ internal class Node
             .Player.Position.ToGridPosition()
             .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
 
+        var previousPosition = simulationAgent.Player.Position.ToGridPosition();
         for (var depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
-            var nextAction = simulationAgent.GetSimulationAction();
+            var nextAction = simulationAgent.GetSimulationAction(previousPosition);
+
+            previousPosition = simulationAgent.Player.Position.ToGridPosition();
 
             simulationAgent.ApplyAction(nextAction);
             AdvanceTimeOneTile(simulationState, simulationAgent);

@@ -208,7 +208,7 @@ public class MctsAgent : Agent
         return result;
     }
 
-    internal BombermanAction GetSimulationAction()
+    internal BombermanAction GetSimulationAction(GridPosition previousPosition)
     {
         var possibilities = new List<BombermanAction> { BombermanAction.Stand };
 
@@ -253,18 +253,23 @@ public class MctsAgent : Agent
                 possibilities.Add(equivalentMovementAction);
         }
 
-        const double heuristicMoveProbability = 0.6;
-        if (_rnd.NextDouble() < heuristicMoveProbability)
+        var reverseActions = possibilities
+            .Where(action => GetGridPositionAfterAction(gridPosition, action) == previousPosition)
+            .ToList();
+
+        if (reverseActions.Count > 0)
         {
-            return possibilities
-                .Select(action => new
-                {
-                    Action = action,
-                    Heuristic = SimulationHeuristic(action, gridPosition, opponentGridPosition),
-                })
-                .OrderBy(x => x.Heuristic)
-                .Select(x => x.Action)
-                .First();
+            var normalActionProbability = 1.0f / possibilities.Count;
+            var reverseActionProbability = normalActionProbability / 4; // 4 times less likely than a normal action
+            if (
+                reverseActions.Count == possibilities.Count
+                || _rnd.NextDouble() < reverseActionProbability
+            )
+            {
+                return reverseActions[_rnd.Next(0, reverseActions.Count)];
+            }
+
+            possibilities.RemoveAll(reverseActions.Contains);
         }
 
         return possibilities[_rnd.Next(0, possibilities.Count)];

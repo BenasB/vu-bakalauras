@@ -3,6 +3,9 @@ const relativeCanvas = document.getElementById("relative");
 const foregroundTextures = [];
 const textures = {};
 
+const tileSize = 32;
+const relativeMapSize = 31;
+
 async function preloadTextures() {
   const textureFiles = [
     { name: "bomb", url: "textures/bomb.png" },
@@ -33,7 +36,6 @@ async function preloadTextures() {
 }
 
 function drawTileMap(canvas, TileMap, Players) {
-  const tileSize = 32;
   const width = TileMap[0].length;
   const height = TileMap.length;
   canvas.width = width * tileSize;
@@ -94,16 +96,16 @@ function gatherRelative(node) {
     dy: node.SimulationEndState.Players[0].Position.Y - node.State.Players[0].Position.Y
   }].map(({ dx, dy }) => ({
     Position: {
-      X: 15 * 32 + dx,
-      Y: 15 * 32 + dy
+      X: 15 * tileSize + dx,
+      Y: 15 * tileSize + dy
     },
     Alive: true
   })) : [];
   return states.concat(...node.Children.map(n => gatherRelative(n)))
 }
 
-const squareEmptyTileMap = [...Array(31)].map(_ => Array(31).fill(-1))
-squareEmptyTileMap[15][15] = 2
+const squareEmptyTileMap = [...Array(relativeMapSize)].map(_ => Array(relativeMapSize).fill(-1))
+squareEmptyTileMap[Math.floor(relativeMapSize / 2)][Math.floor(relativeMapSize / 2)] = 2
 
 function processNode(node) {
   const absolutePlayers = gatherAbsolute(node);
@@ -111,6 +113,12 @@ function processNode(node) {
 
   const relativePlayers = gatherRelative(node);
   drawTileMap(relativeCanvas, squareEmptyTileMap, relativePlayers);
+
+  const distance = relativePlayers
+    .map(({ Position: { X, Y } }) => (Math.abs(X / tileSize - Math.floor(relativeMapSize / 2)) + Math.abs(Y / tileSize - Math.floor(relativeMapSize / 2))))
+    .reduce((acc, cur) => acc + cur, 0)
+    / relativePlayers.length;
+  document.getElementById("distance").textContent = distance;
 }
 
 document.getElementById("json-upload").addEventListener("change", (event) => {
