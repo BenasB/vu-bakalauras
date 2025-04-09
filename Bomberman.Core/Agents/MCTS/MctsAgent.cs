@@ -13,13 +13,17 @@ public class MctsAgent : Agent
     private readonly MctsAgentOptions _options;
     private static readonly string SerializationOutputDirectory = $"{DateTimeOffset.Now.Ticks}";
 
-    private Random _rnd = new();
+    private readonly Random _rnd = new();
+    private readonly int _maxDistance;
 
     public MctsAgent(GameState state, Player player, int agentIndex, MctsAgentOptions options)
         : base(player, agentIndex)
     {
         _state = state;
         _options = options;
+        _maxDistance = new GridPosition(0, 0).ManhattanDistance(
+            new GridPosition(state.TileMap.Height / 2, state.TileMap.Width / 2)
+        );
         _ = Task.Run(LoopMcts);
     }
 
@@ -27,6 +31,7 @@ public class MctsAgent : Agent
         : base(player, original.AgentIndex)
     {
         _options = original._options;
+        _maxDistance = original._maxDistance;
         _state = state;
     }
 
@@ -253,40 +258,17 @@ public class MctsAgent : Agent
                 possibilities.Add(equivalentMovementAction);
         }
 
-        var reverseActions = possibilities
-            .Where(action => GetGridPositionAfterAction(gridPosition, action) == previousPosition)
-            .ToList();
-
-        if (reverseActions.Count > 0)
-        {
-            var normalActionProbability = 1.0f / possibilities.Count;
-            var reverseActionProbability = normalActionProbability / 4; // 4 times less likely than a normal action
-            if (
-                reverseActions.Count == possibilities.Count
-                || _rnd.NextDouble() < reverseActionProbability
-            )
-            {
-                return reverseActions[_rnd.Next(0, reverseActions.Count)];
-            }
-
-            possibilities.RemoveAll(reverseActions.Contains);
-        }
-
         return possibilities[_rnd.Next(0, possibilities.Count)];
 
         bool IsTileSafeToWalk(GridPosition position) =>
             _state.TileMap.GetTile(position) is null or (IEnterable and not ExplosionTile);
     }
 
-    private static int SimulationHeuristic(
-        BombermanAction action,
-        GridPosition playerPosition,
-        GridPosition opponentPosition
-    )
+    internal double SimulationHeuristic(GridPosition playerPosition, GridPosition opponentPosition)
     {
-        return opponentPosition.ManhattanDistance(
-            GetGridPositionAfterAction(playerPosition, action)
-        );
+        var distance = opponentPosition.ManhattanDistance(playerPosition);
+
+        return 1 - (double)distance / _maxDistance;
     }
 
     /// <summary>

@@ -38,6 +38,7 @@ internal static class ToDtoExtensions
             node.Visits,
             node.TotalReward,
             node.AverageReward,
+            node.HeuristicValue,
             node.State.ToDto(),
             node.Children.Select(n => n.ToDto()).ToArray(),
             // DEBUG

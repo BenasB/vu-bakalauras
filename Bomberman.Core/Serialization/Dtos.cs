@@ -6,6 +6,7 @@ internal record NodeDto(
     int Visits,
     double TotalReward,
     double AverageReward,
+    double HeuristicValue,
     GameStateDto State,
     NodeDto[] Children,
     // DEBUG

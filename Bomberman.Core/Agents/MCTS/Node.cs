@@ -13,6 +13,7 @@ internal class Node
     public int Visits { get; private set; }
     public double TotalReward { get; private set; }
     public double AverageReward => TotalReward / (Visits + 1e-6);
+    public double HeuristicValue { get; }
     public GameState State { get; }
 
     // DEBUG
@@ -31,6 +32,12 @@ internal class Node
         _agent = (MctsAgent)State.Agents[agentIndex];
         AdvanceTimeOneTile(State, _agent);
         UnexploredActions = _agent.GetPossibleActions().ToList();
+
+        var opponent = State.Agents.First(a => a != _agent);
+        HeuristicValue = _agent.SimulationHeuristic(
+            _agent.Player.Position.ToGridPosition(),
+            opponent.Player.Position.ToGridPosition()
+        );
     }
 
     private Node(Node parent, BombermanAction action)
@@ -42,6 +49,12 @@ internal class Node
         _agent.ApplyAction(action);
         AdvanceTimeOneTile(State, _agent);
         UnexploredActions = _agent.GetPossibleActions().ToList();
+
+        var opponent = State.Agents.First(a => a != _agent);
+        HeuristicValue = _agent.SimulationHeuristic(
+            _agent.Player.Position.ToGridPosition(),
+            opponent.Player.Position.ToGridPosition()
+        );
     }
 
     public Node Expand()
@@ -137,7 +150,11 @@ internal class Node
                 "Can't calculate UCB1 on a node that has no parent"
             );
 
-        return AverageReward + (1.41f / 1) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits);
+        const double heuristicWeight = 0.5f;
+
+        return AverageReward
+            + (1.41f / 1) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits)
+            + heuristicWeight * HeuristicValue;
     }
 
     /// <summary>
