@@ -57,20 +57,27 @@ public class TileMap : IUpdatable
             .ToArray();
     }
 
-    internal TileMap WithDefaultTileLayout(params GridPosition[] startingTiles)
+    internal TileMap WithRandomTileFill()
     {
-        WithBorder();
-
-        for (int row = 1; row < Height - 1; row++)
-        for (int column = 1; column < Width - 1; column++)
+        for (int row = 0; row < Height; row++)
+        for (int column = 0; column < Width; column++)
             _foregroundTiles[row][column] = RandomTile(new GridPosition(row, column));
 
-        // Checker walls
+        return this;
+    }
+
+    internal TileMap WithCheckerPattern()
+    {
         for (int row = 2; row < Height - 1; row += 2)
         for (int column = 2; column < Width - 1; column += 2)
             _foregroundTiles[row][column] = new WallTile(new GridPosition(row, column));
 
-        // Clear around starting positions to allow players to move
+        return this;
+    }
+
+    // Clear around starting positions to allow players to move
+    internal TileMap WithSpaceAround(params GridPosition[] startingTiles)
+    {
         foreach (var start in startingTiles)
         foreach (var position in new[] { start }.Concat(start.Neighbours))
         {

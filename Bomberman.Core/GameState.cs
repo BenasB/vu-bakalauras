@@ -10,20 +10,16 @@ public class GameState : IUpdatable
 
     public bool Terminated => Agents.Any(a => a is { Player.Alive: false });
 
-    public GameState(Func<GameState, Player, int, Agent> agentFactory)
+    public GameState(Func<GameState, Player, int, Agent> agentFactory, Scenario scenario)
     {
-        //var startOne = new GridPosition(Row: 1, Column: 1);
-        var startOne = new GridPosition(Row: 5, Column: 6);
-        //var startOne = new GridPosition(Row: 5, Column: 4);
-        var startTwo = new GridPosition(Row: 5, Column: 15);
-        //TileMap = new TileMap(17, 11).WithDefaultTileLayout(startOne, startTwo);
-        TileMap = new TileMap(17, 11).WithBorder();
-        var playerOne = new Player(startOne, TileMap);
-        var playerTwo = new Player(startTwo, TileMap);
-
+        TileMap = scenario.TileMap;
         Agents = new Agent[2];
-        Agents[0] = agentFactory(this, playerOne, 0);
-        Agents[1] = agentFactory(this, playerTwo, 1);
+
+        for (int i = 0; i < Agents.Length; i++)
+        {
+            var player = new Player(scenario.StartPositions[i], TileMap);
+            Agents[i] = agentFactory(this, player, i);
+        }
     }
 
     public GameState(GameState original)

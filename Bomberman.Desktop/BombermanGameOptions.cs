@@ -1,3 +1,4 @@
+using Bomberman.Core;
 using Bomberman.Core.Agents;
 using Bomberman.Core.Agents.MCTS;
 
@@ -10,4 +11,6 @@ internal record BombermanGameOptions
 
     public MctsAgentOptions PlayerOneMctsOptions { get; set; } = new();
     public MctsAgentOptions PlayerTwoMctsOptions { get; set; } = new();
+
+    public Scenario Scenario { get; } = Scenario.Empty;
 }
