@@ -66,7 +66,7 @@ internal class Node
         return newChild;
     }
 
-    public Node Select()
+    public Node Select(double heuristicWeight)
     {
         if (UnexploredActions.Count != 0)
             return this;
@@ -74,8 +74,8 @@ internal class Node
         if (State.Terminated)
             return this;
 
-        var bestNode = Children.OrderByDescending(node => node.UCT()).First();
-        return bestNode.Select();
+        var bestNode = Children.OrderByDescending(node => node.UCT(heuristicWeight)).First();
+        return bestNode.Select(heuristicWeight);
     }
 
     /// <returns>Reward</returns>
@@ -131,14 +131,12 @@ internal class Node
         _parent?.Backpropagate(reward);
     }
 
-    private double UCT()
+    private double UCT(double heuristicWeight)
     {
         if (_parent == null)
             throw new InvalidOperationException(
                 "Can't calculate UCB1 on a node that has no parent"
             );
-
-        const double heuristicWeight = 0.5f;
 
         return AverageReward
             + (1.41f / 1) * MathF.Sqrt(MathF.Log(_parent.Visits) / Visits)
