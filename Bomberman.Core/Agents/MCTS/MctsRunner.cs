@@ -46,6 +46,7 @@ public class MctsRunner : IUpdatable
             _ = WaitAndWriteStateAsync();
         }
 
+        // TODO: What if we have a target but for some reason it's unreachable?
         if (_target != null && _target.NearPosition(_mctsAgent.Player.Position, 0.1))
         {
             _target = null;
@@ -126,8 +127,6 @@ public class MctsRunner : IUpdatable
             var root = new Node(mctsStartingState, _mctsAgent.AgentIndex, previousAction);
 
             var iterations = 0;
-
-            // TODO: What about 'Stand' action, should we wait full time?
 
             while (!_stateChannel.Reader.TryPeek(out _) && !_state.Terminated)
             {
