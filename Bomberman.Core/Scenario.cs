@@ -46,7 +46,7 @@ public class Scenario
                 tileMap.PlaceTile(new WallTile(new GridPosition(i, tileMap.Width - 3)));
             }
 
-            return new Scenario()
+            return new Scenario
             {
                 TileMap = tileMap,
                 StartPositions =

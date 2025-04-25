@@ -1,7 +1,3 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Text.Json;
-using Bomberman.Core.Serialization;
 using Bomberman.Core.Tiles;
 using Bomberman.Core.Utilities;
 
@@ -10,27 +6,25 @@ namespace Bomberman.Core.Agents.MCTS;
 public class MctsAgent : Agent
 {
     private readonly GameState _state;
-    private readonly MctsAgentOptions _options;
-    private static readonly string SerializationOutputDirectory = $"{DateTimeOffset.Now.Ticks}";
 
     private readonly Random _rnd = new();
     private readonly int _maxDistance;
 
+    private readonly MctsRunner? _mctsRunner;
+
     public MctsAgent(GameState state, Player player, int agentIndex, MctsAgentOptions options)
         : base(player, agentIndex)
     {
+        _mctsRunner = new MctsRunner(state, this, options);
         _state = state;
-        _options = options;
         _maxDistance = new GridPosition(0, 0).ManhattanDistance(
             new GridPosition(state.TileMap.Height / 2, state.TileMap.Width / 2)
         );
-        _ = Task.Run(LoopMcts);
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
         : base(player, original.AgentIndex)
     {
-        _options = original._options;
         _maxDistance = original._maxDistance;
         _state = state;
     }
@@ -38,80 +32,11 @@ public class MctsAgent : Agent
     internal override Agent Clone(GameState state, Player player) =>
         new MctsAgent(state, player, this);
 
-    private void LoopMcts()
+    public override void Update(TimeSpan deltaTime)
     {
-        Logger.Information($"Starting MCTS loop for agent {AgentIndex}");
+        _mctsRunner?.Update(deltaTime);
 
-        var serializationQueue = new BlockingCollection<Node>(new ConcurrentQueue<Node>());
-
-        if (_options.Export)
-            _ = Task.Run(() => SerializationLoop(serializationQueue));
-
-        var previousAction = BombermanAction.Stand;
-        while (!_state.Terminated)
-        {
-            // IMPORTANT: Starting state should be simulated based on previous action determined by MCTS
-            var mctsStartingState = new GameState(_state, CreateAgent);
-            var root = new Node(mctsStartingState, AgentIndex, previousAction);
-
-            var iterations = 0;
-
-            // TODO: What about 'Stand' action, should we wait full time?
-            // TODO: Make this dependent on real game state instead of time to support non constant fps
-            var mctsInterval = TimeSpan.FromSeconds(1 / Player.Speed);
-            // TODO: Do we need alignment to coordinates after a single action is performed?
-
-            var stopWatch = Stopwatch.StartNew();
-            while (stopWatch.Elapsed < mctsInterval && !_state.Terminated)
-            {
-                iterations++;
-                var selectedNode = root.Select();
-                var expandedNode = selectedNode.Expand();
-                var reward = expandedNode.Simulate();
-                expandedNode.Backpropagate(reward);
-            }
-            stopWatch.Stop();
-
-            if (_state.Terminated)
-                break;
-
-            var bestNode = root.Children.MaxBy(child => child.Visits);
-            var bestAction =
-                bestNode?.Action
-                ?? throw new InvalidOperationException("Could not find the best action");
-
-            // Be aware of concurrency
-            ApplyAction(bestAction);
-            previousAction = bestAction;
-
-            if (_options.Export)
-                serializationQueue.Add(root);
-
-            Logger.Information(
-                $"Applied best action after ({iterations} iterations): {bestAction}"
-            );
-        }
-    }
-
-    private void SerializationLoop(BlockingCollection<Node> collection)
-    {
-        Directory.CreateDirectory(SerializationOutputDirectory);
-
-        var jsonOptions = new JsonSerializerOptions { MaxDepth = 1024 };
-
-        while (!collection.IsAddingCompleted)
-        {
-            var root = collection.Take();
-            var dto = root.ToDto();
-
-            File.WriteAllText(
-                Path.Combine(
-                    SerializationOutputDirectory,
-                    $"{AgentIndex}-{DateTimeOffset.Now.Ticks}.json"
-                ),
-                JsonSerializer.Serialize(dto, jsonOptions)
-            );
-        }
+        base.Update(deltaTime);
     }
 
     internal void ApplyAction(BombermanAction action)
@@ -213,7 +138,7 @@ public class MctsAgent : Agent
         return result;
     }
 
-    internal BombermanAction GetSimulationAction(GridPosition previousPosition)
+    internal BombermanAction GetSimulationAction()
     {
         var possibilities = new List<BombermanAction> { BombermanAction.Stand };
 
@@ -264,17 +189,24 @@ public class MctsAgent : Agent
             _state.TileMap.GetTile(position) is null or (IEnterable and not ExplosionTile);
     }
 
-    internal double SimulationHeuristic(GridPosition playerPosition, GridPosition opponentPosition)
+    internal double CalculateSimulationHeuristic()
     {
+        var opponentPosition = _state.Agents.First(a => a != this).Player.Position.ToGridPosition();
+        var playerPosition = Player.Position.ToGridPosition();
+
         var distance = opponentPosition.ManhattanDistance(playerPosition);
 
-        return 1 - (double)distance / _maxDistance;
+        var distanceScore = 1 - (double)distance / _maxDistance;
+
+        var placedBombPenalty = !Player.CanPlaceBomb ? 0.1 : 0;
+
+        return Math.Clamp(distanceScore - placedBombPenalty, 0, 1);
     }
 
     /// <summary>
     /// Does not take into account physics, just calculates the grid position
     /// </summary>
-    private static GridPosition GetGridPositionAfterAction(
+    internal static GridPosition GetGridPositionAfterAction(
         GridPosition position,
         BombermanAction action
     ) =>
@@ -299,29 +231,4 @@ public class MctsAgent : Agent
             BombermanAction.Stand => position with { },
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
         };
-
-    private Agent CreateAgent(
-        GameState originalState,
-        GameState newState,
-        Player player,
-        int agentIndex
-    )
-    {
-        if (agentIndex == AgentIndex)
-            return originalState.Agents[agentIndex].Clone(newState, player);
-
-        return (_options.OpponentType, originalState.Agents[agentIndex]) switch
-        {
-            (null, StaticAgent) => originalState.Agents[agentIndex].Clone(newState, player),
-            (null, WalkingAgent) => originalState.Agents[agentIndex].Clone(newState, player),
-            (null, _) => throw new NotSupportedException(
-                "This opponent type is not supported in MCTS, you must replace it"
-            ),
-            (AgentType.Static, _) => new StaticAgent(player, agentIndex),
-            (AgentType.Walking, _) => new WalkingAgent(newState, player, agentIndex),
-            (_, _) => throw new NotSupportedException(
-                "This agent type is not supported for replacement in MCTS"
-            ),
-        };
-    }
 }

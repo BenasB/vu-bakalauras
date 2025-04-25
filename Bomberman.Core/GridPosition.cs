@@ -29,4 +29,10 @@ public record GridPosition(int Row, int Column)
 
     internal int ManhattanDistance(GridPosition pos) =>
         Math.Abs(pos.Row - Row) + Math.Abs(pos.Column - Column);
+
+    internal bool NearPosition(Vector2 pos, double threshold) =>
+        pos.X > Column * Constants.TileSize - threshold
+        && pos.X < Column * Constants.TileSize + threshold
+        && pos.Y > Row * Constants.TileSize - threshold
+        && pos.Y < Row * Constants.TileSize + threshold;
 }

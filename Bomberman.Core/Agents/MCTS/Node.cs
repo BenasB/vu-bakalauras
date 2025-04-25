@@ -25,19 +25,15 @@ internal class Node
 
     public Node(GameState mctsStartingState, int agentIndex, BombermanAction action)
     {
-        // TODO: Add the possibility to switch out the opponent logic
         _parent = null;
         Action = action;
         State = mctsStartingState;
         _agent = (MctsAgent)State.Agents[agentIndex];
+        // IMPORTANT: Starting state should be simulated based on previous action determined by MCTS
+        _agent.ApplyAction(action);
         AdvanceTimeOneTile(State, _agent);
         UnexploredActions = _agent.GetPossibleActions().ToList();
-
-        var opponent = State.Agents.First(a => a != _agent);
-        HeuristicValue = _agent.SimulationHeuristic(
-            _agent.Player.Position.ToGridPosition(),
-            opponent.Player.Position.ToGridPosition()
-        );
+        HeuristicValue = _agent.CalculateSimulationHeuristic();
     }
 
     private Node(Node parent, BombermanAction action)
@@ -49,12 +45,7 @@ internal class Node
         _agent.ApplyAction(action);
         AdvanceTimeOneTile(State, _agent);
         UnexploredActions = _agent.GetPossibleActions().ToList();
-
-        var opponent = State.Agents.First(a => a != _agent);
-        HeuristicValue = _agent.SimulationHeuristic(
-            _agent.Player.Position.ToGridPosition(),
-            opponent.Player.Position.ToGridPosition()
-        );
+        HeuristicValue = _agent.CalculateSimulationHeuristic();
     }
 
     public Node Expand()
@@ -100,12 +91,9 @@ internal class Node
             .Player.Position.ToGridPosition()
             .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
 
-        var previousPosition = simulationAgent.Player.Position.ToGridPosition();
         for (var depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
-            var nextAction = simulationAgent.GetSimulationAction(previousPosition);
-
-            previousPosition = simulationAgent.Player.Position.ToGridPosition();
+            var nextAction = simulationAgent.GetSimulationAction();
 
             simulationAgent.ApplyAction(nextAction);
             AdvanceTimeOneTile(simulationState, simulationAgent);

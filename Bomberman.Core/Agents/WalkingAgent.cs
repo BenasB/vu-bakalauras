@@ -38,7 +38,7 @@ public class WalkingAgent : Agent
         if (!_active)
             return;
 
-        if (_target != null && !IsPlayerOnTarget())
+        if (_target != null && _target.NearPosition(Player.Position, TargetThreshold))
             return;
 
         var playerPosition = Player.Position.ToGridPosition();
@@ -66,11 +66,4 @@ public class WalkingAgent : Agent
         else if (playerPosition.Column > _target.Column)
             Player.SetMovingDirection(Direction.Left);
     }
-
-    private bool IsPlayerOnTarget() =>
-        _target != null
-        && Player.Position.X > _target.Column * Constants.TileSize - TargetThreshold
-        && Player.Position.X < _target.Column * Constants.TileSize + TargetThreshold
-        && Player.Position.Y > _target.Row * Constants.TileSize - TargetThreshold
-        && Player.Position.Y < _target.Row * Constants.TileSize + TargetThreshold;
 }
