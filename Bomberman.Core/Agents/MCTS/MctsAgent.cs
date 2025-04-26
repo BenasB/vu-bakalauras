@@ -17,9 +17,7 @@ public class MctsAgent : Agent
     {
         _mctsRunner = new MctsRunner(state, this, options);
         _state = state;
-        _maxDistance = new GridPosition(0, 0).ManhattanDistance(
-            new GridPosition(state.TileMap.Height / 2, state.TileMap.Width / 2)
-        );
+        _maxDistance = state.TileMap.MaxDistance();
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
@@ -194,9 +192,9 @@ public class MctsAgent : Agent
         var opponentPosition = _state.Agents.First(a => a != this).Player.Position.ToGridPosition();
         var playerPosition = Player.Position.ToGridPosition();
 
-        var distance = opponentPosition.ManhattanDistance(playerPosition);
+        var distance = _state.TileMap.Distance(playerPosition, opponentPosition);
 
-        var distanceScore = 1 - (double)distance / _maxDistance;
+        var distanceScore = 1 - Math.Clamp((double)distance / _maxDistance, 0, 1);
 
         var placedBombPenalty = !Player.CanPlaceBomb ? 0.1 : 0;
 

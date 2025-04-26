@@ -127,11 +127,10 @@ public class MctsRunner : IUpdatable
             var root = new Node(mctsStartingState, _mctsAgent.AgentIndex, previousAction);
 
             var iterations = 0;
-            var selectionHeuristicWeight = 1 - root.HeuristicValue; // The bigger the heuristic (closer the root player is), the less effect it should have during this MCTS run
+            var selectionHeuristicWeight = Math.Clamp(1.5 * (1 - root.HeuristicValue), 0, 1); // The bigger the heuristic (closer the root player is), the less effect it should have during this MCTS run
             Logger.Information(
                 $"Selection heuristic weight for this run: {selectionHeuristicWeight}"
             );
-
             while (!_stateChannel.Reader.TryPeek(out _) && !_state.Terminated)
             {
                 iterations++;
@@ -149,7 +148,6 @@ public class MctsRunner : IUpdatable
                 bestNode?.Action
                 ?? throw new InvalidOperationException("Could not find the best action");
 
-            // Be aware of concurrency
             if (!_actionChannel.Writer.TryWrite(bestAction))
                 throw new InvalidOperationException(
                     "Something went wrong with the data exchange between MCTS loop and the agent"

@@ -57,4 +57,31 @@ public class Scenario
             };
         }
     }
+
+    public static Scenario BacktrackSolidWall
+    {
+        get
+        {
+            var tileMap = new TileMap(17, 11).WithBorder();
+            for (int i = 2; i < tileMap.Height - 1; i++)
+            {
+                tileMap.PlaceTile(new WallTile(new GridPosition(i, tileMap.Width - 3)));
+            }
+
+            for (int i = 2; i < tileMap.Width - 3; i++)
+            {
+                tileMap.PlaceTile(new WallTile(new GridPosition(2, i)));
+            }
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 5, Column: 6),
+                    new GridPosition(Row: 5, Column: 15),
+                ],
+            };
+        }
+    }
 }

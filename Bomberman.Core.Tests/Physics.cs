@@ -64,6 +64,8 @@ public class Physics
     [InlineData(16 * 6)]
     [InlineData(16 * 10)]
     [InlineData(16 * 100)]
+    [InlineData(16 * 31)]
+    [InlineData(16 * 32)]
     public void PlayerMovement_BigVelocityGoingThroughExplosion_PlayerDies(int deltaTimeMs)
     {
         var deltaTime = TimeSpan.FromMilliseconds(deltaTimeMs);
@@ -75,9 +77,12 @@ public class Physics
         var tileMap = new TileMap(3, 1);
         tileMap.PlaceTile(new ExplosionTile(explosionPosition, tileMap, TimeSpan.MaxValue));
         var player = new Player(startingPlayerPosition, tileMap);
-
         player.SetMovingDirection(Direction.Right);
+
+        player.Update(TimeSpan.FromSeconds((1 / player.Speed / 2) - 0.01)); // Get the player right on the bounds
+
         player.Update(deltaTime);
+        player.Update(TimeSpan.Zero);
 
         Assert.False(player.Alive);
     }
