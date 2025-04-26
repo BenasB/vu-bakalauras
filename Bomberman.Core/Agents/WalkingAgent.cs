@@ -38,7 +38,7 @@ public class WalkingAgent : Agent
         if (!_active)
             return;
 
-        if (_target != null && _target.NearPosition(Player.Position, TargetThreshold))
+        if (_target != null && !_target.NearPosition(Player.Position, TargetThreshold))
             return;
 
         var playerPosition = Player.Position.ToGridPosition();
