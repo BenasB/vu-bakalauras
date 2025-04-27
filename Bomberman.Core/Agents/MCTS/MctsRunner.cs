@@ -127,7 +127,14 @@ public class MctsRunner : IUpdatable
             var root = new Node(mctsStartingState, _mctsAgent.AgentIndex, previousAction);
 
             var iterations = 0;
-            var selectionHeuristicWeight = Math.Clamp(1.0 * (1 - root.HeuristicValue), 0, 1); // The bigger the heuristic (closer the root player is), the less effect it should have during this MCTS run
+            var rootAgent = root.State.Agents[_mctsAgent.AgentIndex];
+            var rootOpponent = root.State.Agents.First(agent => agent != rootAgent);
+            var distance = root.State.TileMap.Distance(
+                rootAgent.Player.Position.ToGridPosition(),
+                rootOpponent.Player.Position.ToGridPosition(),
+                rootAgent.Player.Speed
+            ); // The closer the root player is, the less effect it should have during this MCTS run
+            var selectionHeuristicWeight = (1.0 / 4) * distance;
             Logger.Information(
                 $"Selection heuristic weight for this run: {selectionHeuristicWeight}"
             );

@@ -174,6 +174,9 @@ public class MctsAgent : Agent
 
     internal double CalculateSimulationHeuristic()
     {
+        if (!Player.Alive)
+            return 0;
+
         var opponentPosition = _state.Agents.First(a => a != this).Player.Position.ToGridPosition();
         var playerPosition = Player.Position.ToGridPosition();
 
@@ -181,13 +184,14 @@ public class MctsAgent : Agent
 
         var distanceScore = 1 - Math.Clamp(distance / MaxDistance, 0, 1);
 
-        var wastedBombsPenalty =
-            -0.1
-            * Player.ActiveBombs.Count(bombTile =>
-                !IsPromisingBombPosition(bombTile.Position, opponentPosition)
-            );
+        var activeBombs = Player.ActiveBombs.ToList();
+        var promisingBombCount = activeBombs.Count(bombTile =>
+            IsPromisingBombPosition(bombTile.Position, opponentPosition)
+        );
+        var wastedBombsPenalty = -0.1 * (activeBombs.Count - promisingBombCount);
+        var promisingBombIncentive = 0.1 * promisingBombCount;
 
-        return Math.Clamp(distanceScore + wastedBombsPenalty, 0, 1);
+        return Math.Clamp(distanceScore + promisingBombIncentive + wastedBombsPenalty, 0, 1);
     }
 
     /// <summary>

@@ -106,4 +106,82 @@ public class Scenario
             };
         }
     }
+
+    public static Scenario BacktrackBoxWall
+    {
+        get
+        {
+            var tileMap = new TileMap(17, 11).WithBorder();
+            for (int i = 2; i < tileMap.Height - 1; i++)
+            {
+                tileMap.PlaceTile(new BoxTile(new GridPosition(i, tileMap.Width - 3)));
+            }
+
+            for (int i = 2; i < tileMap.Width - 3; i++)
+            {
+                tileMap.PlaceTile(new BoxTile(new GridPosition(2, i)));
+            }
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 5, Column: 6),
+                    new GridPosition(Row: 5, Column: 15),
+                ],
+            };
+        }
+    }
+
+    public static Scenario BoxWallShort
+    {
+        get
+        {
+            var tileMap = new TileMap(17, 11).WithBorder();
+            tileMap.PlaceTile(new BoxTile(new GridPosition(tileMap.Height / 2, tileMap.Width - 3)));
+            for (int i = 1; i < 3; i++)
+            {
+                tileMap.PlaceTile(
+                    new BoxTile(new GridPosition(tileMap.Height / 2 + i, tileMap.Width - 3))
+                );
+                tileMap.PlaceTile(
+                    new BoxTile(new GridPosition(tileMap.Height / 2 - i, tileMap.Width - 3))
+                );
+            }
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 5, Column: 6),
+                    new GridPosition(Row: 5, Column: 15),
+                ],
+            };
+        }
+    }
+
+    public static Scenario BoxWallMultiple
+    {
+        get
+        {
+            var tileMap = new TileMap(17, 11).WithBorder();
+            for (int column = tileMap.Width - 3; column > tileMap.Width / 2; column -= 2)
+            for (int i = 1; i < tileMap.Height - 1; i++)
+            {
+                tileMap.PlaceTile(new BoxTile(new GridPosition(i, column)));
+            }
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 5, Column: 6),
+                    new GridPosition(Row: 5, Column: 15),
+                ],
+            };
+        }
+    }
 }
