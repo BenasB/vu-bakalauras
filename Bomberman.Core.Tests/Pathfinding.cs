@@ -4,27 +4,29 @@ namespace Bomberman.Core.Tests;
 
 public class Pathfinding
 {
+    internal const float WalkingSpeed = 2;
+
     [Theory]
     [ClassData(typeof(PathfindingData))]
     public void FindsDistanceCorrectly(
         TileMap tileMap,
         GridPosition start,
         GridPosition end,
-        int expectedDistance
+        double expectedDistance
     )
     {
-        Assert.Equal(expectedDistance, tileMap.Distance(start, end));
+        Assert.Equal(expectedDistance, tileMap.Distance(start, end, WalkingSpeed));
     }
 
     [Theory]
     [ClassData(typeof(MaxPathfindingData))]
-    public void FindsMaxDistanceCorrectly(TileMap tileMap, int expectedDistance)
+    public void FindsMaxDistanceCorrectly(TileMap tileMap, double expectedDistance)
     {
-        Assert.Equal(expectedDistance, tileMap.MaxDistance());
+        Assert.Equal(expectedDistance, tileMap.MaxDistance(WalkingSpeed));
     }
 }
 
-public class PathfindingData : TheoryData<TileMap, GridPosition, GridPosition, int>
+public class PathfindingData : TheoryData<TileMap, GridPosition, GridPosition, double>
 {
     public PathfindingData()
     {
@@ -70,7 +72,7 @@ public class PathfindingData : TheoryData<TileMap, GridPosition, GridPosition, i
         {
             var start = new GridPosition(0, 0);
             var finish = new GridPosition(0, 4);
-            var expectedDistance = 12;
+            var expectedDistance = 12.0;
             var height = 5;
             var width = 5;
             var gapPosition = new GridPosition(height - 1, width / 2);
@@ -97,11 +99,20 @@ public class PathfindingData : TheoryData<TileMap, GridPosition, GridPosition, i
                 tileMap.PlaceTile(new ExplosionTile(gapPosition, tileMap, TimeSpan.MaxValue));
                 Add(tileMap, start, finish, expectedDistance);
             }
+
+            {
+                var tileMap = GetTileMap();
+                tileMap.PlaceTile(new BoxTile(gapPosition));
+                var addedDistanceDueToBox =
+                    (BombTile.DetonateAfter + BombTile.ExplosionDuration).TotalSeconds
+                    * Pathfinding.WalkingSpeed;
+                Add(tileMap, start, finish, expectedDistance + addedDistanceDueToBox);
+            }
         }
     }
 }
 
-public class MaxPathfindingData : TheoryData<TileMap, int>
+public class MaxPathfindingData : TheoryData<TileMap, double>
 {
     public MaxPathfindingData()
     {

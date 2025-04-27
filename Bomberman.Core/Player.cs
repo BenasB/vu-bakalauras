@@ -21,6 +21,8 @@ public class Player : IUpdatable, IDamageable
     internal bool CanPlaceBomb =>
         _placedBombTiles.Count < MaxPlacedBombs || _placedBombTiles.Any(bomb => bomb.Detonated);
 
+    internal IEnumerable<BombTile> ActiveBombs => _placedBombTiles.Where(bomb => !bomb.Detonated);
+
     private readonly List<BombTile> _placedBombTiles = [];
     private readonly TileMap _tileMap;
 

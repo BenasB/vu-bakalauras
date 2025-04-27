@@ -4,8 +4,8 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
     : Tile(position),
         IUpdatable
 {
-    private static readonly TimeSpan DetonateAfter = TimeSpan.FromSeconds(3);
-    private static readonly TimeSpan ExplosionDuration = TimeSpan.FromSeconds(0.25);
+    public static readonly TimeSpan DetonateAfter = TimeSpan.FromSeconds(3);
+    public static readonly TimeSpan ExplosionDuration = TimeSpan.FromSeconds(0.25);
 
     private TimeSpan _existingTime = TimeSpan.Zero;
 

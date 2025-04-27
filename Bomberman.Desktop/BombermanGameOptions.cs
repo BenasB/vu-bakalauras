@@ -12,5 +12,5 @@ internal record BombermanGameOptions
     public MctsAgentOptions PlayerOneMctsOptions { get; set; } = new();
     public MctsAgentOptions PlayerTwoMctsOptions { get; set; } = new();
 
-    public Scenario Scenario { get; } = Scenario.BacktrackSolidWall;
+    public Scenario Scenario { get; } = Scenario.BoxWall;
 }

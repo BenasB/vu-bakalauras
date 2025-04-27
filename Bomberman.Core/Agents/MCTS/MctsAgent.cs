@@ -5,7 +5,7 @@ namespace Bomberman.Core.Agents.MCTS;
 
 public class MctsAgent : Agent
 {
-    internal int MaxDistance { get; }
+    internal double MaxDistance { get; }
 
     private readonly GameState _state;
     private readonly Random _rnd = new();
@@ -16,7 +16,7 @@ public class MctsAgent : Agent
     {
         _mctsRunner = new MctsRunner(state, this, options);
         _state = state;
-        MaxDistance = state.TileMap.MaxDistance();
+        MaxDistance = state.TileMap.MaxDistance(Player.Speed);
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
@@ -144,23 +144,9 @@ public class MctsAgent : Agent
         var opponent = _state.Agents.First(a => a != this).Player;
         var opponentGridPosition = opponent.Position.ToGridPosition();
 
-        // TODO: Take into account the bomb's range
         var shouldPlaceBomb =
             _state.TileMap.GetTile(gridPosition) is null
-            && (
-                gridPosition with { Row = gridPosition.Row - 1 } == opponentGridPosition
-                || gridPosition with { Row = gridPosition.Row + 1 } == opponentGridPosition
-                || gridPosition with { Column = gridPosition.Column - 1 } == opponentGridPosition
-                || gridPosition with { Column = gridPosition.Column + 1 } == opponentGridPosition
-                || _state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row - 1 })
-                    is BoxTile
-                || _state.TileMap.GetTile(gridPosition with { Row = gridPosition.Row + 1 })
-                    is BoxTile
-                || _state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column - 1 })
-                    is BoxTile
-                || _state.TileMap.GetTile(gridPosition with { Column = gridPosition.Column + 1 })
-                    is BoxTile
-            );
+            && IsPromisingBombPosition(gridPosition, opponentGridPosition);
 
         var actionsPerDirection = new[]
         {
@@ -191,13 +177,17 @@ public class MctsAgent : Agent
         var opponentPosition = _state.Agents.First(a => a != this).Player.Position.ToGridPosition();
         var playerPosition = Player.Position.ToGridPosition();
 
-        var distance = _state.TileMap.Distance(playerPosition, opponentPosition);
+        var distance = _state.TileMap.Distance(playerPosition, opponentPosition, Player.Speed);
 
-        var distanceScore = 1 - Math.Clamp((double)distance / MaxDistance, 0, 1);
+        var distanceScore = 1 - Math.Clamp(distance / MaxDistance, 0, 1);
 
-        var placedBombPenalty = !Player.CanPlaceBomb ? 0.1 : 0;
+        var wastedBombsPenalty =
+            -0.1
+            * Player.ActiveBombs.Count(bombTile =>
+                !IsPromisingBombPosition(bombTile.Position, opponentPosition)
+            );
 
-        return Math.Clamp(distanceScore - placedBombPenalty, 0, 1);
+        return Math.Clamp(distanceScore + wastedBombsPenalty, 0, 1);
     }
 
     /// <summary>
@@ -228,4 +218,19 @@ public class MctsAgent : Agent
             BombermanAction.Stand => position with { },
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
         };
+
+    // TODO: Take into account the bomb's range
+    private bool IsPromisingBombPosition(
+        GridPosition bombPosition,
+        GridPosition opponentPosition
+    ) =>
+        bombPosition with { Row = bombPosition.Row - 1 } == opponentPosition
+        || bombPosition with { Row = bombPosition.Row + 1 } == opponentPosition
+        || bombPosition with { Column = bombPosition.Column - 1 } == opponentPosition
+        || bombPosition with { Column = bombPosition.Column + 1 } == opponentPosition
+        || _state.TileMap.GetTile(bombPosition with { Row = bombPosition.Row - 1 }) is BoxTile
+        || _state.TileMap.GetTile(bombPosition with { Row = bombPosition.Row + 1 }) is BoxTile
+        || _state.TileMap.GetTile(bombPosition with { Column = bombPosition.Column - 1 }) is BoxTile
+        || _state.TileMap.GetTile(bombPosition with { Column = bombPosition.Column + 1 })
+            is BoxTile;
 }

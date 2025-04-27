@@ -127,7 +127,7 @@ public class MctsRunner : IUpdatable
             var root = new Node(mctsStartingState, _mctsAgent.AgentIndex, previousAction);
 
             var iterations = 0;
-            var selectionHeuristicWeight = Math.Clamp(1.5 * (1 - root.HeuristicValue), 0, 1); // The bigger the heuristic (closer the root player is), the less effect it should have during this MCTS run
+            var selectionHeuristicWeight = Math.Clamp(1.0 * (1 - root.HeuristicValue), 0, 1); // The bigger the heuristic (closer the root player is), the less effect it should have during this MCTS run
             Logger.Information(
                 $"Selection heuristic weight for this run: {selectionHeuristicWeight}"
             );

@@ -84,4 +84,26 @@ public class Scenario
             };
         }
     }
+
+    public static Scenario BoxWall
+    {
+        get
+        {
+            var tileMap = new TileMap(17, 11).WithBorder();
+            for (int i = 1; i < tileMap.Height - 1; i++)
+            {
+                tileMap.PlaceTile(new BoxTile(new GridPosition(i, tileMap.Width - 3)));
+            }
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 5, Column: 6),
+                    new GridPosition(Row: 5, Column: 15),
+                ],
+            };
+        }
+    }
 }

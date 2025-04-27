@@ -105,11 +105,12 @@ internal class Node
 
         var distance = simulationState.TileMap.Distance(
             simulationAgent.Player.Position.ToGridPosition(),
-            opponentAgent.Player.Position.ToGridPosition()
+            opponentAgent.Player.Position.ToGridPosition(),
+            simulationAgent.Player.Speed
         );
 
         // distanceScore [0.25; 0.75]
-        var distanceScore = ((1.0 - ((double)distance / simulationAgent.MaxDistance)) / 2) + 0.25;
+        var distanceScore = ((1.0 - (distance / simulationAgent.MaxDistance)) / 2) + 0.25;
 
         return distanceScore;
     }
