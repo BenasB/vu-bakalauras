@@ -30,7 +30,17 @@ public class MctsRunner : IUpdatable
         _mctsAgent = mctsAgent;
         _options = options;
 
-        _ = Task.Run(LoopMcts);
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await LoopMcts();
+            }
+            catch (Exception e)
+            {
+                Logger.Warning(string.Join(Environment.NewLine, e.Message, e.StackTrace));
+            }
+        });
     }
 
     public void Update(TimeSpan deltaTime)
@@ -74,9 +84,12 @@ public class MctsRunner : IUpdatable
         var waitTime = 1 / _mctsAgent.Player.Speed;
         await Task.Delay(TimeSpan.FromSeconds(waitTime));
         if (!_stateChannel.Writer.TryWrite(new GameState(_state, CreateAgent)))
+        {
+            Logger.Warning("Unable to pass the game state to MCTS after waiting");
             throw new InvalidOperationException(
                 "Unable to pass the game state to MCTS after waiting"
             );
+        }
         _mctsAgent.ApplyAction(BombermanAction.Stand);
     }
 

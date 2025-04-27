@@ -189,7 +189,7 @@ public class MctsAgent : Agent
             IsPromisingBombPosition(bombTile.Position, opponentPosition)
         );
         var wastedBombsPenalty = -0.1 * (activeBombs.Count - promisingBombCount);
-        var promisingBombIncentive = 0.1 * promisingBombCount;
+        var promisingBombIncentive = 0.02 * promisingBombCount;
 
         return Math.Clamp(distanceScore + promisingBombIncentive + wastedBombsPenalty, 0, 1);
     }
