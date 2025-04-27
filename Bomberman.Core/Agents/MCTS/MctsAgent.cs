@@ -5,11 +5,10 @@ namespace Bomberman.Core.Agents.MCTS;
 
 public class MctsAgent : Agent
 {
+    internal int MaxDistance { get; }
+
     private readonly GameState _state;
-
     private readonly Random _rnd = new();
-    private readonly int _maxDistance;
-
     private readonly MctsRunner? _mctsRunner;
 
     public MctsAgent(GameState state, Player player, int agentIndex, MctsAgentOptions options)
@@ -17,13 +16,13 @@ public class MctsAgent : Agent
     {
         _mctsRunner = new MctsRunner(state, this, options);
         _state = state;
-        _maxDistance = state.TileMap.MaxDistance();
+        MaxDistance = state.TileMap.MaxDistance();
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
         : base(player, original.AgentIndex)
     {
-        _maxDistance = original._maxDistance;
+        MaxDistance = original.MaxDistance;
         _state = state;
     }
 
@@ -194,7 +193,7 @@ public class MctsAgent : Agent
 
         var distance = _state.TileMap.Distance(playerPosition, opponentPosition);
 
-        var distanceScore = 1 - Math.Clamp((double)distance / _maxDistance, 0, 1);
+        var distanceScore = 1 - Math.Clamp((double)distance / MaxDistance, 0, 1);
 
         var placedBombPenalty = !Player.CanPlaceBomb ? 0.1 : 0;
 

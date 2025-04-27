@@ -87,10 +87,6 @@ internal class Node
 
         const int maxSimulationDepth = 20;
 
-        var startingDistance = simulationAgent
-            .Player.Position.ToGridPosition()
-            .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
-
         for (var depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
             var nextAction = simulationAgent.GetSimulationAction();
@@ -107,18 +103,13 @@ internal class Node
         if (!opponentAgent.Player.Alive)
             return 1;
 
-        var maxManhattanDistance =
-            simulationState.TileMap.Width - 2 + simulationState.TileMap.Height - 2;
-
-        var finishDistance = simulationAgent
-            .Player.Position.ToGridPosition()
-            .ManhattanDistance(opponentAgent.Player.Position.ToGridPosition());
-
-        // How much distance did we reduce? How closer did we get
-        var distanceReduction = startingDistance - finishDistance;
+        var distance = simulationState.TileMap.Distance(
+            simulationAgent.Player.Position.ToGridPosition(),
+            opponentAgent.Player.Position.ToGridPosition()
+        );
 
         // distanceScore [0.25; 0.75]
-        var distanceScore = (((double)distanceReduction / maxManhattanDistance) / 4) + 0.5;
+        var distanceScore = ((1.0 - ((double)distance / simulationAgent.MaxDistance)) / 2) + 0.25;
 
         return distanceScore;
     }
