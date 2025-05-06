@@ -184,4 +184,23 @@ public class Scenario
             };
         }
     }
+    
+    public static Scenario BombInTheWay
+    {
+        get
+        {
+            var tileMap = new TileMap(15, 10).WithBorder();
+            tileMap.PlaceTile(new BombTile(new GridPosition(1, 3), tileMap, 1));
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 1, Column: 1),
+                    new GridPosition(Row: 1, Column: tileMap.Width-2),
+                ],
+            };
+        }
+    }
 }
