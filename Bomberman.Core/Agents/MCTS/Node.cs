@@ -154,7 +154,7 @@ internal class Node
             simulationTimeLeft -= secondsPerFrame;
         }
 
-        if (simulationTimeLeft > 0)
+        if (simulationTimeLeft > 1e-10)
             stateToAdvance.Update(TimeSpan.FromSeconds(simulationTimeLeft));
     }
 }

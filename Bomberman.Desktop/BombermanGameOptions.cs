@@ -12,5 +12,5 @@ internal record BombermanGameOptions
     public MctsAgentOptions PlayerOneMctsOptions { get; set; } = new();
     public MctsAgentOptions PlayerTwoMctsOptions { get; set; } = new();
 
-    public Scenario Scenario { get; } = Scenario.BombInTheWay;
+    public Scenario Scenario { get; } = Scenario.Default;
 }
