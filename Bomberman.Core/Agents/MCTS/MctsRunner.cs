@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Numerics;
+using System.Text.Json;
 using System.Threading.Channels;
 using Bomberman.Core.Serialization;
 using Bomberman.Core.Utilities;
@@ -15,15 +16,17 @@ public class MctsRunner : IUpdatable
 
     private bool _firstStateWriteDone;
     private GridPosition? _target;
+    private Vector2 _lastPosition;
+    private bool _ignoreNextAction = false;
 
     private readonly Channel<BombermanAction> _actionChannel =
         Channel.CreateBounded<BombermanAction>(
             new BoundedChannelOptions(1) { SingleReader = true, SingleWriter = true }
         );
-    private readonly Channel<GameState> _stateChannel = Channel.CreateBounded<GameState>(
+    private readonly Channel<(GameState, BombermanAction?)> _stateChannel = Channel.CreateBounded<(GameState, BombermanAction?)>(
         new BoundedChannelOptions(1) { SingleReader = true, SingleWriter = true }
     );
-
+    
     public MctsRunner(GameState state, MctsAgent mctsAgent, MctsAgentOptions options)
     {
         _state = state;
@@ -48,7 +51,7 @@ public class MctsRunner : IUpdatable
         if (!_firstStateWriteDone)
         {
             _firstStateWriteDone = true;
-            if (!_stateChannel.Writer.TryWrite(new GameState(_state, CreateAgent)))
+            if (!_stateChannel.Writer.TryWrite((new GameState(_state, CreateAgent), null)))
                 throw new InvalidOperationException(
                     "Unable to kick off the MCTS process by passing the first state"
                 );
@@ -56,17 +59,41 @@ public class MctsRunner : IUpdatable
             _ = WaitAndWriteStateAsync();
         }
 
-        // TODO: What if we have a target but for some reason it's unreachable?
-        if (_target != null && _target.NearPosition(_mctsAgent.Player.Position, 0.1))
+        if (_target != null)
         {
-            _target = null;
-            if (!_stateChannel.Writer.TryWrite(new GameState(_state, CreateAgent)))
-                throw new InvalidOperationException("Unable to pass the game state to MCTS");
-            _mctsAgent.ApplyAction(BombermanAction.Stand);
+            if (_target.NearPosition(_mctsAgent.Player.Position, 0.1))
+            {
+                _target = null;
+                if (!_stateChannel.Writer.TryWrite((new GameState(_state, CreateAgent), null)))
+                    throw new InvalidOperationException("Unable to pass the game state to MCTS");
+                _mctsAgent.ApplyAction(BombermanAction.Stand);
+            }
+
+            if (_lastPosition == _mctsAgent.Player.Position)
+            {
+                Logger.Warning("Agent did not move although they had a target, restart the MCTS process");
+                _target = null;
+                const BombermanAction waitingAction = BombermanAction.Stand;
+                if (!_stateChannel.Writer.TryWrite((new GameState(_state, CreateAgent), waitingAction)))
+                    throw new InvalidOperationException("Unable to pass the game state to MCTS to restart the MCTS process");
+                _mctsAgent.ApplyAction(waitingAction);
+                // Ignore the next action because it is based on wrong assumptions (starting position)
+                _ignoreNextAction = true;
+                _ = WaitAndWriteStateAsync();
+            }
         }
+        
+        _lastPosition = _mctsAgent.Player.Position;
 
         if (!_actionChannel.Reader.TryRead(out var action))
             return;
+
+        if (_ignoreNextAction)
+        {
+            Logger.Warning("Ignoring action");
+            _ignoreNextAction = false;
+            return;
+        }
 
         _mctsAgent.ApplyAction(action);
         var currentPlayerPosition = _mctsAgent.Player.Position.ToGridPosition();
@@ -83,7 +110,7 @@ public class MctsRunner : IUpdatable
     {
         var waitTime = 1 / _mctsAgent.Player.Speed;
         await Task.Delay(TimeSpan.FromSeconds(waitTime));
-        if (!_stateChannel.Writer.TryWrite(new GameState(_state, CreateAgent)))
+        if (!_stateChannel.Writer.TryWrite((new GameState(_state, CreateAgent), null)))
         {
             Logger.Warning("Unable to pass the game state to MCTS after waiting");
             throw new InvalidOperationException(
@@ -132,10 +159,15 @@ public class MctsRunner : IUpdatable
         var previousAction = BombermanAction.Stand;
         while (!_state.Terminated)
         {
-            if (!_stateChannel.Reader.TryRead(out var mctsStartingState))
+            if (!_stateChannel.Reader.TryRead(out var item))
                 throw new InvalidOperationException(
                     "Something went wrong with the data exchange between MCTS loop and the agent"
                 );
+
+            var (mctsStartingState, previousActionOverwrite) = item;
+
+            if (previousActionOverwrite != null)
+                previousAction = previousActionOverwrite.Value;
 
             var root = new Node(mctsStartingState, _mctsAgent.AgentIndex, previousAction);
 
