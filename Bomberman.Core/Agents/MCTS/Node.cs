@@ -103,7 +103,7 @@ internal class Node
         if (!opponentAgent.Player.Alive)
             return 1;
 
-        var distance = simulationState.TileMap.Distance(
+        var distance = simulationState.TileMap.ShortestDistance(
             simulationAgent.Player.Position.ToGridPosition(),
             opponentAgent.Player.Position.ToGridPosition(),
             simulationAgent.Player.Speed

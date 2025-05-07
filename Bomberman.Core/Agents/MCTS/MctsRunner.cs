@@ -23,10 +23,11 @@ public class MctsRunner : IUpdatable
         Channel.CreateBounded<BombermanAction>(
             new BoundedChannelOptions(1) { SingleReader = true, SingleWriter = true }
         );
-    private readonly Channel<(GameState, BombermanAction?)> _stateChannel = Channel.CreateBounded<(GameState, BombermanAction?)>(
-        new BoundedChannelOptions(1) { SingleReader = true, SingleWriter = true }
-    );
-    
+    private readonly Channel<(GameState, BombermanAction?)> _stateChannel = Channel.CreateBounded<(
+        GameState,
+        BombermanAction?
+    )>(new BoundedChannelOptions(1) { SingleReader = true, SingleWriter = true });
+
     public MctsRunner(GameState state, MctsAgent mctsAgent, MctsAgentOptions options)
     {
         _state = state;
@@ -71,18 +72,26 @@ public class MctsRunner : IUpdatable
 
             if (_lastPosition == _mctsAgent.Player.Position)
             {
-                Logger.Warning("Agent did not move although they had a target, restart the MCTS process");
+                Logger.Warning(
+                    "Agent did not move although they had a target, restart the MCTS process"
+                );
                 _target = null;
                 const BombermanAction waitingAction = BombermanAction.Stand;
-                if (!_stateChannel.Writer.TryWrite((new GameState(_state, CreateAgent), waitingAction)))
-                    throw new InvalidOperationException("Unable to pass the game state to MCTS to restart the MCTS process");
+                if (
+                    !_stateChannel.Writer.TryWrite(
+                        (new GameState(_state, CreateAgent), waitingAction)
+                    )
+                )
+                    throw new InvalidOperationException(
+                        "Unable to pass the game state to MCTS to restart the MCTS process"
+                    );
                 _mctsAgent.ApplyAction(waitingAction);
                 // Ignore the next action because it is based on wrong assumptions (starting position)
                 _ignoreNextAction = true;
                 _ = WaitAndWriteStateAsync();
             }
         }
-        
+
         _lastPosition = _mctsAgent.Player.Position;
 
         if (!_actionChannel.Reader.TryRead(out var action))
@@ -134,11 +143,13 @@ public class MctsRunner : IUpdatable
         {
             (null, StaticAgent) => originalState.Agents[agentIndex].Clone(newState, player),
             (null, WalkingAgent) => originalState.Agents[agentIndex].Clone(newState, player),
+            (null, BombingAgent) => originalState.Agents[agentIndex].Clone(newState, player),
             (null, _) => throw new NotSupportedException(
                 "This opponent type is not supported in MCTS, you must replace it"
             ),
             (AgentType.Static, _) => new StaticAgent(player, agentIndex),
             (AgentType.Walking, _) => new WalkingAgent(newState, player, agentIndex),
+            (AgentType.Bombing, _) => new BombingAgent(newState, player, agentIndex),
             (_, _) => throw new NotSupportedException(
                 "This agent type is not supported for replacement in MCTS"
             ),
@@ -174,7 +185,7 @@ public class MctsRunner : IUpdatable
             var iterations = 0;
             var rootAgent = root.State.Agents[_mctsAgent.AgentIndex];
             var rootOpponent = root.State.Agents.First(agent => agent != rootAgent);
-            var distance = root.State.TileMap.Distance(
+            var distance = root.State.TileMap.ShortestDistance(
                 rootAgent.Player.Position.ToGridPosition(),
                 rootOpponent.Player.Position.ToGridPosition(),
                 rootAgent.Player.Speed

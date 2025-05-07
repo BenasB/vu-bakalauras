@@ -16,7 +16,7 @@ public class MctsAgent : Agent
     {
         _mctsRunner = new MctsRunner(state, this, options);
         _state = state;
-        MaxDistance = state.TileMap.MaxDistance(Player.Speed);
+        MaxDistance = state.TileMap.MaxShortestDistance(Player.Speed);
     }
 
     private MctsAgent(GameState state, Player player, MctsAgent original)
@@ -180,7 +180,11 @@ public class MctsAgent : Agent
         var opponentPosition = _state.Agents.First(a => a != this).Player.Position.ToGridPosition();
         var playerPosition = Player.Position.ToGridPosition();
 
-        var distance = _state.TileMap.Distance(playerPosition, opponentPosition, Player.Speed);
+        var distance = _state.TileMap.ShortestDistance(
+            playerPosition,
+            opponentPosition,
+            Player.Speed
+        );
 
         var distanceScore = 1 - Math.Clamp(distance / MaxDistance, 0, 1);
 

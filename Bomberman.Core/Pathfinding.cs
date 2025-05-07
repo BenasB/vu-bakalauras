@@ -4,14 +4,14 @@ namespace Bomberman.Core;
 
 internal static class Pathfinding
 {
-    internal static double Distance(
+    internal static double ShortestDistance(
         this TileMap tileMap,
         GridPosition start,
         GridPosition finish,
         float walkingSpeed
     )
     {
-        var costs = tileMap.CalculateCosts(start, walkingSpeed, finish);
+        var (costs, _) = tileMap.CalculateCosts(start, walkingSpeed, finish);
         var finishCost = costs[finish.Row, finish.Column];
 
         if (double.IsPositiveInfinity(finishCost))
@@ -20,7 +20,7 @@ internal static class Pathfinding
         return finishCost;
     }
 
-    internal static double MaxDistance(this TileMap tileMap, float walkingSpeed)
+    internal static double MaxShortestDistance(this TileMap tileMap, float walkingSpeed)
     {
         GridPosition? start = null;
         for (int row = 0; row < tileMap.Height && start == null; row++)
@@ -38,19 +38,19 @@ internal static class Pathfinding
                 "Could not find a tile to start the calculation from"
             );
 
-        var (_, nextStart) = tileMap.MaxDistance(start, walkingSpeed);
-        var (maxDistance, _) = tileMap.MaxDistance(nextStart, walkingSpeed);
+        var (_, nextStart) = tileMap.MaxShortestDistance(start, walkingSpeed);
+        var (maxDistance, _) = tileMap.MaxShortestDistance(nextStart, walkingSpeed);
 
         return maxDistance;
     }
 
-    private static (double, GridPosition) MaxDistance(
+    private static (double, GridPosition) MaxShortestDistance(
         this TileMap tileMap,
         GridPosition start,
         float walkingSpeed
     )
     {
-        var costs = tileMap.CalculateCosts(start, walkingSpeed);
+        var (costs, _) = tileMap.CalculateCosts(start, walkingSpeed);
 
         var max = -1.0;
         var maxRow = -1;
@@ -71,7 +71,33 @@ internal static class Pathfinding
         return (max, new GridPosition(maxRow, maxColumn));
     }
 
-    private static double[,] CalculateCosts(
+    internal static List<GridPosition>? ShortestPath(
+        this TileMap tileMap,
+        GridPosition start,
+        GridPosition finish,
+        float walkingSpeed
+    )
+    {
+        var (_, parents) = tileMap.CalculateCosts(start, walkingSpeed, finish);
+
+        var parent = parents[finish.Row, finish.Column];
+        if (parent == null)
+        {
+            return null;
+        }
+
+        var path = new List<GridPosition> { finish };
+        while (parent != null)
+        {
+            path.Add(parent);
+            parent = parents[parent.Row, parent.Column];
+        }
+
+        path.Reverse();
+        return path;
+    }
+
+    private static (double[,], GridPosition?[,]) CalculateCosts(
         this TileMap tileMap,
         GridPosition start,
         float walkingSpeed,
@@ -82,6 +108,7 @@ internal static class Pathfinding
         pq.Enqueue(start, 0);
 
         var costs = new double[tileMap.Height, tileMap.Width];
+        var parents = new GridPosition?[tileMap.Height, tileMap.Width];
         for (int row = 0; row < tileMap.Height; row++)
         for (int column = 0; column < tileMap.Width; column++)
         {
@@ -97,7 +124,7 @@ internal static class Pathfinding
             var current = pq.Dequeue();
 
             if (finish != null && current == finish)
-                return costs;
+                return (costs, parents);
 
             foreach (var neighbour in current.Neighbours)
             {
@@ -125,11 +152,12 @@ internal static class Pathfinding
                 if (newNeighbourCost >= costs[neighbour.Row, neighbour.Column])
                     continue;
 
+                parents[neighbour.Row, neighbour.Column] = current;
                 costs[neighbour.Row, neighbour.Column] = newNeighbourCost;
                 pq.Enqueue(neighbour, newNeighbourCost);
             }
         }
 
-        return costs;
+        return (costs, parents);
     }
 }

@@ -7,7 +7,7 @@ public class Pathfinding
     internal const float WalkingSpeed = 2;
 
     [Theory]
-    [ClassData(typeof(PathfindingData))]
+    [ClassData(typeof(ShortestDistanceData))]
     public void FindsDistanceCorrectly(
         TileMap tileMap,
         GridPosition start,
@@ -15,20 +15,32 @@ public class Pathfinding
         double expectedDistance
     )
     {
-        Assert.Equal(expectedDistance, tileMap.Distance(start, end, WalkingSpeed));
+        Assert.Equal(expectedDistance, tileMap.ShortestDistance(start, end, WalkingSpeed));
     }
 
     [Theory]
-    [ClassData(typeof(MaxPathfindingData))]
+    [ClassData(typeof(MaxShortestDistanceData))]
     public void FindsMaxDistanceCorrectly(TileMap tileMap, double expectedDistance)
     {
-        Assert.Equal(expectedDistance, tileMap.MaxDistance(WalkingSpeed));
+        Assert.Equal(expectedDistance, tileMap.MaxShortestDistance(WalkingSpeed));
+    }
+
+    [Theory]
+    [ClassData(typeof(ShortestPathData))]
+    public void FindsPathCorrectly(
+        TileMap tileMap,
+        GridPosition start,
+        GridPosition end,
+        List<GridPosition>? expectedPath
+    )
+    {
+        Assert.Equal(expectedPath, tileMap.ShortestPath(start, end, WalkingSpeed));
     }
 }
 
-public class PathfindingData : TheoryData<TileMap, GridPosition, GridPosition, double>
+public class ShortestDistanceData : TheoryData<TileMap, GridPosition, GridPosition, double>
 {
-    public PathfindingData()
+    public ShortestDistanceData()
     {
         Add(new TileMap(5, 5), new GridPosition(0, 0), new GridPosition(0, 1), 1);
         Add(new TileMap(5, 5), new GridPosition(0, 0), new GridPosition(1, 0), 1);
@@ -112,9 +124,9 @@ public class PathfindingData : TheoryData<TileMap, GridPosition, GridPosition, d
     }
 }
 
-public class MaxPathfindingData : TheoryData<TileMap, double>
+public class MaxShortestDistanceData : TheoryData<TileMap, double>
 {
-    public MaxPathfindingData()
+    public MaxShortestDistanceData()
     {
         // 0 0 0 0 0
         // 0 0 0 0 0
@@ -168,6 +180,73 @@ public class MaxPathfindingData : TheoryData<TileMap, double>
                 tileMap.PlaceTile(new WallTile(new GridPosition(1, i)));
             }
             Add(tileMap, 14);
+        }
+    }
+}
+
+public class ShortestPathData : TheoryData<TileMap, GridPosition, GridPosition, List<GridPosition>?>
+{
+    public ShortestPathData()
+    {
+        // S 0 0 0 F
+        Add(
+            new TileMap(5, 1),
+            new GridPosition(0, 0),
+            new GridPosition(0, 4),
+            new List<GridPosition> { new(0, 0), new(0, 1), new(0, 2), new(0, 3), new(0, 4) }
+        );
+
+        // S 0 1 0 F
+        {
+            var tileMap = new TileMap(5, 1);
+            tileMap.PlaceTile(new WallTile(new GridPosition(0, 2)));
+            Add(tileMap, new GridPosition(0, 0), new GridPosition(0, 4), null);
+        }
+
+        // S 0 1 0 0
+        // 0 0 1 0 0
+        // 0 0 1 0 0
+        // 0 0 1 0 0
+        // 0 0 0 0 F
+        {
+            var tileMap = new TileMap(5, 5);
+            for (int i = 0; i < tileMap.Height - 1; i++)
+            {
+                tileMap.PlaceTile(new WallTile(new GridPosition(i, 2)));
+            }
+
+            Add(
+                tileMap,
+                new GridPosition(0, 0),
+                new GridPosition(4, 4),
+                new List<GridPosition>
+                {
+                    new(0, 0),
+                    new(1, 0),
+                    new(1, 1),
+                    new(2, 1),
+                    new(3, 1),
+                    new(4, 1),
+                    new(4, 2),
+                    new(4, 3),
+                    new(4, 4),
+                }
+            );
+        }
+
+        // S 0 1 0 0
+        // 0 0 1 0 0
+        // 0 0 1 0 0
+        // 0 0 1 0 0
+        // 0 0 1 0 F
+        {
+            var tileMap = new TileMap(5, 5);
+            for (int i = 0; i < tileMap.Height; i++)
+            {
+                tileMap.PlaceTile(new WallTile(new GridPosition(i, 2)));
+            }
+
+            Add(tileMap, new GridPosition(0, 0), new GridPosition(4, 4), null);
         }
     }
 }

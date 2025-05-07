@@ -4,6 +4,7 @@ public enum AgentType
 {
     Static,
     Walking,
+    Bombing,
     Mcts,
     Keyboard,
 }
