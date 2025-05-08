@@ -56,19 +56,55 @@ public class MctsAgent : Agent
                 Player.SetMovingDirection(Direction.None);
                 break;
             case BombermanAction.PlaceBombAndMoveUp:
-                Player.PlaceBomb();
+                try
+                {
+                    Player.PlaceBomb();
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning(
+                        $"MCTS should have blaced a bomb but something was wrong: {e.Message}"
+                    );
+                }
                 Player.SetMovingDirection(Direction.Up);
                 break;
             case BombermanAction.PlaceBombAndMoveDown:
-                Player.PlaceBomb();
+                try
+                {
+                    Player.PlaceBomb();
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning(
+                        $"MCTS should have blaced a bomb but something was wrong: {e.Message}"
+                    );
+                }
                 Player.SetMovingDirection(Direction.Down);
                 break;
             case BombermanAction.PlaceBombAndMoveLeft:
-                Player.PlaceBomb();
+                try
+                {
+                    Player.PlaceBomb();
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning(
+                        $"MCTS should have blaced a bomb but something was wrong: {e.Message}"
+                    );
+                }
                 Player.SetMovingDirection(Direction.Left);
                 break;
             case BombermanAction.PlaceBombAndMoveRight:
-                Player.PlaceBomb();
+                try
+                {
+                    Player.PlaceBomb();
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning(
+                        $"MCTS should have blaced a bomb but something was wrong: {e.Message}"
+                    );
+                }
                 Player.SetMovingDirection(Direction.Right);
                 break;
             default:
