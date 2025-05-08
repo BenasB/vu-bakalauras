@@ -12,6 +12,7 @@ public class WalkingAgent : Agent
     public WalkingAgent(GameState state, Player player, int agentIndex)
         : base(player, agentIndex)
     {
+        player.SetMovingDirection(Direction.None);
         _state = state;
         _rnd = new StatefulRandom();
         _walker = new Walker(player, GetRandomTarget);

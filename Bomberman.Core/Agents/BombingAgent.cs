@@ -11,6 +11,7 @@ public class BombingAgent : Agent
     public BombingAgent(GameState state, Player player, int agentIndex)
         : base(player, agentIndex)
     {
+        player.SetMovingDirection(Direction.None);
         _state = state;
         var opponentAgent = state.Agents.First(agent => agent.AgentIndex != agentIndex);
         _path = new Queue<GridPosition>(
@@ -32,7 +33,7 @@ public class BombingAgent : Agent
     }
 
     internal override Agent Clone(GameState state, Player player) =>
-        new StaticAgent(player, AgentIndex);
+        new BombingAgent(state, player, this);
 
     public override void Update(TimeSpan deltaTime)
     {
