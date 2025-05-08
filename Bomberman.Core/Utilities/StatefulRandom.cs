@@ -39,4 +39,13 @@ internal class StatefulRandom
 
         return (double)_state / M;
     }
+
+    public void Shuffle<T>(T[] array)
+    {
+        for (int i = array.Length - 1; i > 0; i--)
+        {
+            int j = (int)(NextDouble() * (i + 1));
+            (array[i], array[j]) = (array[j], array[i]);
+        }
+    }
 }

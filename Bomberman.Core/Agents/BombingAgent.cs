@@ -6,11 +6,13 @@ namespace Bomberman.Core.Agents;
 public class BombingAgent : Agent
 {
     private readonly GameState _state;
-    private Queue<GridPosition> _pathQueue = new();
+    private Queue<GridPosition> _safetyPathQueue = new();
     private Walker? _attackWalker;
     private Walker? _safetyWalker;
     private BombTile? _placedBombTile;
     private GridPosition? _placedBombPosition;
+
+    private readonly StatefulRandom _rnd = new();
 
     private bool _init;
 
@@ -38,7 +40,8 @@ public class BombingAgent : Agent
     {
         _state = state;
         _init = original._init;
-        _pathQueue = new Queue<GridPosition>(original._pathQueue);
+        _rnd = new StatefulRandom(original._rnd);
+        _safetyPathQueue = new Queue<GridPosition>(original._safetyPathQueue);
 
         if (original._placedBombTile != null)
         {
@@ -63,7 +66,7 @@ public class BombingAgent : Agent
         _attackWalker =
             original._attackWalker == null
                 ? null
-                : new Walker(player, GetNextTarget, original._attackWalker);
+                : new Walker(player, GetNextAttackPathTarget, original._attackWalker);
         _safetyWalker =
             original._safetyWalker == null
                 ? null
@@ -121,31 +124,28 @@ public class BombingAgent : Agent
 
     private GridPosition? GetNextTarget()
     {
-        return _pathQueue.TryDequeue(out var target) ? target : null;
+        return _safetyPathQueue.TryDequeue(out var target) ? target : null;
+    }
+
+    private GridPosition? GetNextAttackPathTarget()
+    {
+        var path =
+            _state.TileMap.ShortestPath(
+                Player.Position.ToGridPosition(),
+                Opponent.Player.Position.ToGridPosition(),
+                Player.Speed
+            ) ?? throw new InvalidOperationException("Could not find a path to the opponent");
+        path.RemoveAt(0); // Ignore the starting position, which will always be there
+        if (path.Count > 0)
+            path.RemoveAt(path.Count - 1); // Do not go on the player directly
+
+        return path.Count > 0 ? path[0] : null;
     }
 
     private void MoveToAttack()
     {
         _safetyWalker = null;
-
-        List<GridPosition> path;
-        try
-        {
-            path =
-                _state.TileMap.ShortestPath(
-                    Player.Position.ToGridPosition(),
-                    Opponent.Player.Position.ToGridPosition(),
-                    Player.Speed
-                ) ?? throw new InvalidOperationException("Could not find a path to the opponent");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-        path.RemoveAt(path.Count - 1);
-        _pathQueue = new Queue<GridPosition>(path);
-        _attackWalker = new Walker(Player, GetNextTarget);
+        _attackWalker = new Walker(Player, GetNextAttackPathTarget);
     }
 
     private void MoveToSafety()
@@ -166,7 +166,7 @@ public class BombingAgent : Agent
         if (pathToSafety == null)
             return;
 
-        _pathQueue = new Queue<GridPosition>(pathToSafety);
+        _safetyPathQueue = new Queue<GridPosition>(pathToSafety);
         _safetyWalker = new Walker(Player, GetNextTarget);
     }
 
@@ -187,7 +187,11 @@ public class BombingAgent : Agent
             if (!dangerousPositions.Contains(current))
                 break;
 
-            foreach (var neighbour in current.Neighbours)
+            // Introduce uncertainty
+            var neighbours = current.Neighbours.ToArray();
+            _rnd.Shuffle(neighbours);
+
+            foreach (var neighbour in neighbours)
             {
                 if (
                     neighbour.Row < 0
