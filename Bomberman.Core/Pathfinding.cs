@@ -78,6 +78,11 @@ internal static class Pathfinding
         float walkingSpeed
     )
     {
+        if (start == finish)
+        {
+            return new List<GridPosition> { start };
+        }
+
         var (_, parents) = tileMap.CalculateCosts(start, walkingSpeed, finish);
 
         var parent = parents[finish.Row, finish.Column];

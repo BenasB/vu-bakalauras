@@ -248,5 +248,13 @@ public class ShortestPathData : TheoryData<TileMap, GridPosition, GridPosition, 
 
             Add(tileMap, new GridPosition(0, 0), new GridPosition(4, 4), null);
         }
+
+        // S/F 0 0 0 0
+        Add(
+            new TileMap(5, 1),
+            new GridPosition(0, 0),
+            new GridPosition(0, 0),
+            new List<GridPosition> { new(0, 0) }
+        );
     }
 }

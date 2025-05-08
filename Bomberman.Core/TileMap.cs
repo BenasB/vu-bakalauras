@@ -11,7 +11,7 @@ public class TileMap : IUpdatable
 
     private readonly Tile[][] _backgroundTiles;
     private readonly Tile?[][] _foregroundTiles;
-    private readonly StatefulRandom _rnd = new(44);
+    private readonly StatefulRandom _rnd = new(7321);
 
     public ImmutableArray<ImmutableArray<Tile>> BackgroundTiles =>
         [.. _backgroundTiles.Select(row => row.ToImmutableArray())];

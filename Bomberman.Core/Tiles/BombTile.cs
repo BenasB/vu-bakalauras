@@ -22,7 +22,7 @@ public class BombTile(GridPosition position, TileMap tileMap, int range)
     /// <summary>
     /// Gets explosion paths in 4 directions based on the bomb range
     /// </summary>
-    private IEnumerable<IEnumerable<GridPosition>> ExplosionPaths =>
+    internal IEnumerable<IEnumerable<GridPosition>> ExplosionPaths =>
         new Func<int, GridPosition>[]
         {
             distanceFromCenter => Position with { Row = Position.Row - distanceFromCenter },
