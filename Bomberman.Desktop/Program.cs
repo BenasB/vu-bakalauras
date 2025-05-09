@@ -20,7 +20,9 @@ for (int i = 0; i < args.Length; i++)
     if (args[i].StartsWith(flagPrefix))
         flag = args[i][flagPrefix.Length..].ToLower();
     else
-        throw new InvalidOperationException($"Unsupported flag '{args[i]}'");
+        throw new InvalidOperationException(
+            $"Flag '{args[i]}' does not start with the {flagPrefix} prefix"
+        );
 
     const string playerPrefix = "player";
     if (flag.StartsWith(playerPrefix))
@@ -66,9 +68,20 @@ for (int i = 0; i < args.Length; i++)
                 options.PlayerTwoMctsOptions = mctsOptions;
         }
     }
+    else if (flag == "seed")
+    {
+        i++;
+        var value = args[i];
+        if (int.TryParse(value, out var seed))
+            options.Seed = seed;
+        else
+            throw new InvalidOperationException(
+                $"Could not parse '{value}' into an integer to use as the seed"
+            );
+    }
     else
     {
-        throw new InvalidOperationException($"Unsupported flag '{args[i]}'");
+        throw new InvalidOperationException($"Unsupported flag '{flag}'");
     }
 }
 

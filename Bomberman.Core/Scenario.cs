@@ -6,11 +6,21 @@ public class Scenario
 {
     public required TileMap TileMap { get; init; }
     public required GridPosition[] StartPositions { get; init; }
+}
 
-    public static Scenario Default =>
+public class ScenarioFactory
+{
+    private readonly int _seed;
+
+    public ScenarioFactory(int seed)
+    {
+        _seed = seed;
+    }
+
+    public Scenario Default =>
         new()
         {
-            TileMap = new TileMap(17, 11)
+            TileMap = new TileMap(17, 11, _seed)
                 .WithRandomTileFill()
                 .WithBorder()
                 .WithCheckerPattern()
@@ -25,10 +35,10 @@ public class Scenario
             ],
         };
 
-    public static Scenario Empty =>
+    public Scenario Empty =>
         new()
         {
-            TileMap = new TileMap(17, 11).WithBorder(),
+            TileMap = new TileMap(17, 11, _seed).WithBorder(),
             StartPositions =
             [
                 new GridPosition(Row: 5, Column: 6),
@@ -36,11 +46,11 @@ public class Scenario
             ],
         };
 
-    public static Scenario SolidWall
+    public Scenario SolidWall
     {
         get
         {
-            var tileMap = new TileMap(17, 11).WithBorder();
+            var tileMap = new TileMap(17, 11, _seed).WithBorder();
             for (int i = 2; i < tileMap.Height - 2; i++)
             {
                 tileMap.PlaceTile(new WallTile(new GridPosition(i, tileMap.Width - 3)));
@@ -58,11 +68,11 @@ public class Scenario
         }
     }
 
-    public static Scenario BacktrackSolidWall
+    public Scenario BacktrackSolidWall
     {
         get
         {
-            var tileMap = new TileMap(17, 11).WithBorder();
+            var tileMap = new TileMap(17, 11, _seed).WithBorder();
             for (int i = 2; i < tileMap.Height - 1; i++)
             {
                 tileMap.PlaceTile(new WallTile(new GridPosition(i, tileMap.Width - 3)));
@@ -85,11 +95,11 @@ public class Scenario
         }
     }
 
-    public static Scenario BoxWall
+    public Scenario BoxWall
     {
         get
         {
-            var tileMap = new TileMap(17, 11).WithBorder();
+            var tileMap = new TileMap(17, 11, _seed).WithBorder();
             for (int i = 1; i < tileMap.Height - 1; i++)
             {
                 tileMap.PlaceTile(new BoxTile(new GridPosition(i, tileMap.Width - 3)));
@@ -107,11 +117,11 @@ public class Scenario
         }
     }
 
-    public static Scenario BacktrackBoxWall
+    public Scenario BacktrackBoxWall
     {
         get
         {
-            var tileMap = new TileMap(17, 11).WithBorder();
+            var tileMap = new TileMap(17, 11, _seed).WithBorder();
             for (int i = 2; i < tileMap.Height - 1; i++)
             {
                 tileMap.PlaceTile(new BoxTile(new GridPosition(i, tileMap.Width - 3)));
@@ -134,11 +144,11 @@ public class Scenario
         }
     }
 
-    public static Scenario BoxWallShort
+    public Scenario BoxWallShort
     {
         get
         {
-            var tileMap = new TileMap(17, 11).WithBorder();
+            var tileMap = new TileMap(17, 11, _seed).WithBorder();
             tileMap.PlaceTile(new BoxTile(new GridPosition(tileMap.Height / 2, tileMap.Width - 3)));
             for (int i = 1; i < 3; i++)
             {
@@ -162,11 +172,11 @@ public class Scenario
         }
     }
 
-    public static Scenario BoxWallMultiple
+    public Scenario BoxWallMultiple
     {
         get
         {
-            var tileMap = new TileMap(17, 11).WithBorder();
+            var tileMap = new TileMap(17, 11, _seed).WithBorder();
             for (int column = tileMap.Width - 3; column > tileMap.Width / 2; column -= 2)
             for (int i = 1; i < tileMap.Height - 1; i++)
             {
@@ -184,12 +194,12 @@ public class Scenario
             };
         }
     }
-    
-    public static Scenario BombInTheWay
+
+    public Scenario BombInTheWay
     {
         get
         {
-            var tileMap = new TileMap(15, 10).WithBorder();
+            var tileMap = new TileMap(15, 10, _seed).WithBorder();
             tileMap.PlaceTile(new BombTile(new GridPosition(1, 3), tileMap, 1));
 
             return new Scenario
@@ -198,7 +208,7 @@ public class Scenario
                 StartPositions =
                 [
                     new GridPosition(Row: 1, Column: 1),
-                    new GridPosition(Row: 1, Column: tileMap.Width-2),
+                    new GridPosition(Row: 1, Column: tileMap.Width - 2),
                 ],
             };
         }

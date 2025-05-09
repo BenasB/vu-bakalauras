@@ -45,7 +45,8 @@ internal class BombermanGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _gameState = new GameState(CreateAgent, options.Scenario);
+        var scenarioFactory = new ScenarioFactory(options.Seed);
+        _gameState = new GameState(CreateAgent, scenarioFactory.Default);
     }
 
     private Agent CreateAgent(GameState state, Player player, int agentIndex)
