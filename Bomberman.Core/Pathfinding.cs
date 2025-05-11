@@ -133,12 +133,7 @@ internal static class Pathfinding
 
             foreach (var neighbour in current.Neighbours)
             {
-                if (
-                    neighbour.Row < 0
-                    || neighbour.Row >= tileMap.Height
-                    || neighbour.Column < 0
-                    || neighbour.Column >= tileMap.Width
-                )
+                if (!tileMap.IsPositionInsideBounds(neighbour))
                     continue;
 
                 var neighbourTile = tileMap.GetTile(neighbour);

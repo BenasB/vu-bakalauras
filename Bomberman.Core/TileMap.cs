@@ -126,6 +126,9 @@ public class TileMap : IUpdatable
         }
     }
 
+    public bool IsPositionInsideBounds(GridPosition pos) =>
+        pos.Row >= 0 && pos.Row < Height && pos.Column >= 0 && pos.Column < Width;
+
     internal Tile? GetTile(GridPosition gridPosition)
     {
         if (gridPosition.Row < 0 || gridPosition.Row >= Height)

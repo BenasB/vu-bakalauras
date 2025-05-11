@@ -1,5 +1,4 @@
 using System.Numerics;
-using Bomberman.Core.Utilities;
 
 namespace Bomberman.Core.Agents;
 
@@ -45,6 +44,24 @@ internal class Walker : IUpdatable
                 IsStuck = true;
                 return;
             }
+
+#if DEBUG
+            if (_lastPosition != null)
+            {
+                var lastDiff =
+                    Math.Abs(_lastPosition.Value.X - _target.Column * Constants.TileSize)
+                    + Math.Abs(_lastPosition.Value.Y - _target.Row * Constants.TileSize);
+
+                var currDiff =
+                    Math.Abs(_player.Position.X - _target.Column * Constants.TileSize)
+                    + Math.Abs(_player.Position.Y - _target.Row * Constants.TileSize);
+
+                if (currDiff > lastDiff)
+                    throw new InvalidOperationException(
+                        "Distance increased, but we should be moving towards the target"
+                    );
+            }
+#endif
 
             IsStuck = false;
             _lastPosition = _player.Position;

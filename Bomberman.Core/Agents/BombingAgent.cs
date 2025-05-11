@@ -10,7 +10,7 @@ public class BombingAgent : Agent
     private Walker? _attackWalker;
     private Walker? _safetyWalker;
     private BombTile? _placedBombTile;
-    private GridPosition? _placedBombPosition;
+    private GridPosition? _threatPosition;
 
     private readonly StatefulRandom _rnd = new();
 
@@ -18,15 +18,8 @@ public class BombingAgent : Agent
 
     private Agent? _opponentBacking;
 
-    private Agent Opponent
-    {
-        get
-        {
-            return _opponentBacking ??= _state.Agents.First(agent =>
-                agent.AgentIndex != AgentIndex
-            );
-        }
-    }
+    private Agent Opponent =>
+        _opponentBacking ??= _state.Agents.First(agent => agent.AgentIndex != AgentIndex);
 
     public BombingAgent(GameState state, Player player, int agentIndex)
         : base(player, agentIndex)
@@ -49,17 +42,17 @@ public class BombingAgent : Agent
             if (tile is ExplosionTile)
             {
                 _placedBombTile = null;
-                _placedBombPosition = original._placedBombPosition;
+                _threatPosition = original._threatPosition;
             }
             else if (tile != null)
             {
                 _placedBombTile = (BombTile)tile;
-                _placedBombPosition = original._placedBombPosition;
+                _threatPosition = original._threatPosition;
             }
             else
             {
                 _placedBombTile = null;
-                _placedBombPosition = null;
+                _threatPosition = null;
             }
         }
 
@@ -104,17 +97,14 @@ public class BombingAgent : Agent
             // Wait for the bomb to fully explode
             if (
                 _placedBombTile is { Detonated: false }
-                || (
-                    _placedBombPosition != null
-                    && _state.TileMap.GetTile(_placedBombPosition) != null
-                )
+                || (_threatPosition != null && _state.TileMap.GetTile(_threatPosition) != null)
             )
             {
                 return;
             }
 
             _placedBombTile = null;
-            _placedBombPosition = null;
+            _threatPosition = null;
             MoveToAttack();
         }
 
@@ -139,7 +129,8 @@ public class BombingAgent : Agent
         if (path.Count > 0)
             path.RemoveAt(path.Count - 1); // Do not go on the player directly
 
-        return path.Count > 0 ? path[0] : null;
+        var nextTarget = path.Count > 0 ? path[0] : null;
+        return nextTarget;
     }
 
     private void MoveToAttack()
@@ -152,17 +143,13 @@ public class BombingAgent : Agent
     {
         _attackWalker = null;
 
-        try
+        _threatPosition = Player.Position.ToGridPosition();
+        if (_state.TileMap.GetTile(_threatPosition) == null)
         {
             _placedBombTile = Player.PlaceBomb();
-            _placedBombPosition = _placedBombTile.Position;
-        }
-        catch
-        {
-            return;
         }
 
-        var pathToSafety = GetSafetyPath(_placedBombTile);
+        var pathToSafety = GetSafetyPath(_threatPosition, _placedBombTile);
         if (pathToSafety == null)
             return;
 
@@ -170,15 +157,16 @@ public class BombingAgent : Agent
         _safetyWalker = new Walker(Player, GetNextTarget);
     }
 
-    private List<GridPosition>? GetSafetyPath(BombTile bombTile)
+    private List<GridPosition>? GetSafetyPath(GridPosition threatPosition, BombTile? bombTile)
     {
-        var dangerousPositions = bombTile
-            .ExplosionPaths.SelectMany(x => x)
-            .Concat([bombTile.Position])
-            .ToList();
+        var dangerousPositions = new List<GridPosition> { threatPosition };
+        if (bombTile != null)
+            dangerousPositions = dangerousPositions
+                .Concat(bombTile.ExplosionPaths.SelectMany(x => x))
+                .ToList();
 
         var queue = new Queue<GridPosition>();
-        queue.Enqueue(bombTile.Position);
+        queue.Enqueue(threatPosition);
         var parents = new GridPosition?[_state.TileMap.Height, _state.TileMap.Width];
 
         GridPosition? current;

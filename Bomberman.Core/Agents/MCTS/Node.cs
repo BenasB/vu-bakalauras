@@ -89,6 +89,14 @@ internal class Node
 
         for (var depth = 0; depth < maxSimulationDepth && !simulationState.Terminated; depth++)
         {
+#if DEBUG
+            var opponentPosition = opponentAgent.Player.Position.ToGridPosition();
+            if (!simulationState.TileMap.IsPositionInsideBounds(opponentPosition))
+                throw new InvalidOperationException(
+                    "Opponent somehow ended up outside the tile map"
+                );
+#endif
+
             var nextAction = simulationAgent.GetSimulationAction();
 
             simulationAgent.ApplyAction(nextAction);
