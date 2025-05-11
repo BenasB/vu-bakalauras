@@ -29,7 +29,7 @@ internal class Walker : IUpdatable
         _target = original._target;
         _getNextTarget = getNextTarget;
         _lastPosition = null;
-        IsFinished = original.IsStuck;
+        IsFinished = original.IsFinished;
         IsStuck = original.IsStuck;
     }
 
