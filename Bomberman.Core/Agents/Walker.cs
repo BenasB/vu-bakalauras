@@ -52,14 +52,17 @@ internal class Walker : IUpdatable
                 return;
         }
 
-        _target = _getNextTarget.Invoke();
-
-        if (_target == null)
+        do
         {
+            _target = _getNextTarget.Invoke();
+
+            if (_target != null)
+                continue;
+
             _player.SetMovingDirection(Direction.None);
             IsFinished = true;
             return;
-        }
+        } while (_target.NearPosition(_player.Position, TargetThreshold));
 
         var playerPosition = _player.Position.ToGridPosition();
         if (playerPosition.Row < _target.Row)
@@ -70,5 +73,9 @@ internal class Walker : IUpdatable
             _player.SetMovingDirection(Direction.Right);
         else if (playerPosition.Column > _target.Column)
             _player.SetMovingDirection(Direction.Left);
+        else
+            throw new InvalidOperationException(
+                "Could not determine movement direction from the target"
+            );
     }
 }
