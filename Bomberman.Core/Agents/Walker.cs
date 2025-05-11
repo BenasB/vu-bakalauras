@@ -64,14 +64,13 @@ internal class Walker : IUpdatable
             return;
         } while (_target.NearPosition(_player.Position, TargetThreshold));
 
-        var playerPosition = _player.Position.ToGridPosition();
-        if (playerPosition.Row < _target.Row)
+        if (_player.Position.Y < _target.Row * Constants.TileSize - TargetThreshold)
             _player.SetMovingDirection(Direction.Down);
-        else if (playerPosition.Row > _target.Row)
+        else if (_player.Position.Y > _target.Row * Constants.TileSize + TargetThreshold)
             _player.SetMovingDirection(Direction.Up);
-        else if (playerPosition.Column < _target.Column)
+        else if (_player.Position.X < _target.Column * Constants.TileSize - TargetThreshold)
             _player.SetMovingDirection(Direction.Right);
-        else if (playerPosition.Column > _target.Column)
+        else if (_player.Position.X > _target.Column * Constants.TileSize + TargetThreshold)
             _player.SetMovingDirection(Direction.Left);
         else
             throw new InvalidOperationException(
