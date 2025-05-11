@@ -23,6 +23,8 @@ public class Player : IUpdatable, IDamageable
 
     internal IEnumerable<BombTile> ActiveBombs => _placedBombTiles.Where(bomb => !bomb.Detonated);
 
+    public PlayerStatistics Statistics { get; }
+
     private readonly List<BombTile> _placedBombTiles = [];
     private readonly TileMap _tileMap;
 
@@ -30,6 +32,7 @@ public class Player : IUpdatable, IDamageable
     {
         _tileMap = tileMap;
         Position = startPosition;
+        Statistics = new PlayerStatistics { BombsPlaced = 0, DistanceMoved = 0 };
     }
 
     internal Player(Player original, TileMap tileMap)
@@ -48,6 +51,11 @@ public class Player : IUpdatable, IDamageable
             )
             .ToList();
         _tileMap = tileMap;
+        Statistics = new PlayerStatistics
+        {
+            BombsPlaced = original.Statistics.BombsPlaced,
+            DistanceMoved = original.Statistics.DistanceMoved,
+        };
     }
 
     public void Update(TimeSpan deltaTime)
@@ -74,6 +82,8 @@ public class Player : IUpdatable, IDamageable
             velocity
         );
         var adjustedVelocity = _velocityDirection * adjustedVelocityLength;
+
+        Statistics.DistanceMoved += adjustedVelocityLength;
 
         if (adjustedVelocityLength != 0)
             Position = Vector2.Add(snappedPosition, adjustedVelocity);
@@ -112,6 +122,7 @@ public class Player : IUpdatable, IDamageable
             );
 
         _placedBombTiles.Add(bombTile);
+        Statistics.BombsPlaced++;
 
         return bombTile;
     }
@@ -161,4 +172,10 @@ public class Player : IUpdatable, IDamageable
     {
         Alive = false;
     }
+}
+
+public class PlayerStatistics
+{
+    public required double DistanceMoved { get; set; }
+    public required int BombsPlaced { get; set; }
 }

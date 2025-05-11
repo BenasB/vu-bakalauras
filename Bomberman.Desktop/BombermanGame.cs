@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bomberman.Core;
 using Bomberman.Core.Agents;
@@ -20,6 +21,7 @@ internal class BombermanGame : Game
     private SpriteFont _spriteFont;
 
     private readonly GameState _gameState;
+    private readonly List<IGameReporter> _reporters = [new LoggerReporter()];
 
     // TODO: Move to texturing component
     private Texture2D _floorTexture;
@@ -44,6 +46,9 @@ internal class BombermanGame : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
+        if (options.JsonReportFilePath != null)
+            _reporters.Add(new JsonReporter(options.JsonReportFilePath));
 
         var scenarioFactory = new ScenarioFactory(options.Seed);
         _gameState = new GameState(CreateAgent, scenarioFactory.Default);
@@ -120,7 +125,10 @@ internal class BombermanGame : Game
     protected override void Update(GameTime gameTime)
     {
         if (_gameState.Terminated)
+        {
+            Exit();
             return;
+        }
 
         if (gameTime.IsRunningSlowly)
         {
@@ -147,6 +155,15 @@ internal class BombermanGame : Game
         _gameState.Update(gameTime.ElapsedGameTime);
 
         base.Update(gameTime);
+    }
+
+    protected override void OnExiting(object sender, ExitingEventArgs args)
+    {
+        foreach (var reporter in _reporters)
+        {
+            reporter.Report(_gameState);
+        }
+        base.OnExiting(sender, args);
     }
 
     protected override void Draw(GameTime gameTime)

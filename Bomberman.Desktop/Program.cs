@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bomberman.Core.Agents;
@@ -78,6 +79,12 @@ for (int i = 0; i < args.Length; i++)
             throw new InvalidOperationException(
                 $"Could not parse '{value}' into an integer to use as the seed"
             );
+    }
+    else if (flag == "report")
+    {
+        i++;
+        var value = args[i];
+        options.JsonReportFilePath = value;
     }
     else
     {

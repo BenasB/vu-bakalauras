@@ -13,4 +13,6 @@ internal record BombermanGameOptions
     public MctsAgentOptions PlayerTwoMctsOptions { get; set; } = new();
 
     public int Seed { get; set; } = 44;
+
+    public string? JsonReportFilePath { get; set; } = null;
 }
