@@ -7,4 +7,6 @@ public record MctsAgentOptions
     public double SelectionHeuristicWeightCoefficient { get; set; } = 1.0 / 4;
 
     public bool Export { get; set; } = false;
+
+    public long? SlowDownTicks { get; set; } = null;
 }

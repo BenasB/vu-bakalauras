@@ -48,7 +48,7 @@ public class JsonReporter : IGameReporter
             false => [],
         };
 
-        const double mctsIterationLowerPecentile = 0.8;
+        const double mctsIterationLowerPecentile = 0.75;
 
         var gameReport = state.Agents.ToDictionary<Agent?, string, object>(
             agent => agent.GetType().Name,

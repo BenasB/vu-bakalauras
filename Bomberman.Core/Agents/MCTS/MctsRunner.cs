@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Text.Json;
 using System.Threading.Channels;
 using Bomberman.Core.Serialization;
@@ -19,7 +20,7 @@ public class MctsRunner : IUpdatable
     private Vector2 _lastPosition;
     private bool _ignoreNextAction = false;
 
-    internal List<int> IterationCounts = [];
+    internal readonly List<int> IterationCounts = [];
 
     private readonly Channel<BombermanAction> _actionChannel =
         Channel.CreateBounded<BombermanAction>(
@@ -196,6 +197,7 @@ public class MctsRunner : IUpdatable
             Logger.Information(
                 $"Selection heuristic weight for this run: {selectionHeuristicWeight}"
             );
+            var stopwatch = new Stopwatch();
             while (!_stateChannel.Reader.TryPeek(out _) && !_state.Terminated)
             {
                 iterations++;
@@ -204,7 +206,12 @@ public class MctsRunner : IUpdatable
                 var reward = expandedNode.Simulate();
                 expandedNode.Backpropagate(reward);
 
-                // TODO: artificial slowdown
+                if (_options.SlowDownTicks != null)
+                {
+                    stopwatch.Restart();
+                    while (stopwatch.ElapsedTicks < _options.SlowDownTicks) { }
+                    stopwatch.Stop();
+                }
             }
 
             IterationCounts.Add(iterations);
