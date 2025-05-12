@@ -11,6 +11,12 @@ public class MctsAgent : Agent
     private readonly Random _rnd = new();
     private readonly MctsRunner? _mctsRunner;
 
+    internal MctsRunner MctsRunner =>
+        _mctsRunner
+        ?? throw new InvalidOperationException(
+            "You are trying to access the mcts runner on a cloned MctsAgent which itself does not run the MCTS loop"
+        );
+
     public MctsAgent(GameState state, Player player, int agentIndex, MctsAgentOptions options)
         : base(player, agentIndex)
     {

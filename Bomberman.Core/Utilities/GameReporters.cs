@@ -1,5 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Bomberman.Core.Agents;
+using Bomberman.Core.Agents.MCTS;
 
 namespace Bomberman.Core.Utilities;
 
@@ -26,6 +28,11 @@ public class JsonReporter : IGameReporter
 {
     private readonly string _filePath;
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+
     public JsonReporter(string filePath)
     {
         _filePath = filePath;
@@ -41,6 +48,8 @@ public class JsonReporter : IGameReporter
             false => [],
         };
 
+        const double mctsIterationLowerPecentile = 0.8;
+
         var gameReport = state.Agents.ToDictionary<Agent?, string, object>(
             agent => agent.GetType().Name,
             agent => new JsonPlayerReport
@@ -48,13 +57,27 @@ public class JsonReporter : IGameReporter
                 Alive = agent.Player.Alive,
                 BombsPlaced = agent.Player.Statistics.BombsPlaced,
                 DistanceMoved = agent.Player.Statistics.DistanceMoved,
+                AverageIterations = agent switch
+                {
+                    MctsAgent mctsAgent => mctsAgent
+                        .MctsRunner.IterationCounts.OrderBy(c => c)
+                        .Take(
+                            (int)
+                                Math.Floor(
+                                    mctsAgent.MctsRunner.IterationCounts.Count
+                                        * mctsIterationLowerPecentile
+                                )
+                        )
+                        .Average(),
+                    _ => null,
+                },
             }
         );
 
         gameReport.Add(nameof(GameState.Terminated), state.Terminated);
 
         existingReports.Add(gameReport);
-        var newJsonString = JsonSerializer.Serialize(existingReports);
+        var newJsonString = JsonSerializer.Serialize(existingReports, JsonOptions);
         File.WriteAllText(_filePath, newJsonString);
     }
 
@@ -63,5 +86,6 @@ public class JsonReporter : IGameReporter
         public required bool Alive { get; init; }
         public required double DistanceMoved { get; init; }
         public required int BombsPlaced { get; init; }
+        public double? AverageIterations { get; init; }
     }
 }

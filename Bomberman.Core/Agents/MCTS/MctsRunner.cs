@@ -19,6 +19,8 @@ public class MctsRunner : IUpdatable
     private Vector2 _lastPosition;
     private bool _ignoreNextAction = false;
 
+    internal List<int> IterationCounts = [];
+
     private readonly Channel<BombermanAction> _actionChannel =
         Channel.CreateBounded<BombermanAction>(
             new BoundedChannelOptions(1) { SingleReader = true, SingleWriter = true }
@@ -201,7 +203,11 @@ public class MctsRunner : IUpdatable
                 var expandedNode = selectedNode.Expand();
                 var reward = expandedNode.Simulate();
                 expandedNode.Backpropagate(reward);
+
+                // TODO: artificial slowdown
             }
+
+            IterationCounts.Add(iterations);
 
             if (_state.Terminated)
                 break;
