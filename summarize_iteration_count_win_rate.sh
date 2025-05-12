@@ -16,12 +16,12 @@ for file in "$directory"/*.json; do
     # Skip directories
     [ -d "$file" ] && continue
     
-    # Extract c-value from filename (format: mcts-vs-opponent-mapX-cX.XX.json)
+    # Extract slow down value from filename (format: mcts-vs-opponent-map1-sXX.json)
     filename=$(basename "$file")
-    if [[ "$filename" =~ c([0-9.]+) ]]; then
-        c_value="${BASH_REMATCH[1]}"
+    if [[ "$filename" =~ s([0-9]+) ]]; then
+        s_value="${BASH_REMATCH[1]}"
     else
-        echo "Warning: Could not extract c-value from $filename" >&2
+        echo "Warning: Could not extract slow down value from $filename" >&2
         continue
     fi
     
@@ -41,23 +41,23 @@ for file in "$directory"/*.json; do
     [ -z "$win_count" ] && continue
     
     # Update totals
-    ((wins["$c_value,$opponent"]+=win_count))
-    ((totals["$c_value,$opponent"]+=game_count))
+    ((wins["$s_value,$opponent"]+=win_count))
+    ((totals["$s_value,$opponent"]+=game_count))
 done
 
 # Get unique c-values (sorted numerically) and opponent types (sorted alphabetically)
-readarray -t c_values < <(printf '%s\n' "${!totals[@]}" | cut -d, -f1 | sort -n | uniq)
+readarray -t s_values < <(printf '%s\n' "${!totals[@]}" | cut -d, -f1 | sort -n | uniq)
 readarray -t opponents < <(printf '%s\n' "${!totals[@]}" | cut -d, -f2 | sort | uniq)
 
 # Output CSV header
-echo -n "c_value"
+echo -n "s_value"
 for opponent in "${opponents[@]}"; do
     echo -n ",${opponent}_winrate"
 done
 echo  # newline
 
 # Output data rows
-for c in "${c_values[@]}"; do
+for c in "${s_values[@]}"; do
     echo -n "$c"
     for opponent in "${opponents[@]}"; do
         key="$c,$opponent"
