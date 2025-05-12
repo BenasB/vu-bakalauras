@@ -1,10 +1,11 @@
 using System.Text.Json;
+using Bomberman.Core.Agents;
 
 namespace Bomberman.Core.Utilities;
 
 public interface IGameReporter
 {
-    void Report(GameState terminatedState);
+    void Report(GameState state);
 }
 
 public class LoggerReporter : IGameReporter
@@ -30,17 +31,17 @@ public class JsonReporter : IGameReporter
         _filePath = filePath;
     }
 
-    public void Report(GameState terminatedState)
+    public void Report(GameState state)
     {
         var existingReports = File.Exists(_filePath) switch
         {
-            true => JsonSerializer.Deserialize<List<Dictionary<string, JsonPlayerReport>>>(
+            true => JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
                 File.ReadAllText(_filePath)
             ) ?? [],
             false => [],
         };
 
-        var gameReport = terminatedState.Agents.ToDictionary(
+        var gameReport = state.Agents.ToDictionary<Agent?, string, object>(
             agent => agent.GetType().Name,
             agent => new JsonPlayerReport
             {
@@ -49,6 +50,8 @@ public class JsonReporter : IGameReporter
                 DistanceMoved = agent.Player.Statistics.DistanceMoved,
             }
         );
+
+        gameReport.Add(nameof(GameState.Terminated), state.Terminated);
 
         existingReports.Add(gameReport);
         var newJsonString = JsonSerializer.Serialize(existingReports);

@@ -190,7 +190,7 @@ public class MctsRunner : IUpdatable
                 rootOpponent.Player.Position.ToGridPosition(),
                 rootAgent.Player.Speed
             ); // The closer the root player is, the less effect it should have during this MCTS run
-            var selectionHeuristicWeight = (1.0 / 4) * distance;
+            var selectionHeuristicWeight = _options.SelectionHeuristicWeightCoefficient * distance;
             Logger.Information(
                 $"Selection heuristic weight for this run: {selectionHeuristicWeight}"
             );

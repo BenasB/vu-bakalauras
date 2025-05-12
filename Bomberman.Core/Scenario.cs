@@ -17,23 +17,31 @@ public class ScenarioFactory
         _seed = seed;
     }
 
-    public Scenario Default =>
-        new()
+    public Scenario Default
+    {
+        get
         {
-            TileMap = new TileMap(17, 11, _seed)
+            const int size = 13;
+            var tileMap = new TileMap(size, size, _seed)
                 .WithRandomTileFill()
                 .WithBorder()
                 .WithCheckerPattern()
                 .WithSpaceAround(
-                    new GridPosition(Row: 5, Column: 4),
-                    new GridPosition(Row: 5, Column: 12)
-                ),
-            StartPositions =
-            [
-                new GridPosition(Row: 5, Column: 4),
-                new GridPosition(Row: 5, Column: 12),
-            ],
-        };
+                    new GridPosition(Row: 1, Column: 1),
+                    new GridPosition(Row: size - 2, Column: size - 2)
+                );
+
+            return new Scenario
+            {
+                TileMap = tileMap,
+                StartPositions =
+                [
+                    new GridPosition(Row: 1, Column: 1),
+                    new GridPosition(Row: size - 2, Column: size - 2),
+                ],
+            };
+        }
+    }
 
     public Scenario Empty =>
         new()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bomberman.Core.Agents;
@@ -85,6 +84,17 @@ for (int i = 0; i < args.Length; i++)
         i++;
         var value = args[i];
         options.JsonReportFilePath = value;
+    }
+    else if (flag == "timeout")
+    {
+        i++;
+        var value = args[i];
+        if (TimeSpan.TryParse(value, out var timeSpan))
+            options.Timeout = timeSpan;
+        else
+            throw new InvalidOperationException(
+                $"Could not parse '{value}' into a time span to use as the timeout value"
+            );
     }
     else
     {

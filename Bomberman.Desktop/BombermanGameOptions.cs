@@ -1,4 +1,4 @@
-using Bomberman.Core;
+using System;
 using Bomberman.Core.Agents;
 using Bomberman.Core.Agents.MCTS;
 
@@ -15,4 +15,6 @@ internal record BombermanGameOptions
     public int Seed { get; set; } = 44;
 
     public string? JsonReportFilePath { get; set; } = null;
+
+    public TimeSpan? Timeout { get; set; } = null;
 }

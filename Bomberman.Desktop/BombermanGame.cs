@@ -130,6 +130,12 @@ internal class BombermanGame : Game
             return;
         }
 
+        if (_options.Timeout != null && gameTime.TotalGameTime >= _options.Timeout)
+        {
+            Exit();
+            return;
+        }
+
         if (gameTime.IsRunningSlowly)
         {
             _runningSlowAccumulator += gameTime.ElapsedGameTime;
