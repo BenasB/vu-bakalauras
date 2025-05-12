@@ -4,12 +4,12 @@ set -euo pipefail
 
 # === Configuration ===
 C_VALUES=(0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 1.0 2.0)
-SEEDS=$(seq 1 10)                    # Map seeds 1–10
-REPEATS=$(seq 1 10)                  # 10 runs per map
+SEEDS=$(seq 1 10)
+REPEATS=$(seq 1 1)
 OPPONENTS=("static" "walking" "bombing")
-TIMEOUT=0:2:0                          # Seconds before killing the run
+TIMEOUT=0:1:0
 EXE="./Bomberman.Desktop/bin/Release/net8.0/Bomberman.Desktop.exe" 
-REPORT_DIR="analysis/weight-tuning"          # Output directory
+REPORT_DIR="analysis/weight-tuning"
 
 mkdir -p "$REPORT_DIR"
 
