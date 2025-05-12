@@ -7,7 +7,7 @@ C_VALUES=(0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 1.0 2.0)
 SEEDS=$(seq 1 10)                    # Map seeds 1–10
 REPEATS=$(seq 1 10)                  # 10 runs per map
 OPPONENTS=("static" "walking" "bombing")
-TIMEOUT=120                          # Seconds before killing the run
+TIMEOUT=0:2:0                          # Seconds before killing the run
 EXE="./Bomberman.Desktop/bin/Release/net8.0/Bomberman.Desktop.exe" 
 REPORT_DIR="analysis/weight-tuning"          # Output directory
 
@@ -21,12 +21,12 @@ for c in "${C_VALUES[@]}"; do
         report_file="${REPORT_DIR}/mcts-vs-${opp}-map${seed}-c${c}.json"
         echo "Running: Opponent=$opp, Seed=$seed, c=$c, Rep=$rep"
 
-        timeout "$TIMEOUT"s \
-          "$EXE" \
+        "$EXE" \
           --seed "$seed" \
           --playerOne mcts "{\"SelectionHeuristicWeightCoefficient\": $c}" \
           --playerTwo "$opp" \
-          --report "$report_file" || echo "Timeout or error on Seed $seed, Opponent $opp, c=$c, Rep $rep"
+          --timeout "$TIMEOUT" \
+          --report "$report_file" || echo "Error on Seed $seed, Opponent $opp, c=$c, Rep $rep"
 
       done
     done
