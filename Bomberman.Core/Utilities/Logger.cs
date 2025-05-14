@@ -17,7 +17,7 @@ public static class Logger
 
     public static void Information(string message)
     {
-        if (Level < LogLevel.Information)
+        if (Level > LogLevel.Information)
             return;
 
         Log(nameof(Information), message);
@@ -25,7 +25,7 @@ public static class Logger
 
     public static void Warning(string message)
     {
-        if (Level < LogLevel.Warning)
+        if (Level > LogLevel.Warning)
             return;
 
         Log(nameof(Warning), message);
