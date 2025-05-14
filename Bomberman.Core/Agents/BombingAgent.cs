@@ -144,7 +144,7 @@ public class BombingAgent : Agent
         _attackWalker = null;
 
         _threatPosition = Player.Position.ToGridPosition();
-        if (_state.TileMap.GetTile(_threatPosition) == null)
+        if (_state.TileMap.GetTile(_threatPosition) == null && Player.CanPlaceBomb)
         {
             _placedBombTile = Player.PlaceBomb();
         }
