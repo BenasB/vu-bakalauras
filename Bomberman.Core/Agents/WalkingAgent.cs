@@ -15,7 +15,7 @@ public class WalkingAgent : Agent
         player.SetMovingDirection(Direction.None);
         _state = state;
         _rnd = new StatefulRandom();
-        _walker = new Walker(player, GetRandomTarget);
+        _walker = new Walker(player, state.TileMap, GetRandomTarget);
     }
 
     private WalkingAgent(GameState state, Player player, WalkingAgent original)
@@ -23,7 +23,7 @@ public class WalkingAgent : Agent
     {
         _state = state;
         _rnd = new StatefulRandom(original._rnd);
-        _walker = new Walker(player, GetRandomTarget, original._walker);
+        _walker = new Walker(player, state.TileMap, GetRandomTarget, original._walker);
     }
 
     internal override Agent Clone(GameState state, Player player) =>

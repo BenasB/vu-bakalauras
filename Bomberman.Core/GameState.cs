@@ -10,6 +10,8 @@ public class GameState : IUpdatable
 
     public bool Terminated => Agents.Any(a => a is { Player.Alive: false });
 
+    public TimeSpan TimeElapsed { get; private set; } = TimeSpan.Zero;
+
     public GameState(Func<GameState, Player, int, Agent> agentFactory, Scenario scenario)
     {
         TileMap = scenario.TileMap;
@@ -25,6 +27,7 @@ public class GameState : IUpdatable
     public GameState(GameState original)
     {
         TileMap = new TileMap(original.TileMap);
+        TimeElapsed = original.TimeElapsed;
 
         Agents = new Agent[original.Agents.Length];
         for (int i = 0; i < original.Agents.Length; i++)
@@ -40,6 +43,7 @@ public class GameState : IUpdatable
     )
     {
         TileMap = new TileMap(original.TileMap);
+        TimeElapsed = original.TimeElapsed;
 
         Agents = new Agent[original.Agents.Length];
         for (int i = 0; i < original.Agents.Length; i++)
@@ -53,6 +57,8 @@ public class GameState : IUpdatable
     {
         if (Terminated)
             return;
+
+        TimeElapsed += deltaTime;
 
         foreach (var agent in Agents)
             agent.Update(deltaTime);

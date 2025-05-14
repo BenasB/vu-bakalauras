@@ -59,11 +59,16 @@ public class BombingAgent : Agent
         _attackWalker =
             original._attackWalker == null
                 ? null
-                : new Walker(player, GetNextAttackPathTarget, original._attackWalker);
+                : new Walker(
+                    player,
+                    state.TileMap,
+                    GetNextAttackPathTarget,
+                    original._attackWalker
+                );
         _safetyWalker =
             original._safetyWalker == null
                 ? null
-                : new Walker(player, GetNextTarget, original._safetyWalker);
+                : new Walker(player, state.TileMap, GetNextTarget, original._safetyWalker);
     }
 
     internal override Agent Clone(GameState state, Player player) =>
@@ -136,7 +141,7 @@ public class BombingAgent : Agent
     private void MoveToAttack()
     {
         _safetyWalker = null;
-        _attackWalker = new Walker(Player, GetNextAttackPathTarget);
+        _attackWalker = new Walker(Player, _state.TileMap, GetNextAttackPathTarget);
     }
 
     private void MoveToSafety()
@@ -154,7 +159,7 @@ public class BombingAgent : Agent
             return;
 
         _safetyPathQueue = new Queue<GridPosition>(pathToSafety);
-        _safetyWalker = new Walker(Player, GetNextTarget);
+        _safetyWalker = new Walker(Player, _state.TileMap, GetNextTarget);
     }
 
     private List<GridPosition>? GetSafetyPath(GridPosition threatPosition, BombTile? bombTile)

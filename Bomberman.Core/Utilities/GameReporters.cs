@@ -14,6 +14,7 @@ public class LoggerReporter : IGameReporter
 {
     public void Report(GameState state)
     {
+        Logger.Information($"Game finished: {nameof(GameState.TimeElapsed)} = {state.TimeElapsed}");
         for (int i = 0; i < state.Agents.Length; i++)
         {
             var agent = state.Agents[i];
@@ -75,6 +76,7 @@ public class JsonReporter : IGameReporter
         );
 
         gameReport.Add(nameof(GameState.Terminated), state.Terminated);
+        gameReport.Add(nameof(GameState.TimeElapsed), state.TimeElapsed);
 
         existingReports.Add(gameReport);
         var newJsonString = JsonSerializer.Serialize(existingReports, JsonOptions);

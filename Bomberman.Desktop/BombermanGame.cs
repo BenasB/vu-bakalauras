@@ -86,8 +86,8 @@ internal class BombermanGame : Game
                 agentIndex,
                 agentIndex switch
                 {
-                    0 => _options.PlayerOneMctsOptions,
-                    1 => _options.PlayerTwoMctsOptions,
+                    0 => _options.PlayerOneMctsOptions ?? new MctsAgentOptions(),
+                    1 => _options.PlayerTwoMctsOptions ?? new MctsAgentOptions(),
                     _ => throw new InvalidOperationException("Only 2 players are supported."),
                 }
             ),

@@ -9,8 +9,8 @@ internal record BombermanGameOptions
     public AgentType PlayerOne { get; set; } = AgentType.Walking;
     public AgentType PlayerTwo { get; set; } = AgentType.Walking;
 
-    public MctsAgentOptions PlayerOneMctsOptions { get; set; } = new();
-    public MctsAgentOptions PlayerTwoMctsOptions { get; set; } = new();
+    public MctsAgentOptions? PlayerOneMctsOptions { get; set; } = null;
+    public MctsAgentOptions? PlayerTwoMctsOptions { get; set; } = null;
 
     public int Seed { get; set; } = 44;
 

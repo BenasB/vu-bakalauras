@@ -148,7 +148,7 @@ internal class Node
     /// </summary>
     private static void AdvanceTimeOneTile(GameState stateToAdvance, MctsAgent agent)
     {
-        const double secondsPerFrame = 1.0 / 10;
+        const double secondsPerFrame = 1.0 / 16;
         var frameDeltaTime = TimeSpan.FromSeconds(secondsPerFrame);
 
         var oneTileDeltaTimeInSeconds = 1.0 / agent.Player.Speed;
