@@ -124,9 +124,13 @@ public class BombingAgent : Agent
 
     private GridPosition? GetNextAttackPathTarget()
     {
+        var playerPosition = Player.Position.ToGridPosition();
+        if (!playerPosition.NearPosition(Player.Position, Walker.TargetThreshold))
+            return playerPosition;
+
         var path =
             _state.TileMap.ShortestPath(
-                Player.Position.ToGridPosition(),
+                playerPosition,
                 Opponent.Player.Position.ToGridPosition(),
                 Player.Speed
             ) ?? throw new InvalidOperationException("Could not find a path to the opponent");

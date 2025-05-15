@@ -5,7 +5,7 @@ namespace Bomberman.Core.Agents;
 
 internal class Walker : IUpdatable
 {
-    private const float TargetThreshold = 0.1f * Constants.TileSize;
+    public const float TargetThreshold = 0.1f * Constants.TileSize;
 
     private readonly Player _player;
     private readonly TileMap _tileMap;

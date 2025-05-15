@@ -43,6 +43,9 @@ public class WalkingAgent : Agent
     {
         var playerPosition = Player.Position.ToGridPosition();
 
+        if (!playerPosition.NearPosition(Player.Position, Walker.TargetThreshold))
+            return playerPosition;
+
         var clearTiles = playerPosition
             .Neighbours.Where(tile => _state.TileMap.GetTile(tile) is null)
             .ToList();
