@@ -136,6 +136,7 @@ internal class BombermanGame : Game
             return;
         }
 
+#if DEBUG
         if (gameTime.IsRunningSlowly)
         {
             _runningSlowAccumulator += gameTime.ElapsedGameTime;
@@ -151,6 +152,7 @@ internal class BombermanGame : Game
         {
             _runningSlowAccumulator = TimeSpan.Zero;
         }
+#endif
 
         if (
             GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
