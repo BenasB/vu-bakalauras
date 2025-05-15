@@ -220,16 +220,20 @@ public class MctsRunner : IUpdatable
                 break;
 
             var bestNode = root.Children.MaxBy(child => child.Visits);
-            var bestAction =
-                bestNode?.Action
-                ?? throw new InvalidOperationException("Could not find the best action");
+            var bestAction = bestNode?.Action;
 
-            if (!_actionChannel.Writer.TryWrite(bestAction))
+            if (bestAction == null)
+            {
+                bestAction = BombermanAction.Stand;
+                Logger.Information("Could not find the best action, choosing to stand");
+            }
+
+            if (!_actionChannel.Writer.TryWrite(bestAction.Value))
                 throw new InvalidOperationException(
                     "Something went wrong with the data exchange between MCTS loop and the agent"
                 );
 
-            previousAction = bestAction;
+            previousAction = bestAction.Value;
 
             if (_options.Export)
                 serializationChannel.Writer.TryWrite(root);
