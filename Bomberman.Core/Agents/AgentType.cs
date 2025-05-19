@@ -7,4 +7,5 @@ public enum AgentType
     Bombing,
     Mcts,
     Keyboard,
+    Bombing2,
 }

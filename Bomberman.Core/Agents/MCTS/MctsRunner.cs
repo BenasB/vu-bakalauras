@@ -147,12 +147,14 @@ public class MctsRunner : IUpdatable
             (null, StaticAgent) => originalState.Agents[agentIndex].Clone(newState, player),
             (null, WalkingAgent) => originalState.Agents[agentIndex].Clone(newState, player),
             (null, BombingAgent) => originalState.Agents[agentIndex].Clone(newState, player),
+            (null, BombingAgent2) => originalState.Agents[agentIndex].Clone(newState, player),
             (null, _) => throw new NotSupportedException(
                 "This opponent type is not supported in MCTS, you must replace it"
             ),
             (AgentType.Static, _) => new StaticAgent(player, agentIndex),
             (AgentType.Walking, _) => new WalkingAgent(newState, player, agentIndex),
             (AgentType.Bombing, _) => new BombingAgent(newState, player, agentIndex),
+            (AgentType.Bombing2, _) => new BombingAgent2(newState, player, agentIndex),
             (_, _) => throw new NotSupportedException(
                 "This agent type is not supported for replacement in MCTS"
             ),

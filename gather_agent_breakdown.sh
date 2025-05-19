@@ -3,10 +3,10 @@
 set -euo pipefail
 
 # === Configuration ===
-MCTS_OPPONENTS=("" "Static" "Walking" "Bombing")
+MCTS_OPPONENTS=("" "Static" "Walking" "Bombing" "Bombing2")
 SEEDS=$(seq 1 10)
 REPEATS=$(seq 1 1)
-REAL_OPPONENTS=("static" "walking" "bombing")
+REAL_OPPONENTS=("bombing2")
 TIMEOUT=0:1:0
 EXE="./Bomberman.Desktop/bin/Release/net8.0/Bomberman.Desktop.exe" 
 REPORT_DIR="analysis/agent-breakdown"

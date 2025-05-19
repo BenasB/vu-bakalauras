@@ -68,6 +68,7 @@ internal class BombermanGame : Game
             AgentType.Static => new StaticAgent(player, agentIndex),
             AgentType.Walking => new WalkingAgent(state, player, agentIndex),
             AgentType.Bombing => new BombingAgent(state, player, agentIndex),
+            AgentType.Bombing2 => new BombingAgent2(state, player, agentIndex),
             AgentType.Keyboard => new KeyboardAgent(
                 player,
                 agentIndex,
