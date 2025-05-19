@@ -1,1 +1,77 @@
-[{"MctsAgent":{"Alive":true,"DistanceMoved":443.73403692245483,"BombsPlaced":2,"AverageIterations":31.176470588235293},"BombingAgent":{"Alive":false,"DistanceMoved":599.467452287674,"BombsPlaced":2},"Terminated":true}]
+[
+  {
+    "MctsAgent": {
+      "Alive": true,
+      "DistanceMoved": 603.7345118522644,
+      "BombsPlaced": 1,
+      "AverageIterations": 30.941176470588236
+    },
+    "BombingAgent": {
+      "Alive": false,
+      "DistanceMoved": 551.4673280715942,
+      "BombsPlaced": 2
+    },
+    "Terminated": true,
+    "TimeElapsed": "00:00:11.8166903"
+  },
+  {
+    "MctsAgent": {
+      "Alive": true,
+      "DistanceMoved": 448.00087451934814,
+      "BombsPlaced": 1,
+      "AverageIterations": 30.8125
+    },
+    "BombingAgent": {
+      "Alive": false,
+      "DistanceMoved": 572.800703048706,
+      "BombsPlaced": 1
+    },
+    "Terminated": true,
+    "TimeElapsed": "00:00:11.2833559"
+  },
+  {
+    "MctsAgent": {
+      "Alive": false,
+      "DistanceMoved": 689.0680117607117,
+      "BombsPlaced": 5,
+      "AverageIterations": 30.666666666666668
+    },
+    "BombingAgent": {
+      "Alive": true,
+      "DistanceMoved": 630.400815486908,
+      "BombsPlaced": 3
+    },
+    "Terminated": true,
+    "TimeElapsed": "00:00:16.8000336"
+  },
+  {
+    "MctsAgent": {
+      "Alive": true,
+      "DistanceMoved": 1428.2692203521729,
+      "BombsPlaced": 4,
+      "AverageIterations": 31.05
+    },
+    "BombingAgent": {
+      "Alive": false,
+      "DistanceMoved": 1018.668240070343,
+      "BombsPlaced": 5
+    },
+    "Terminated": true,
+    "TimeElapsed": "00:00:27.7000554"
+  },
+  {
+    "MctsAgent": {
+      "Alive": true,
+      "DistanceMoved": 2848.005497455597,
+      "BombsPlaced": 15,
+      "AverageIterations": 31.310344827586206
+    },
+    "BombingAgent": {
+      "Alive": true,
+      "DistanceMoved": 2209.0705943107605,
+      "BombsPlaced": 12
+    },
+    "Terminated": false,
+    "TimeElapsed": "00:00:59.9834533"
+  }
+]

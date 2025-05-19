@@ -3,10 +3,10 @@
 set -euo pipefail
 
 # === Configuration ===
-SLOW_DOWN_TICKS=$(seq 0 40000 320000)
+SLOW_DOWN_TICKS=$(seq 0 40000 200000)
 SEEDS=$(seq 1 1)
-REPEATS=$(seq 1 1)
-OPPONENTS=("static" "walking" "bombing")
+REPEATS=$(seq 1 2)
+OPPONENTS=("bombing")
 TIMEOUT=0:1:0
 EXE="./Bomberman.Desktop/bin/Release/net8.0/Bomberman.Desktop.exe" 
 REPORT_DIR="analysis/iteration-count"
@@ -23,10 +23,10 @@ for s in $SLOW_DOWN_TICKS; do
 
         "$EXE" \
           --seed "$seed" \
-          --playerOne mcts "{\"SlowDownTicks\": $s}" \
+          --playerOne mcts "{\"SlowDownTicks\": $s, \"OpponentType\": \"Bombing2\"}" \
           --playerTwo "$opp" \
           --timeout "$TIMEOUT" \
-          --report "$report_file" || echo "Error on Seed $seed, Opponent $opp, c=$c, Rep $rep"
+          --report "$report_file" || echo "Error on Seed $seed, Opponent $opp, s=$s, Rep $rep"
 
       done
     done
