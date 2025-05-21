@@ -5,8 +5,8 @@ set -euo pipefail
 # === Configuration ===
 MCTS_OPPONENTS=("" "Static" "Walking" "Bombing" "Bombing2")
 SEEDS=$(seq 1 10)
-REPEATS=$(seq 1 1)
-REAL_OPPONENTS=("bombing2")
+REPEATS=$(seq 1 10)
+REAL_OPPONENTS=("static" "walking" "bombing" "bombing2")
 TIMEOUT=0:1:0
 EXE="./Bomberman.Desktop/bin/Release/net8.0/Bomberman.Desktop.exe" 
 REPORT_DIR="analysis/agent-breakdown"
@@ -14,10 +14,10 @@ REPORT_DIR="analysis/agent-breakdown"
 mkdir -p "$REPORT_DIR"
 
 # === Run Experiments ===
-for seed in $SEEDS; do
-  for real_opp in "${REAL_OPPONENTS[@]}"; do
-    for mcts_opp in "${MCTS_OPPONENTS[@]}"; do
-      for rep in $REPEATS; do
+for rep in $REPEATS; do
+  for seed in $SEEDS; do
+    for real_opp in "${REAL_OPPONENTS[@]}"; do
+      for mcts_opp in "${MCTS_OPPONENTS[@]}"; do  
         report_file="${REPORT_DIR}/mcts-vs-${real_opp}-${mcts_opp}-map${seed}.json"
         echo "Running: Real opponent=$real_opp, MCTS opponent=$mcts_opp, Seed=$seed, Rep=$rep"
         
