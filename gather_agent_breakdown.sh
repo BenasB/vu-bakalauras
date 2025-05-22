@@ -3,32 +3,32 @@
 set -euo pipefail
 
 # === Configuration ===
-MCTS_OPPONENTS=("" "Static" "Walking" "Bombing" "Bombing2")
+MCTS_OPPONENTS=("Static" "Walking" "Bombing" "Bombing2")
 SEEDS=$(seq 1 10)
-REPEATS=$(seq 1 10)
-REAL_OPPONENTS=("static" "walking" "bombing" "bombing2")
+REPEATS=$(seq 1 3)
 TIMEOUT=0:1:0
 EXE="./Bomberman.Desktop/bin/Release/net8.0/Bomberman.Desktop.exe" 
-REPORT_DIR="analysis/agent-breakdown"
+REPORT_DIR="analysis/agent-breakdown/mcts-vs-mcts"
 
 mkdir -p "$REPORT_DIR"
 
 # === Run Experiments ===
 for rep in $REPEATS; do
   for seed in $SEEDS; do
-    for real_opp in "${REAL_OPPONENTS[@]}"; do
+    for opp in "${MCTS_OPPONENTS[@]}"; do
       for mcts_opp in "${MCTS_OPPONENTS[@]}"; do  
-        report_file="${REPORT_DIR}/mcts-vs-${real_opp}-${mcts_opp}-map${seed}.json"
-        echo "Running: Real opponent=$real_opp, MCTS opponent=$mcts_opp, Seed=$seed, Rep=$rep"
+        report_file="${REPORT_DIR}/mcts-vs-mcts-${opp}-${mcts_opp}-map${seed}.json"
+        echo "Running: P2 change=$opp, P1 change=$mcts_opp, Seed=$seed, Rep=$rep"
         
         mcts_opts=$([ "$mcts_opp" == "" ] && echo "{}" || echo "{\"OpponentType\": \"$mcts_opp\"}")
+        opp_opts=$([ "$opp" == "" ] && echo "{}" || echo "{\"OpponentType\": \"$opp\"}")
 
         "$EXE" \
           --seed "$seed" \
           --playerOne mcts "$mcts_opts" \
-          --playerTwo "$real_opp" \
+          --playerTwo mcts "$opp_opts" \
           --timeout "$TIMEOUT" \
-          --report "$report_file" || echo "Error on Seed $seed, Real opponent=$real_opp, MCTS opponent=$mcts_opp, Rep=$rep"
+          --report "$report_file" || echo "Error on P2 change=$opp, P1 change=$mcts_opp, Seed=$seed, Rep=$rep"
 
       done
     done

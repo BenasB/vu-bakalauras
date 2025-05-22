@@ -51,9 +51,11 @@ public class JsonReporter : IGameReporter
 
         const double mctsIterationLowerPecentile = 0.75;
 
-        var gameReport = state.Agents.ToDictionary<Agent?, string, object>(
-            agent => agent.GetType().Name,
-            agent => new JsonPlayerReport
+        var gameReport = new Dictionary<string, object>();
+
+        gameReport.Add(
+            nameof(GameState.Agents),
+            state.Agents.Select(agent => new JsonPlayerReport
             {
                 Alive = agent.Player.Alive,
                 BombsPlaced = agent.Player.Statistics.BombsPlaced,
@@ -72,7 +74,7 @@ public class JsonReporter : IGameReporter
                         .Average(),
                     _ => null,
                 },
-            }
+            })
         );
 
         gameReport.Add(nameof(GameState.Terminated), state.Terminated);
